@@ -81,7 +81,10 @@ Returns a copy of the current data
 
 # Contributing
 
-Fork the repo, make your additions, and submit a pull request.
+ - Fork the repo
+ - make your additions
+ - update the version number in package.json and at the top of MockFirebase.js
+ - submit a pull request.
 
 # Support
 

@@ -1,7 +1,8 @@
 /**
- * MockFirebase:
+ * MockFirebase: A Firebase stub/spy library for writing unit tests
+ * https://github.com/katowulf/mockfirebase
+ * @version 0.0.1
  */
-
 (function() {
 
    // some hoop jumping for node require() vs browser usage
