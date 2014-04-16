@@ -7,7 +7,7 @@
   var DEBUG = false;
   var PUSH_COUNTER = 0;
   var _ = requireLib('lodash', '_');
-  var makeSpy = requireLib('sinon');
+  var sinon = requireLib('sinon');
 
   // some hoop jumping for node require() vs browser usage
   exports.MockFirebase = MockFirebase;
@@ -101,7 +101,7 @@
     // the Firebase constructor can be spied on using spyOn(window, 'Firebase') from within the test unit
     for(var key in this) {
       if( !key.match(/^_/) && typeof(this[key]) === 'function' ) {
-        makeSpy(this, key);
+        sinon.spy(this, key);
       }
     }
   }
@@ -326,8 +326,8 @@
     },
 
     transaction: function(valueFn, finishedFn, applyLocally) {
-      var valueSpy = makeSpy(valueFn);
-      var finishedSpy = makeSpy(finishedFn);
+      var valueSpy = sinon.spy(valueFn);
+      var finishedSpy = sinon.spy(finishedFn);
       this._defer(function() {
         var err = this._nextErr('transaction');
         // unlike most defer methods, this will use the value as it exists at the time
