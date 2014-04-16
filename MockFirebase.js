@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.0.1-modified
+ * @version 0.0.3
  */
 (function(exports) {
   var DEBUG = false;
@@ -9,6 +9,7 @@
   var _ = requireLib('lodash', '_');
   var sinon = requireLib('sinon');
   var _Firebase = exports.Firebase;
+  var _FirebaseSimpleLogin = exports.FirebaseSimpleLogin;
 
   /**
    * A mock that simulates Firebase operations for use in unit tests.
@@ -91,7 +92,6 @@
 
     // stores the operations that have been queued until a flush() event is triggered
     this.ops = [];
-
 
     // turn all our public methods into spies so they can be monitored for calls and return values
     // see jasmine spies: https://github.com/pivotal/jasmine/wiki/Spies
@@ -460,8 +460,18 @@
       return _.isObject(this.data) && _.has(this.data, key)? this.data[key] : null;
     },
 
-    _getPrevChild: function(key) {
-
+    _getPrevChild: function(key, pri) {
+      function keysMatch(c) { return c.name() === key }
+      var recs = this.children;
+      var i = _.findIndex(recs, keysMatch);
+      if( i === -1 ) {
+        recs = this.children.slice();
+        child = {name: function() { return key; }, priority: pri===undefined? null : pri };
+        recs.push(child);
+        recs.sort(childComparator);
+        i = _.findIndex(recs, keysMatch);
+      }
+      return i > 0? i : null;
     }
   };
 
@@ -472,12 +482,11 @@
   function MockFirebaseSimpleLogin(ref, callback, resultData) {
     // allows test units to monitor the callback function to make sure
     // it is invoked (even if one is not declared)
-    this.spy = sinon.spy(callback||function() {});
+    this.callback = sinon.spy(callback||function() {});
     this.attempts = [];
     this.failMethod = MockFirebaseSimpleLogin.DEFAULT_FAIL_WHEN;
     this.ref = ref; // we don't use ref for anything
-    this.callback = callback;
-    this.autoFlushTime = false;
+    this.autoFlushTime = MockFirebaseSimpleLogin.DEFAULT_AUTO_FLUSH;
     this.resultData = _.cloneDeep(MockFirebaseSimpleLogin.DEFAULT_RESULT_DATA);
     resultData && _.assign(this.resultData, resultData);
   }
@@ -498,15 +507,18 @@
      * @returns {MockFirebaseSimpleLogin}
      */
     flush: function(milliseconds) {
+      var self = this;
       if(_.isNumber(milliseconds) ) {
-        setTimeout(this.flush.bind(this), milliseconds);
+        setTimeout(self.flush.bind(self), milliseconds);
       }
       else {
-        var attempts = this.attempts;
-        this.attempts = [];
-        _.each(attempts, function(x) { x(); });
+        var attempts = self.attempts;
+        self.attempts = [];
+        _.each(attempts, function(x) {
+          x[0].apply(self, x.slice(1));
+        });
       }
-      return this;
+      return self;
     },
 
     /**
@@ -534,10 +546,25 @@
     },
 
     /**
-     * `testMethod` is passed the {string}provider and {object}options
+     * `testMethod` is passed the {string}provider, {object}options, {object}user
      * for each call to login(). If it returns anything other than
      * null, then that is passed as the error message to the
      * callback and the login call fails.
+     *
+     * <code>
+     *   // this is a simplified example of the default implementation (MockFirebaseSimpleLogin.DEFAULT_FAIL_WHEN)
+     *   auth.failWhen(function(provider, options, user) {
+     *      if( user.email !== options.email ) {
+     *         return MockFirebaseSimpleLogin.createError('INVALID_USER');
+     *      }
+     *      else if( user.password !== options.password ) {
+     *         return MockFirebaseSimpleLogin.createError('INVALID_PASSWORD');
+     *      }
+     *      else {
+     *         return null;
+     *      }
+     *   });
+     * </code>
      *
      * Multiple calls to this method replace the old failWhen criteria.
      *
@@ -549,36 +576,125 @@
       return this;
     },
 
+    /**
+     * Retrieves a user account from the mock user data on this object
+     *
+     * @param provider
+     * @param options
+     */
+    getUser: function(provider, options) {
+      var data = this.resultData[provider];
+      if( provider === 'password' ) {
+        data = (data||{})[options.email];
+      }
+      return data||{};
+    },
+
     /*****************************************************
      * Public API
      *****************************************************/
     login: function(provider, options) {
-      var err = this.failMethod(provider, options||{});
+      var err = this.failMethod(provider, options||{}, this.getUser(provider, options));
       this._notify(err, err===null? this.resultData[provider]: null);
+    },
+
+    logout: function() {
+      this._notify(null, null);
+    },
+
+    createUser: function(email, password, callback) {
+      callback || (callback = _.noop);
+      this._defer(function() {
+        var user = this.resultData['password'][email] = createEmailUser(email, password);
+        this.callback(null, user);
+      });
+    },
+
+    changePassword: function(email, oldPassword, newPassword, callback) {
+      callback || (callback = _.noop);
+      this._defer(function() {
+        var user = this.getUser('password', {email: email});
+        if( !user ) {
+          callback(MockFirebaseSimpleLogin.createError('INVALID_USER'), false);
+        }
+        else if( oldPassword !== user.password ) {
+          callback(MockFirebaseSimpleLogin.createError('INVALID_PASSWORD'), false);
+        }
+        else {
+          user.password = newPassword;
+          callback(null, true);
+        }
+      });
+    },
+
+    sendPasswordResetEmail: function(email, callback) {
+      callback || (callback = _.noop);
+      this._defer(function() {
+        var user = this.getUser('password', {email: email});
+        if( user ) {
+          callback(null, true);
+        }
+        else {
+          callback(MockFirebaseSimpleLogin.createError('INVALID_USER'), false);
+        }
+      });
+    },
+
+    removeUser: function(email, password, callback) {
+      callback || (callback = _.noop);
+      this._defer(function() {
+        var user = this.getUser('password', {email: email});
+        if( !user ) {
+          callback(MockFirebaseSimpleLogin.createError('INVALID_USER'), false);
+        }
+        else if( user.password !== password ) {
+          callback(MockFirebaseSimpleLogin.createError('INVALID_PASSWORD'), false);
+        }
+        else {
+          delete this.resultData['password'][email];
+          callback(null, true);
+        }
+      });
     },
 
     /*****************************************************
      * Private/internal methods
      *****************************************************/
     _notify: function(error, user) {
-      var self = this;
-      self.attempts.push(function() {
-        self.spy(error, user);
-      }.bind(self));
-      if( self.autoFlushTime !== false ) {
-        this.flush(self.autoFlushTime);
+      this._defer(this.callback, error, user);
+    },
+
+    _defer: function() {
+      var args = _.toArray(arguments);
+      this.attempts.push(args);
+      if( this.autoFlushTime !== false ) {
+        this.flush(this.autoFlushTime);
       }
     }
   };
 
   /*** UTIL FUNCTIONS ***/
+  var USER_COUNT = 100;
+  function createEmailUser(email, password) {
+    var id = USER_COUNT++;
+    return {
+      uid: 'password:'+id,
+      id: id,
+      email: email,
+      password: password,
+      provider: 'password',
+      md5_hash: MD5(email),
+      firebaseAuthToken: 'FIREBASE_AUTH_TOKEN' //todo
+    };
+  }
 
-  function defaultResult(provider, i) {
-    var id = 100+i;
+  function createDefaultUser(provider, i) {
+    var id = USER_COUNT++;
 
     var out = {
       uid: provider+':'+id,
       id: id,
+      password: id,
       provider: provider,
       firebaseAuthToken: 'FIREBASE_AUTH_TOKEN' //todo
     };
@@ -749,26 +865,45 @@
     return { code: code||'UNKNOWN_ERROR', message: message||code||'UNKNOWN_ERROR' };
   }
 
-  MockFirebaseSimpleLogin.DEFAULT_FAIL_WHEN = function(provider, options) {
+  MockFirebaseSimpleLogin.DEFAULT_FAIL_WHEN = function(provider, options, user) {
     var res = null;
     if( ['persona', 'anonymous', 'password', 'twitter', 'facebook', 'google', 'github'].indexOf(provider) === -1 ) {
       console.error('MockFirebaseSimpleLogin:login() failed: unrecognized authentication provider '+provider);
-      res = MockFirebaseSimpleLogin.createError();
+//      res = MockFirebaseSimpleLogin.createError();
+    }
+    else if( provider === 'password' ) {
+      if( user.email !== options.email ) {
+        res = MockFirebaseSimpleLogin.createError('INVALID_USER');
+      }
+      else if( user.password !== options.password ) {
+        res = MockFirebaseSimpleLogin.createError('INVALID_PASSWORD');
+      }
     }
     return res;
   };
 
   MockFirebaseSimpleLogin.DEFAULT_RESULT_DATA = {};
   //todo make this accurate to the provider's data
-  _.each(['persona', 'anonymous', 'password', 'facebook', 'twitter', 'google', 'github'], defaultResult);
+  _.each(['persona', 'anonymous', 'password', 'facebook', 'twitter', 'google', 'github'], function(provider) {
+    var user = createDefaultUser(provider);
+    if( provider !== 'password' ) {
+      MockFirebaseSimpleLogin.DEFAULT_RESULT_DATA[provider] = user;
+    }
+    else {
+      var set = MockFirebaseSimpleLogin.DEFAULT_RESULT_DATA[provider] = {};
+      set[user.email] = user;
+    }
+  });
 
 
   MockFirebase.MD5 = MD5;
+  MockFirebaseSimpleLogin.DEFAULT_AUTO_FLUSH = false;
 
   MockFirebase._ = _; // expose for tests
 
   MockFirebase.noConflict = function() {
     exports.Firebase = _Firebase;
+    exports.FirebaseSimpleLogin = _FirebaseSimpleLogin;
   };
 
   MockFirebase.ref = ref;
@@ -796,5 +931,6 @@
   exports.MockFirebase = MockFirebase;
   exports.MockFirebaseSimpleLogin = MockFirebaseSimpleLogin;
   exports.Firebase = MockFirebase;
+  exports.FirebaseSimpleLogin = MockFirebaseSimpleLogin;
 
 })(typeof(module)==='object' && module.exports? module.exports : this);
