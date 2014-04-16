@@ -473,9 +473,12 @@
    * SIMPLE LOGIN
    ******************************************************************************/
   function MockFirebaseSimpleLogin(ref, callback, resultData) {
+    // allows test units to monitor the callback function to make sure
+    // it is invoked (even if one is not declared)
+    this.spy = sinon.spy(callback||function() {});
     this.attempts = [];
     this.failMethod = MockFirebaseSimpleLogin.DEFAULT_FAIL_WHEN;
-    this.ref = ref;
+    this.ref = ref; // we don't use ref for anything
     this.callback = callback;
     this.autoFlushTime = false;
     this.resultData = _.cloneDeep(MockFirebaseSimpleLogin.DEFAULT_RESULT_DATA);
@@ -530,6 +533,7 @@
       if( this.autoFlushTime !== false ) {
         this.flush(this.autoFlushTime);
       }
+      return this;
     },
 
     /**
@@ -562,7 +566,7 @@
     _notify: function(error, user) {
       var self = this;
       self.attempts.push(function() {
-        self.callback && self.callback(error, user);
+        self.spy(error, user);
       }.bind(self));
       if( self.autoFlushTime !== false ) {
         this.flush(self.autoFlushTime);
@@ -584,7 +588,7 @@
   };
 
   MockFirebaseSimpleLogin.DEFAULT_RESULT_DATA = {};
-    //todo make this accurate to the provider's data
+  //todo make this accurate to the provider's data
   _.each(['persona', 'anonymous', 'password', 'facebook', 'twitter', 'google', 'github'], defaultResult);
 
   function defaultResult(provider, i) {
