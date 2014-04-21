@@ -19,6 +19,14 @@ A Firebase stub useful for unit testing.
    <script src="sinon.js"></script>
    <script src="MockFirebase.js"></script>
 
+### Browser Support
+
+Works by default with IE 9 and up. To add support for older versions, just include polyfills for [Function.prototype.bind](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind#Compatibility),
+[Array.prototype.indexOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf#Polyfill), and [Array.prototype.forEach](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach#Polyfill).
+
+Jasmine tests will run in the browser without any configuration. To add support for any other test suite (e.g. Mocha),
+just include [sinon.js](http://sinonjs.org/) in the browser script tags, Karma config, etc.
+
 ## Usage
 
 MockFirebase is designed to be used synchronously or asynchronously for unit testing by allowing you complete

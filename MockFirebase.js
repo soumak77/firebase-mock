@@ -1,16 +1,9 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.0.3
+ * @version 0.0.4
  */
 (function(exports) {
-  var DEBUG = false;
-  var PUSH_COUNTER = 0;
-  var _ = requireLib('lodash', '_');
-  var sinon = requireLib('sinon');
-  var _Firebase = exports.Firebase;
-  var _FirebaseSimpleLogin = exports.FirebaseSimpleLogin;
-
   /**
    * A mock that simulates Firebase operations for use in unit tests.
    *
@@ -98,7 +91,7 @@
     // the Firebase constructor can be spied on using spyOn(window, 'Firebase') from within the test unit
     for(var key in this) {
       if( !key.match(/^_/) && typeof(this[key]) === 'function' ) {
-        sinon.spy(this, key);
+        spyFactory(this, key);
       }
     }
   }
@@ -323,8 +316,8 @@
     },
 
     transaction: function(valueFn, finishedFn, applyLocally) {
-      var valueSpy = sinon.spy(valueFn);
-      var finishedSpy = sinon.spy(finishedFn);
+      var valueSpy = spyFactory(valueFn);
+      var finishedSpy = spyFactory(finishedFn);
       this._defer(function() {
         var err = this._nextErr('transaction');
         // unlike most defer methods, this will use the value as it exists at the time
@@ -482,7 +475,7 @@
   function MockFirebaseSimpleLogin(ref, callback, resultData) {
     // allows test units to monitor the callback function to make sure
     // it is invoked (even if one is not declared)
-    this.callback = sinon.spy(callback||function() {});
+    this.callback = spyFactory(callback||function() {});
     this.attempts = [];
     this.failMethod = MockFirebaseSimpleLogin.DEFAULT_FAIL_WHEN;
     this.ref = ref; // we don't use ref for anything
@@ -674,6 +667,34 @@
   };
 
   /*** UTIL FUNCTIONS ***/
+  var DEBUG = false;
+  var PUSH_COUNTER = 0;
+  var _ = requireLib('lodash', '_');
+  var sinon = requireLib('sinon');
+
+  var spyFactory = (function createSpyFactory() {
+    var fn;
+    if( typeof(jasmine) !== 'undefined' ) {
+      fn = function(obj, method) {
+        if( arguments.length === 2 ) {
+          return spyOn(obj, method).andCallThrough();
+        }
+        else {
+          var fn = jasmine.createSpy();
+          if( arguments.length === 1 && typeof(arguments[0]) === 'function' ) {
+            fn.andCallFake(obj);
+          }
+          return fn;
+        }
+      }
+    }
+    else {
+      var sinon = requireLib('sinon');
+      fn = sinon.spy.bind(sinon);
+    }
+    return fn;
+  })();
+
   var USER_COUNT = 100;
   function createEmailUser(email, password) {
     var id = USER_COUNT++;
@@ -883,7 +904,6 @@
   };
 
   MockFirebaseSimpleLogin.DEFAULT_RESULT_DATA = {};
-  //todo make this accurate to the provider's data
   _.each(['persona', 'anonymous', 'password', 'facebook', 'twitter', 'google', 'github'], function(provider) {
     var user = createDefaultUser(provider);
     if( provider !== 'password' ) {
@@ -901,6 +921,8 @@
 
   MockFirebase._ = _; // expose for tests
 
+  var _Firebase = exports.Firebase;
+  var _FirebaseSimpleLogin = exports.FirebaseSimpleLogin;
   MockFirebase.noConflict = function() {
     exports.Firebase = _Firebase;
     exports.FirebaseSimpleLogin = _FirebaseSimpleLogin;
@@ -933,4 +955,4 @@
   exports.Firebase = MockFirebase;
   exports.FirebaseSimpleLogin = MockFirebaseSimpleLogin;
 
-})(typeof(module)==='object' && module.exports? module.exports : this);
+})(typeof(window) === 'object'? window : module.exports);
