@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.0.5-pre8
+ * @version 0.0.5-pre9
  */
 (function(exports) {
   /**
@@ -405,8 +405,9 @@
         if(_.isEmpty(this.data)) { this.data = null; }
         this._trigger('child_removed', data, pri, ref.name());
         this._trigger('value', this.data, this.priority);
+        this.parent && this.parent._childChanged(this);
       }
-      else if( !_.isEqual(data, this.data[ref.name()]) ) {
+      else if( data !== null && !_.isEqual(data, this.data[ref.name()]) ) {
         this.data[ref.name()] = data;
         this._trigger(exists? 'child_changed' : 'child_added', data, pri, ref.name());
         this._trigger('value', this.data, this.priority);
@@ -431,21 +432,10 @@
         // set this before modifying any children to ensure events only trigger once
         self.data = _.cloneDeep(data);
 
-
         _.each(newData, function(val, key) {
           var pri = self._getPri(key), dat = _.cloneDeep(val);
-          if(_.has(self.children, key)) {
-            self.children[key]._dataChanged(dat);
-          }
-          else {
-            pri = getMeta(dat, 'priority', pri);
-            dat = getMeta(dat, 'value', dat);
-            if(_.isEmpty(dat)) {
-              dat = null;
-            }
-            if(!_.isEqual(val, dat) || pri !== null) {
-              self.child(key).setWithPriority(dat, pri);
-            }
+          if(_.has(self.children, key) || hasMeta(dat)) {
+            self.child(key)._dataChanged(dat);
           }
           if( !_.isEqual(oldData[key], dat) ) {
             var event = 'child_changed';
@@ -540,7 +530,7 @@
     },
 
     _getPrevChild: function(key, pri) {
-      this._resort();
+//      this._resort();
       var keys = this.sortedDataKeys;
       var i = _.indexOf(keys, key);
       if( i === -1 ) {
@@ -1026,6 +1016,10 @@
     else {
       return exports[variableName||moduleName];
     }
+  }
+
+  function hasMeta(data) {
+    return _.isObject(data) && (_.has(data, '.priority') || _.has(data, '.value'));
   }
 
   function getMeta(data, key, defaultVal) {

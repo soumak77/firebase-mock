@@ -18,6 +18,12 @@ describe('MockFirebase', function() {
   describe('#set', function() {
     it('//todo');
 
+    it('should remove old keys from data', function() {
+      fb.autoFlush();
+      fb.set({alpha: true, bravo: false});
+      expect(fb.getData().a).equals(undefined);
+    });
+
     it('should set priorities on children if included in data', function() {
       fb.autoFlush();
       fb.set({a: {'.priority': 100, '.value': 'a'}, b: {'.priority': 200, '.value': 'b'}});
