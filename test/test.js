@@ -14,6 +14,42 @@ describe('MockFirebase', function() {
   });
 
   it('should have test units');
+
+  describe('#set', function() {
+    it('//todo');
+
+    it('should trigger child_removed if child keys are missing', function() {
+      var spy = sinon.spy();
+      fb.autoFlush();
+      fb.on('child_removed', spy);
+      var keys = Object.keys(fb.getData());
+      var len = keys.length;
+      // should not invoke callback yet
+      expect(spy.callCount).equals(0);
+      // data must have more than one record to do this test
+      expect(len).above(1);
+      // remove one key from data and call set()
+      var dat = fb.getData();
+      delete dat[keys[0]];
+      fb.set(dat);
+      expect(spy.callCount).equals(1);
+    });
+
+    it('should change parent from null to object when child is set', function() {
+      fb.autoFlush();
+      fb.set(null);
+      fb.child('newkey').set({foo: 'bar'});
+      expect(fb.getData()).eqls({newkey: {foo: 'bar'}});
+    });
+  })
+
+  describe('#remove', function() {
+    it('//todo');
+
+    it('should call child_removed for any children');
+
+    it('should change to null if last child is removed');
+  })
 });
 
 describe('MockFirebaseSimpleLogin', function() {
