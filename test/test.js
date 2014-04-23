@@ -51,7 +51,23 @@ describe('MockFirebase', function() {
       fb.child('newkey').set({foo: 'bar'});
       expect(fb.getData()).eqls({newkey: {foo: 'bar'}});
     });
-  })
+  });
+
+  describe('#setPriority', function() {
+    it('should trigger child_moved with correct prevChildName', function() {
+      var spy = sinon.spy();
+      fb.autoFlush();
+      var keys = _.keys(fb.getData());
+      expect(keys.length).above(1); // need 2 or more
+      var firstKey = keys[0];
+      var lastKey = keys.pop();
+      fb.on('child_moved', spy);
+      fb.child(firstKey).setPriority(250);
+      expect(spy.callCount).equals(1);
+      var call = spy.getCall(0);
+      expect(call.args[1]).equals(lastKey);
+    });
+  });
 
   describe('#remove', function() {
     it('//todo');
