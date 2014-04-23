@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.0.5-pre5
+ * @version 0.0.5-pre7
  */
 (function(exports) {
   /**
@@ -256,6 +256,11 @@
       this._priChanged(newPriority);
     },
 
+    setWithPriority: function(data, pri) {
+      this.setPriority(pri);
+      this.set(data);
+    },
+
     name: function() {
       return this.myName;
     },
@@ -393,45 +398,55 @@
         this.data = {};
       }
       var exists = this.data.hasOwnProperty(ref.name());
-      DEBUG && console.log('_childChanged', this.toString() + ' -> ' + ref.name(), data); //debug
+      DEBUG && console.log('_childChanged', this.toString() + ' -> ' + ref.name(), data);
       if( data === null && exists ) {
         delete this.data[ref.name()];
         if(_.isEmpty(this.data)) { this.data = null; }
         this._trigger('child_removed', data, pri, ref.name());
         this._trigger('value', this.data, this.priority);
       }
-      else if( data !== null ) {
-        this.data[ref.name()] = _.cloneDeep(data);
+      else if( !_.isEqual(data, this.data[ref.name()]) ) {
+        this.data[ref.name()] = data;
         this._trigger(exists? 'child_changed' : 'child_added', data, pri, ref.name());
         this._trigger('value', this.data, this.priority);
         this.parent && this.parent._childChanged(this);
       }
     },
 
-    _dataChanged: function(data) {
-      var self = this;
-      if(_.isObject(data) && _.has(data, '.priority')) {
-        self._priChanged(data['.priority']);
-        delete data['.priority'];
+    _dataChanged: function(unparsedData) {
+      var self = this, pri = getMeta(unparsedData, 'priority'), data = getMeta(unparsedData, 'value', unparsedData);
+      if( pri !== undefined ) {
+        self._priChanged(pri);
       }
       if( !_.isEqual(data, self.data) ) {
-        DEBUG && console.log('_dataChanged', self.toString(), data); //debug
+        DEBUG && console.log('_dataChanged', self.toString(), data);
         var oldData = _.isObject(self.data)? _.cloneDeep(self.data) : {};
         var newData = _.isObject(data)? _.cloneDeep(data) : {};
         var keysToRemove = _.difference(_.keys(oldData), _.keys(newData));
         var events = [];
 
-        DEBUG && keysToRemove.length && console.log('keysToRemove', keysToRemove);//debug
+        DEBUG && keysToRemove.length && console.log('keysToRemove', keysToRemove);
 
         // set this before modifying any children to ensure events only trigger once
         self.data = _.cloneDeep(data);
 
 
-        _.each(newData, function(dat, key) {
+        _.each(newData, function(val, key) {
+          var pri, dat = _.cloneDeep(val);
           if(_.has(self.children, key)) {
             self.children[key]._dataChanged(dat);
           }
-          if( !_.isEqual(oldData[key], newData[key]) ) {
+          else {
+            pri = getMeta(dat, 'priority');
+            dat = getMeta(dat, 'value', dat);
+            if(_.isEmpty(dat)) {
+              dat = null;
+            }
+            if(!_.isEqual(val, dat)) {
+              self.child(key).setWithPriority(dat, _.isUndefined(pri)? null : pri);
+            }
+          }
+          if( !_.isEqual(oldData[key], dat) ) {
             var event = 'child_changed';
             if( !_.has(oldData, key) ) {
               event = 'child_added';
@@ -1005,6 +1020,16 @@
     else {
       return exports[variableName||moduleName];
     }
+  }
+
+  function getMeta(data, key, defaultVal) {
+    var val = defaultVal;
+    var metaKey = ('.' + key);
+    if( _.isObject(data) && _.has(data, metaKey) ) {
+      val = data[metaKey]
+      delete data[metaKey]
+    }
+    return val;
   }
 
   /*** PUBLIC METHODS AND FIXTURES ***/

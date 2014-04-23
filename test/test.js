@@ -18,6 +18,16 @@ describe('MockFirebase', function() {
   describe('#set', function() {
     it('//todo');
 
+    it('should set priorities on children if included in data', function() {
+      fb.autoFlush();
+      fb.set({a: {'.priority': 100, '.value': 'a'}, b: {'.priority': 200, '.value': 'b'}});
+      var dat = fb.getData();
+      expect(dat.a).equals('a');
+      expect(dat.b).equals('b');
+      expect(fb.child('a').priority).equals(100);
+      expect(fb.child('b').priority).equals(200);
+    });
+
     it('should trigger child_removed if child keys are missing', function() {
       var spy = sinon.spy();
       fb.autoFlush();
