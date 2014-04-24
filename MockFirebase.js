@@ -4,6 +4,8 @@
  * @version 0.0.5-pre9
  */
 (function(exports) {
+  var DEBUG = false; // enable lots of console logging (best used while isolating one test case)
+
   /**
    * A mock that simulates Firebase operations for use in unit tests.
    *
@@ -245,7 +247,7 @@
       var data = _.assign(_.isObject(base)? base : {}, changes);
       DEBUG && console.log('update called', this.toString(), data);
       this._defer(function() {
-        DEBUG && console.log('update completed', this.toString(), data);
+        DEBUG && console.log('update flushed', this.toString(), data);
         if( err === null ) {
           self._dataChanged(data);
         }
@@ -254,7 +256,12 @@
     },
 
     setPriority: function(newPriority) {
-      this._priChanged(newPriority);
+      var self = this;
+      DEBUG && console.log('setPriority called', self.toString(), newPriority);
+      self._defer(function() {
+        DEBUG && console.log('setPriority flushed', self.toString(), newPriority);
+        self._priChanged(newPriority);
+      })
     },
 
     setWithPriority: function(data, pri) {
@@ -400,6 +407,8 @@
       }
       var exists = this.data.hasOwnProperty(ref.name());
       DEBUG && console.log('_childChanged', this.toString() + ' -> ' + ref.name(), data);
+      // in the case that the record exists here
+      // but has been deleted at the child we remove it
       if( data === null && exists ) {
         delete this.data[ref.name()];
         if(_.isEmpty(this.data)) { this.data = null; }
@@ -407,6 +416,8 @@
         this._trigger('value', this.data, this.priority);
         this.parent && this.parent._childChanged(this);
       }
+      // in the case that the record exists at the child level
+      // we add or update as needed
       else if( data !== null && !_.isEqual(data, this.data[ref.name()]) ) {
         this.data[ref.name()] = data;
         this._trigger(exists? 'child_changed' : 'child_added', data, pri, ref.name());
@@ -416,34 +427,34 @@
     },
 
     _dataChanged: function(unparsedData) {
-      var self = this, pri = getMeta(unparsedData, 'priority'), data = getMeta(unparsedData, 'value', unparsedData);
-      if( pri !== undefined ) {
+      var self = this;
+      var pri = getMeta(unparsedData, 'priority', self.priority);
+      var data = cleanData(unparsedData);
+      if( pri !== self.priority ) {
         self._priChanged(pri);
       }
       if( !_.isEqual(data, self.data) ) {
         DEBUG && console.log('_dataChanged', self.toString(), data);
-        var oldData = _.isObject(self.data)? _.cloneDeep(self.data) : {};
-        var newData = _.isObject(data)? _.cloneDeep(data) : {};
+        var oldData = _.isObject(self.data)? _.clone(self.data) : {};
+        var newData = _.isObject(data)? _.clone(data) : {};
         var keysToRemove = _.difference(_.keys(oldData), _.keys(newData));
         var events = [];
-
         DEBUG && keysToRemove.length && console.log('keysToRemove', keysToRemove);
 
         // set this before modifying any children to ensure events only trigger once
-        self.data = _.cloneDeep(data);
+        self.data = data;
 
-        _.each(newData, function(val, key) {
-          var pri = self._getPri(key), dat = _.cloneDeep(val);
-          if(_.has(self.children, key) || hasMeta(dat)) {
-            self.child(key)._dataChanged(dat);
+        _.each(_.keys(newData), function(key) {
+          if(_.has(self.children, key) || _.has(unparsedData[key], '.priority')) {
+            self.child(key)._dataChanged(unparsedData[key]);
           }
-          if( !_.isEqual(oldData[key], dat) ) {
+          if( !_.isEqual(oldData[key], newData[key]) ) {
             var event = 'child_changed';
             if( !_.has(oldData, key) ) {
               event = 'child_added';
               self._addKey(key);
             }
-            events.push([event, newData[key], pri, key]);
+            events.push([event, newData[key], self._getPri(key), key]);
           }
         });
 
@@ -451,8 +462,8 @@
           if( _.has(self.children, key) ) {
             self.children[key]._dataChanged(null);
           }
-          events.push(['child_removed', null, null, key]);
-        })
+          events.push(['child_removed', oldData[key], null, key]);
+        });
 
         // trigger parent notifications after all children have
         // been processed
@@ -481,10 +492,8 @@
 
     _resort: function(childKeyMoved) {
       this.sortedDataKeys.sort(this.childComparator.bind(this));
-
-      if( !_.isUndefined(childKeyMoved) ) {
-        var child = this.child(childKeyMoved);
-        this._trigger('child_moved', child.getData(), child.priority, childKeyMoved);
+      if( !_.isUndefined(childKeyMoved) && _.has(this.data, childKeyMoved) ) {
+        this._trigger('child_moved', this.data[childKeyMoved], this._getPri(childKeyMoved), childKeyMoved);
       }
     },
 
@@ -501,6 +510,7 @@
     },
 
     _trigger: function(event, data, pri, key) {
+      DEBUG && console.log('_trigger', event, this.toString(), key);
       var self = this, ref = event==='value'? self : self.child(key);
       var snap = makeSnap(ref, data, pri);
       _.each(self._events[event], function(fn) {
@@ -811,7 +821,6 @@
   };
 
   /*** UTIL FUNCTIONS ***/
-  var DEBUG = false;
   var lastChildAutoId = null;
   var _ = requireLib('lodash', '_');
   var sinon = requireLib('sinon');
@@ -1024,12 +1033,28 @@
 
   function getMeta(data, key, defaultVal) {
     var val = defaultVal;
-    var metaKey = ('.' + key);
+    var metaKey = '.' + key;
     if( _.isObject(data) && _.has(data, metaKey) ) {
       val = data[metaKey]
       delete data[metaKey]
     }
     return val;
+  }
+
+  function cleanData(data) {
+     var newData = _.clone(data);
+     if(_.isObject(newData)) {
+       if(_.has(newData, '.value')) {
+         newData = _.clone(newData['.value']);
+       }
+       _.each(newData, function(v,k) {
+         if( k !== '.priority' ) {
+           newData[k] = cleanData(v);
+         }
+       });
+       if(_.isEmpty(newData)) { newData = null; }
+     }
+     return newData;
   }
 
   /*** PUBLIC METHODS AND FIXTURES ***/

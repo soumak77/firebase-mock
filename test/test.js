@@ -34,6 +34,16 @@ describe('MockFirebase', function() {
       expect(fb.child('b').priority).equals(200);
     });
 
+    it('should have correct priority in snapshot if added with set', function() {
+      var spy = sinon.spy();
+      fb.autoFlush();
+      fb.on('child_added', spy);
+      var count = spy.callCount;
+      fb.set({alphanew: {'.priority': 100, '.value': 'a'}});
+      expect(spy.callCount).equals(count+1);
+      expect(spy.lastCall.args[0].getPriority()).equals(100);
+    });
+
     it('should trigger child_removed if child keys are missing', function() {
       var spy = sinon.spy();
       fb.autoFlush();
