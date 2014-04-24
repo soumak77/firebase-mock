@@ -395,36 +395,17 @@
      *****************************************************/
 
     _childChanged: function(ref) {
-      var data = ref.getData(), pri = ref.priority;
-      if( !_.isObject(this.data) ) {
-        // if there is no child data and the parent is not
-        // an object, then we are done here (don't accidentally
-        // turn it into an object if there are no children)
-        if( data === null ) {
-          return;
-        }
-        // otherwise, it just became an object because it has a child
-        this.data = {};
+      var events = [];
+      var childKey = ref.name();
+      var data = ref.getData();
+      DEBUG && console.log('_childChanged', this.toString() + ' -> ' + childKey, data);
+      if( data === null ) {
+        this._removeChild(childKey, events);
       }
-      var exists = this.data.hasOwnProperty(ref.name());
-      DEBUG && console.log('_childChanged', this.toString() + ' -> ' + ref.name(), data);
-      // in the case that the record exists here
-      // but has been deleted at the child we remove it
-      if( data === null && exists ) {
-        delete this.data[ref.name()];
-        if(_.isEmpty(this.data)) { this.data = null; }
-        this._trigger('child_removed', data, pri, ref.name());
-        this._trigger('value', this.data, this.priority);
-        this.parent && this.parent._childChanged(this);
+      else {
+        this._updateOrAdd(childKey, data, events);
       }
-      // in the case that the record exists at the child level
-      // we add or update as needed
-      else if( data !== null && !_.isEqual(data, this.data[ref.name()]) ) {
-        this.data[ref.name()] = data;
-        this._trigger(exists? 'child_changed' : 'child_added', data, pri, ref.name());
-        this._trigger('value', this.data, this.priority);
-        this.parent && this.parent._childChanged(this);
-      }
+      this._triggerAll(events);
     },
 
     _dataChanged: function(unparsedData) {
@@ -436,44 +417,29 @@
       }
       if( !_.isEqual(data, self.data) ) {
         DEBUG && console.log('_dataChanged', self.toString(), data);
-        var oldData = _.isObject(self.data)? _.clone(self.data) : {};
-        var newData = _.isObject(data)? _.clone(data) : {};
-        var keysToRemove = _.difference(_.keys(oldData), _.keys(newData));
+        var oldKeys = _.keys(self.data);
+        var newKeys = _.keys(data);
+        var keysToAdd = _.difference(newKeys, oldKeys);
+        var keysToRemove = _.difference(oldKeys, newKeys);
+        var keysToChange = _.difference(newKeys, keysToRemove);
         var events = [];
-        DEBUG && keysToRemove.length && console.log('keysToRemove', keysToRemove);
-
-        // set this before modifying any children to ensure events only trigger once
-        self.data = data;
-
-        _.each(_.keys(newData), function(key) {
-          self.child(key)._dataChanged(unparsedData[key]);
-          if( !_.isEqual(oldData[key], newData[key]) ) {
-            var event = 'child_changed';
-            if( !_.has(oldData, key) ) {
-              event = 'child_added';
-              self._addKey(key);
-            }
-            events.push([event, newData[key], self._getPri(key), key]);
-          }
-        });
 
         _.each(keysToRemove, function(key) {
-          if( _.has(self.children, key) ) {
-            self.children[key]._dataChanged(null);
-          }
-          events.push(['child_removed', oldData[key], null, key]);
+          self._removeChild(key, events);
         });
+
+        if(!_.isObject(data)) {
+          self.data = data;
+        }
+        else {
+          _.each(keysToChange, function(key) {
+            self._updateOrAdd(key, unparsedData[key], events);
+          });
+        }
 
         // trigger parent notifications after all children have
         // been processed
-        _.each(events, function(event) {
-          self._trigger.apply(self, event);
-        })
-
-        self._trigger('value', self.data, self.priority);
-        if( self.parent ) {
-          self.parent._childChanged(self);
-        }
+        self._triggerAll(events);
       }
     },
 
@@ -497,8 +463,17 @@
     },
 
     _addKey: function(newKey) {
-      this.sortedDataKeys.push(newKey);
-      this._resort();
+      if(_.indexOf(this.sortedDataKeys, newKey) === -1) {
+        this.sortedDataKeys.push(newKey);
+        this._resort();
+      }
+    },
+
+    _dropKey: function(key) {
+      var i = _.indexOf(this.sortedDataKeys, key);
+      if( i > -1 ) {
+        this.sortedDataKeys.splice(i, 1);
+      }
     },
 
     _defer: function(fn) {
@@ -521,6 +496,67 @@
           fn(snap);
         }
       });
+    },
+
+    _triggerAll: function(events) {
+      var self = this;
+      if( !events.length ) { return; }
+      _.each(events, function(event) {
+        self._trigger.apply(self, event);
+      })
+      self._trigger('value', self.data, self.priority);
+      if( self.parent ) {
+        self.parent._childChanged(self);
+      }
+    },
+
+    _updateOrAdd: function(key, data, events) {
+      var exists = _.isObject(this.data) && this.data.hasOwnProperty(key);
+      if( !exists ) {
+        return this._addChild(key, data, events);
+      }
+      else {
+        return this._updateChild(key, data, events);
+      }
+    },
+
+    _addChild: function(key, data, events) {
+      if(_.isObject(this.data) && _.has(this.data, key)) {
+        throw new Error('Tried to add existing object', key);
+      }
+      if( !_.isObject(this.data) ) {
+        this.data = {};
+      }
+      this._addKey(key);
+      this.data[key] = cleanData(data);
+      var c = this.child(key);
+      c._dataChanged(data);
+      events && events.push(['child_added', c.getData(), c.priority, key]);
+    },
+
+    _removeChild: function(key, events) {
+       if(_.isObject(this.data) && _.has(this.data, key)) {
+         this._dropKey(key);
+         var data = this.data[key];
+         delete this.data[key];
+         if(_.isEmpty(this.data)) {
+           this.data = null;
+         }
+         if(_.has(this.children, key)) {
+           this.children[key]._dataChanged(null);
+         }
+         events && events.push(['child_removed', data, null, key]);
+       }
+    },
+
+    _updateChild: function(key, data, events) {
+      var cdata = cleanData(data);
+      if(_.isObject(this.data) && _.has(this.data,key) && !_.isEqual(this.data[key], cdata)) {
+        this.data[key] = cdata;
+        var c = this.child(key);
+        c._dataChanged(data);
+        events && events.push(['child_changed', c.getData(), c.priority, key]);
+      }
     },
 
     _newAutoId: function() {
