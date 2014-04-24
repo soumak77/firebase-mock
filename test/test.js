@@ -44,6 +44,44 @@ describe('MockFirebase', function() {
       expect(spy.lastCall.args[0].getPriority()).equals(100);
     });
 
+    it('child_added events should fire with correct prevChildName', function() {
+      var data = {
+        alpha: {'.priority': 200, foo: 'alpha'},
+        bravo: {'.priority': 300, foo: 'bravo'},
+        charlie: {'.priority': 100, foo: 'charlie'}
+      };
+      var expectedPrevChild = [null, 'charlie', 'alpha'];
+      var spy = sinon.spy();
+      fb = new Firebase('Empty://', null).autoFlush();
+      fb.set(data);
+      fb.on('child_added', spy);
+      var count = spy.callCount;
+      expect(count).equals(3);
+      for(var i=0; i < count; i++) {
+        var prevChildKey = spy.getCall(i).args[1];
+        expect(prevChildKey).equals(expectedPrevChild[i]);
+      }
+    });
+
+    it('child_added events should fire with correct priority', function() {
+      var data = {
+        alpha: {'.priority': 200, foo: 'alpha'},
+        bravo: {'.priority': 300, foo: 'bravo'},
+        charlie: {'.priority': 100, foo: 'charlie'}
+      };
+      var spy = sinon.spy();
+      fb = new Firebase('Empty://', null).autoFlush();
+      fb.set(data);
+      fb.on('child_added', spy);
+      var count = spy.callCount;
+      expect(count).equals(3);
+      for(var i=0; i < count; i++) {
+        var snap = spy.getCall(i).args[0];
+        var pri = data[snap.name()]['.priority'];
+        expect(snap.getPriority()).equals(pri);
+      }
+    });
+
     it('should trigger child_removed if child keys are missing', function() {
       var spy = sinon.spy();
       fb.autoFlush();
