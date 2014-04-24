@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.0.5-pre9
+ * @version 0.0.5-pre10
  */
 (function(exports) {
   var DEBUG = false; // enable lots of console logging (best used while isolating one test case)
@@ -321,7 +321,8 @@
         this._defer(function() {
           var prev = null;
           _.each(data, function(v, k) {
-            callback(makeSnap(self.child(k), v, pri), prev);
+            var child = self.child(k);
+            callback(makeSnap(child, v, child.priority), prev);
             prev = k;
           });
         });
@@ -445,9 +446,7 @@
         self.data = data;
 
         _.each(_.keys(newData), function(key) {
-          if(_.has(self.children, key) || _.has(unparsedData[key], '.priority')) {
-            self.child(key)._dataChanged(unparsedData[key]);
-          }
+          self.child(key)._dataChanged(unparsedData[key]);
           if( !_.isEqual(oldData[key], newData[key]) ) {
             var event = 'child_changed';
             if( !_.has(oldData, key) ) {
@@ -515,7 +514,7 @@
       var snap = makeSnap(ref, data, pri);
       _.each(self._events[event], function(fn) {
         if(_.contains(['child_added', 'child_moved'], event)) {
-          fn(snap, self._getPrevChild(key, pri));
+          fn(snap, self._getPrevChild(key));
         }
         else {
           //todo allow scope by changing fn to an array? for use with on() and once() which accept scope?
@@ -539,7 +538,7 @@
       return _.isObject(this.data) && _.has(this.data, key)? this.data[key] : null;
     },
 
-    _getPrevChild: function(key, pri) {
+    _getPrevChild: function(key) {
 //      this._resort();
       var keys = this.sortedDataKeys;
       var i = _.indexOf(keys, key);
