@@ -228,7 +228,7 @@
       data = _.cloneDeep(data);
       DEBUG && console.log('set called',this.toString(), data);
       this._defer(function() {
-        DEBUG && console.log('set completed',this.toString(), data);
+        DEBUG && console.log('set completed',self.toString(), data);
         if( err === null ) {
           self._dataChanged(data);
         }
@@ -247,7 +247,7 @@
       var data = _.assign(_.isObject(base)? base : {}, changes);
       DEBUG && console.log('update called', this.toString(), data);
       this._defer(function() {
-        DEBUG && console.log('update flushed', this.toString(), data);
+        DEBUG && console.log('update flushed', self.toString(), data);
         if( err === null ) {
           self._dataChanged(data);
         }
@@ -344,17 +344,19 @@
     },
 
     transaction: function(valueFn, finishedFn, applyLocally) {
+      var self = this;
       var valueSpy = spyFactory(valueFn);
       var finishedSpy = spyFactory(finishedFn);
+
       this._defer(function() {
-        var err = this._nextErr('transaction');
-        // unlike most defer methods, this will use the value as it exists at the time
+        var err = self._nextErr('transaction');
+        // unlike most defer methods, self will use the value as it exists at the time
         // the transaction is actually invoked, which is the eventual consistent value
         // it would have in reality
-        var res = valueSpy(this.getData());
-        var newData = _.isUndefined(res) || err? this.getData() : res;
-        finishedSpy(err, err === null && !_.isUndefined(res), makeSnap(this, newData, this.priority));
-        this._dataChanged(newData);
+        var res = valueSpy(self.getData());
+        var newData = _.isUndefined(res) || err? self.getData() : res;
+        finishedSpy(err, err === null && !_.isUndefined(res), makeSnap(self, newData, self.priority));
+        self._dataChanged(newData);
       });
       return [valueSpy, finishedSpy, applyLocally];
     },
@@ -1164,3 +1166,4 @@
   exports.FirebaseSimpleLogin = MockFirebaseSimpleLogin;
 
 })(typeof(window) === 'object'? window : module.exports);
+
