@@ -141,5 +141,26 @@ describe('MockFirebase', function() {
       fb.flush();
       expect(spy.callCount).equals(2);
     });
-  })
+  });
+
+  describe('#transaction', function() {
+    it('should call the transaction function', function(done) {
+      fb.transaction(function(currentValue) {
+        done();
+      });
+      fb.flush();
+    });
+    it('should fire the callback with a "committed" boolean and error message', function(done) {
+      fb.transaction(function(currentValue) {
+        currentValue.transacted = 'yes';
+        return currentValue;
+      }, function(error, committed, snapshot) {
+        expect(error).equals(null);
+        expect(committed).equals(true);
+        done();
+      });
+      fb.flush();
+    });
+  });
 });
+
