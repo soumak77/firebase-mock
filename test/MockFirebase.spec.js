@@ -157,6 +157,7 @@ describe('MockFirebase', function() {
       }, function(error, committed, snapshot) {
         expect(error).equals(null);
         expect(committed).equals(true);
+        expect(snapshot.val().transacted).equals('yes');
         done();
       });
       fb.flush();
