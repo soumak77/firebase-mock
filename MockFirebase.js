@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.0.6
+ * @version 0.0.7
  */
 (function(exports) {
   var DEBUG = false; // enable lots of console logging (best used while isolating one test case)
@@ -300,8 +300,9 @@
     },
 
     once: function(event, callback) {
+      var self = this;
       function fn(snap) {
-        this.off(event, fn);
+        self.off(event, fn);
         callback(snap);
       }
       this.on(event, fn);
