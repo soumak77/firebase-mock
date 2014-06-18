@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.0.8
+ * @version 0.0.9
  */
 (function(exports) {
   var DEBUG = false; // enable lots of console logging (best used while isolating one test case)
@@ -295,7 +295,7 @@
       var child = this.child(this._newAutoId());
       var err = this._nextErr('push');
       if( err ) { child.failNext('set', err); }
-      if( data ) {
+      if( arguments.length && data !== null ) {
         // currently, callback only invoked if child exists
         child.set(data, callback);
       }
@@ -433,7 +433,6 @@
         DEBUG && console.log('_dataChanged', self.toString(), data);
         var oldKeys = _.keys(self.data);
         var newKeys = _.keys(data);
-        var keysToAdd = _.difference(newKeys, oldKeys);
         var keysToRemove = _.difference(oldKeys, newKeys);
         var keysToChange = _.difference(newKeys, keysToRemove);
         var events = [];
@@ -443,6 +442,7 @@
         });
 
         if(!_.isObject(data)) {
+          events.push(false);
           self.data = data;
         }
         else {
@@ -507,7 +507,6 @@
           fn.call(context, snap, self._getPrevChild(key));
         }
         else {
-          //todo allow scope by changing fn to an array? for use with on() and once() which accept scope?
           fn.call(context, snap);
         }
       });
@@ -517,8 +516,8 @@
       var self = this;
       if( !events.length ) { return; }
       _.each(events, function(event) {
-        self._trigger.apply(self, event);
-      })
+        event === false || self._trigger.apply(self, event);
+      });
       self._trigger('value', self.data, self.priority);
       if( self.parentRef ) {
         self.parentRef._childChanged(self);
