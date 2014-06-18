@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.0.7
+ * @version 0.0.8
  */
 (function(exports) {
   var DEBUG = false; // enable lots of console logging (best used while isolating one test case)
@@ -173,7 +173,7 @@
      * Simulate a failure by specifying that the next invocation of methodName should
      * fail with the provided error.
      *
-     * @param {String} methodName currently only supports `set` and `transaction`
+     * @param {String} methodName currently only supports `set`, `update`, `push` (with data) and `transaction`
      * @param {String|Error} error
      */
     failNext: function(methodName, error) {
@@ -291,10 +291,13 @@
       return next;
     },
 
-    push: function(data) {
+    push: function(data, callback) {
       var child = this.child(this._newAutoId());
+      var err = this._nextErr('push');
+      if( err ) { child.failNext('set', err); }
       if( data ) {
-        child.set(data);
+        // currently, callback only invoked if child exists
+        child.set(data, callback);
       }
       return child;
     },
