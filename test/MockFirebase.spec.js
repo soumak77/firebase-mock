@@ -3,8 +3,8 @@ var sinon = require('sinon');
 var _ = require('lodash');
 var expect = require('chai').use(require('sinon-chai')).expect;
 var Mock = require('../MockFirebase.js');
-var Firebase = Mock.Firebase;
-var FirebaseSimpleLogin = Mock.FirebaseSimpleLogin;
+var Firebase = Mock.MockFirebase;
+var FirebaseSimpleLogin = Mock.MockFirebaseSimpleLogin;
 
 describe('MockFirebase', function() {
   var fb;

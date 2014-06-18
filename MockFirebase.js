@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.0.5-pre11
+ * @version 0.0.6
  */
 (function(exports) {
   var DEBUG = false; // enable lots of console logging (best used while isolating one test case)
@@ -60,6 +60,8 @@
     this._queryProps = { limit: undefined, startAt: undefined, endAt: undefined };
 
     // represents the fake url
+    //todo should unwrap nested paths; Firebase
+    //todo accepts sub-paths, mock should too
     this.currentPath = currentPath || 'Mock://';
 
     // see failNext()
@@ -79,7 +81,7 @@
     this._events = { value: [], child_added: [], child_removed: [], child_changed: [], child_moved: [] };
 
     // allows changes to be propagated between child/parent instances
-    this.parent = parent||null;
+    this.parentRef = parent||null;
     this.children = {};
     parent && (parent.children[this.name()] = this);
 
@@ -161,7 +163,7 @@
         _.each(this.children, function(c) {
           c.autoFlush(delay);
         });
-        if( this.parent ) { this.parent.autoFlush(delay); }
+        if( this.parentRef ) { this.parentRef.autoFlush(delay); }
         delay !== false && this.flush(delay);
       }
       return this;
@@ -278,13 +280,13 @@
     },
 
     parent: function() {
-      return this.parent? this.parent : this;
+      return this.parentRef;
     },
 
     root: function() {
       var next = this;
-      while(next.parent()) {
-        next = next.parent();
+      while(next.parentRef) {
+        next = next.parentRef;
       }
       return next;
     },
@@ -309,8 +311,8 @@
       this._dataChanged(null);
     },
 
-    on: function(event, callback) { //todo cancelCallback?
-      this._events[event].push(callback);
+    on: function(event, callback, context) { //todo cancelCallback?
+      this._events[event].push([callback, context]);
       var self = this;
       if( event === 'value' ) {
         this._defer(function() {
@@ -329,14 +331,20 @@
       }
     },
 
-    off: function(event, callback) {
+    off: function(event, callback, context) {
       if( !event ) {
         for (var key in this._events)
           if( this._events.hasOwnProperty(key) )
             this.off(key);
       }
       else if( callback ) {
-        this._events[event] = _.without(this._events[event], callback);
+        var list = this._events[event];
+        var newList = this._events[event] = [];
+        _.each(list, function(parts) {
+          if( parts[0] !== callback || parts[1] !== context ) {
+            newList.push(parts);
+          }
+        });
       }
       else {
         this._events[event] = [];
@@ -448,8 +456,8 @@
     _priChanged: function(newPriority) {
       DEBUG && console.log('_priChanged', this.toString(), newPriority);
       this.priority = newPriority;
-      if( this.parent ) {
-        this.parent._resort(this.name());
+      if( this.parentRef ) {
+        this.parentRef._resort(this.name());
       }
     },
 
@@ -489,13 +497,14 @@
       DEBUG && console.log('_trigger', event, this.toString(), key);
       var self = this, ref = event==='value'? self : self.child(key);
       var snap = makeSnap(ref, data, pri);
-      _.each(self._events[event], function(fn) {
+      _.each(self._events[event], function(parts) {
+        var fn = parts[0], context = parts[1];
         if(_.contains(['child_added', 'child_moved'], event)) {
-          fn(snap, self._getPrevChild(key));
+          fn.call(context, snap, self._getPrevChild(key));
         }
         else {
           //todo allow scope by changing fn to an array? for use with on() and once() which accept scope?
-          fn(snap);
+          fn.call(context, snap);
         }
       });
     },
@@ -507,8 +516,8 @@
         self._trigger.apply(self, event);
       })
       self._trigger('value', self.data, self.priority);
-      if( self.parent ) {
-        self.parent._childChanged(self);
+      if( self.parentRef ) {
+        self.parentRef._childChanged(self);
       }
     },
 
@@ -537,18 +546,18 @@
     },
 
     _removeChild: function(key, events) {
-       if(_.isObject(this.data) && _.has(this.data, key)) {
-         this._dropKey(key);
-         var data = this.data[key];
-         delete this.data[key];
-         if(_.isEmpty(this.data)) {
-           this.data = null;
-         }
-         if(_.has(this.children, key)) {
-           this.children[key]._dataChanged(null);
-         }
-         events && events.push(['child_removed', data, null, key]);
-       }
+      if(_.isObject(this.data) && _.has(this.data, key)) {
+        this._dropKey(key);
+        var data = this.data[key];
+        delete this.data[key];
+        if(_.isEmpty(this.data)) {
+          this.data = null;
+        }
+        if(_.has(this.children, key)) {
+          this.children[key]._dataChanged(null);
+        }
+        events && events.push(['child_removed', data, null, key]);
+      }
     },
 
     _updateChild: function(key, data, events) {
@@ -822,7 +831,7 @@
    * they are invoked.
    ***/
   function FlushQueue() {
-     this.queuedEvents = [];
+    this.queuedEvents = [];
   }
 
   FlushQueue.prototype.add = function(args) {
@@ -867,7 +876,7 @@
     if( typeof(jasmine) !== 'undefined' ) {
       fn = function(obj, method) {
         if( arguments.length === 2 ) {
-          return spyOn(obj, method).andCallThrough();
+          return spyOn(obj, method).and.callThrough();
         }
         else {
           var fn = jasmine.createSpy();
@@ -1072,31 +1081,29 @@
     var val = defaultVal;
     var metaKey = '.' + key;
     if( _.isObject(data) && _.has(data, metaKey) ) {
-      val = data[metaKey]
+      val = data[metaKey];
       delete data[metaKey]
     }
     return val;
   }
 
   function cleanData(data) {
-     var newData = _.clone(data);
-     if(_.isObject(newData)) {
-       if(_.has(newData, '.value')) {
-         newData = _.clone(newData['.value']);
-       }
-       _.each(newData, function(v,k) {
-         if( k !== '.priority' ) {
-           newData[k] = cleanData(v);
-         }
-       });
-       if(_.isEmpty(newData)) { newData = null; }
-     }
-     return newData;
+    var newData = _.clone(data);
+    if(_.isObject(newData)) {
+      if(_.has(newData, '.value')) {
+        newData = _.clone(newData['.value']);
+      }
+      _.each(newData, function(v,k) {
+        if( k !== '.priority' ) {
+          newData[k] = cleanData(v);
+        }
+      });
+      if(_.isEmpty(newData)) { newData = null; }
+    }
+    return newData;
   }
 
   /*** PUBLIC METHODS AND FIXTURES ***/
-
-  createError = createError;
 
   MockFirebaseSimpleLogin.DEFAULT_FAIL_WHEN = function(provider, options, user) {
     var res = null;
@@ -1131,39 +1138,51 @@
 
   MockFirebase._ = _; // expose for tests
 
-  var _Firebase = exports.Firebase;
-  var _FirebaseSimpleLogin = exports.FirebaseSimpleLogin;
-  MockFirebase.noConflict = function() {
-    exports.Firebase = _Firebase;
-    exports.FirebaseSimpleLogin = _FirebaseSimpleLogin;
+  MockFirebase._origFirebase = exports.Firebase;
+  MockFirebase._origFirebaseSimpleLogin = exports.FirebaseSimpleLogin;
+
+  MockFirebase.override = function() {
+    exports.Firebase = MockFirebase;
+    exports.FirebaseSimpleLogin = MockFirebaseSimpleLogin;
   };
 
   MockFirebase.ref = ref;
   MockFirebase.DEFAULT_DATA  = {
     'data': {
       'a': {
-        hello: 'world',
+        foo: 'alpha',
         aNumber: 1,
         aBoolean: false
       },
       'b': {
-        foo: 'bar',
+        foo: 'bravo',
         aNumber: 2,
         aBoolean: true
       },
       'c': {
-        bar: 'baz',
+        bar: 'charlie',
         aNumber: 3,
         aBoolean: true
+      },
+      'd': {
+        foo: 'delta',
+        aNumber: 4,
+        aBoolean: true
+      },
+      'e': {
+        foo: 'echo',
+        aNumber: 5
       }
+    },
+    'index': {
+      'b': true,
+      'c': 1,
+      'e': false
     }
   };
 
   // some hoop jumping for node require() vs browser usage
   exports.MockFirebase = MockFirebase;
   exports.MockFirebaseSimpleLogin = MockFirebaseSimpleLogin;
-  exports.Firebase = MockFirebase;
-  exports.FirebaseSimpleLogin = MockFirebaseSimpleLogin;
 
 })(typeof(window) === 'object'? window : module.exports);
-
