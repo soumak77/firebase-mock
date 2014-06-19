@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.0.9
+ * @version 0.0.10
  */
 (function(exports) {
   var DEBUG = false; // enable lots of console logging (best used while isolating one test case)
@@ -316,11 +316,18 @@
     },
 
     on: function(event, callback, context) { //todo cancelCallback?
+      if( arguments.length === 4 ) {
+        context = arguments[3];
+      }
+      else if( typeof(context) === 'function' ) {
+        context = null;
+      };
+
       this._events[event].push([callback, context]);
       var self = this;
       if( event === 'value' ) {
         this._defer(function() {
-          callback(makeSnap(self, self.getData(), self.priority));
+          callback.call(context, makeSnap(self, self.getData(), self.priority));
         });
       }
       else if( event === 'child_added' ) {
@@ -328,7 +335,7 @@
           var prev = null;
           _.each(self.sortedDataKeys, function(k) {
             var child = self.child(k);
-            callback(makeSnap(child, child.getData(), child.priority), prev);
+            callback.call(context, makeSnap(child, child.getData(), child.priority), prev);
             prev = k;
           });
         });
