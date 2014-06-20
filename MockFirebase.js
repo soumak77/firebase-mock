@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.1.0
+ * @version 0.1.1
  */
 (function(exports) {
   var DEBUG = false; // enable lots of console logging (best used while isolating one test case)
@@ -200,12 +200,13 @@
     /**
      * Generates a fake event that does not affect or derive from the actual data in this
      * mock. Great for quick event handling tests that won't rely on longer-term consistency
-     * or for creating out-of-order events that are hard to produce using set/remove/setPriority
+     * or for creating out-of-order networking conditions that are hard to produce
+     * using set/remove/setPriority
      *
      * @param {string} event
      * @param {string} key
      * @param data
-     * @param {string} prevChild
+     * @param {string} [prevChild]
      * @param [pri]
      * @returns {MockFirebase}
      */
@@ -214,14 +215,16 @@
       var self = this;
       var ref = event==='value'? self : self.child(key);
       var snap = makeSnap(ref, data, pri);
-      _.each(self._events[event], function(parts) {
-        var fn = parts[0], context = parts[1];
-        if(_.contains(['child_added', 'child_moved'], event)) {
-          fn.call(context, snap, angular.isUndefined(prevChild)? null : prevChild);
-        }
-        else {
-          fn.call(context, snap);
-        }
+      self._defer(function() {
+        _.each(self._events[event], function (parts) {
+          var fn = parts[0], context = parts[1];
+          if (_.contains(['child_added', 'child_moved'], event)) {
+            fn.call(context, snap, angular.isUndefined(prevChild) ? null : prevChild);
+          }
+          else {
+            fn.call(context, snap);
+          }
+        });
       });
       return this;
     },
@@ -336,7 +339,6 @@
         cancel = function() {};
         context = null;
       }
-
       var err = this._nextErr('once');
       if( err ) {
         this._defer(function() {
