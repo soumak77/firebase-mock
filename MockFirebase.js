@@ -360,21 +360,27 @@
         });
       }
       else {
-        this._events[event].push([callback, context]);
+        var eventArr = [callback, context];
+        this._events[event].push(eventArr);
         var self = this;
         if( event === 'value' ) {
-          this._defer(function() {
-            callback.call(context, makeSnap(self, self.getData(), self.priority));
+          self._defer(function() {
+            // make sure off() wasn't called in the interim
+            if( self._events[event].indexOf(eventArr) > -1) {
+              callback.call(context, makeSnap(self, self.getData(), self.priority));
+            }
           });
         }
         else if( event === 'child_added' ) {
-          this._defer(function() {
-            var prev = null;
-            _.each(self.sortedDataKeys, function(k) {
-              var child = self.child(k);
-              callback.call(context, makeSnap(child, child.getData(), child.priority), prev);
-              prev = k;
-            });
+          self._defer(function() {
+            if( self._events[event].indexOf(eventArr) > -1) {
+              var prev = null;
+              _.each(self.sortedDataKeys, function (k) {
+                var child = self.child(k);
+                callback.call(context, makeSnap(child, child.getData(), child.priority), prev);
+                prev = k;
+              });
+            }
           });
         }
       }
