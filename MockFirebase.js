@@ -311,8 +311,18 @@
       this.on(event, fn);
     },
 
-    remove: function() {
-      this._dataChanged(null);
+    remove: function(callback) {
+      var self = this;
+      var err = this._nextErr('set');
+      DEBUG && console.log('remove called', this.toString());
+      this._defer(function() {
+        DEBUG && console.log('remove completed',self.toString());
+        if( err === null ) {
+          self._dataChanged(null);
+        }
+        callback && callback(err);
+      });
+      return this;
     },
 
     on: function(event, callback, context) { //todo cancelCallback?
