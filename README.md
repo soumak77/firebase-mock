@@ -93,10 +93,10 @@ When writing unit tests, you'll probably want to patch calls to `Firebase` in yo
 
 ## Browser
 
-If `Firebase` is attached to the `window`, you can just replace it directly:
+If `Firebase` is attached to the `window`, you can just replace it using the override method:
 
 ```js
-var Firebase = MockFirebase;
+MockFirebase.override();
 ```
 
 Make sure to include `MockFirebase` before overwriting Firebase and then add your tests after the patch.
