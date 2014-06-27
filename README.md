@@ -87,6 +87,45 @@ Simulate a failure by specifying that the next invocation of methodName should f
 
 Returns a copy of the current data
 
+# Proxying Firebase
+
+When writing unit tests, you'll probably want to patch calls to `Firebase` in your source code with `MockFirebase`. 
+
+## Browser
+
+If `Firebase` is attached to the `window`, you can just replace it directly:
+
+```js
+var Firebase = MockFirebase;
+```
+
+Make sure to include `MockFirebase` before overwriting Firebase and then add your tests after the patch.
+
+## Node/Browserify
+In Node/Browserify, you need to patch `require` itself. [proxyquire](https://github.com/thlorenz/proxyquire) and [proxyquireify](https://github.com/thlorenz/proxyquireify) make this easy.
+
+```js
+// ./mySrc.js
+var Firebase = require('firebase');
+var ref = new Firebase('myRefUrl');
+ref.on('value', function (snapshot) {
+  console.log(snapshot.val());
+});
+```
+
+In order to test the above source code, we use proxyquire like this:
+
+```js
+// ./test.js
+var proxyquire = require('proxyquire');
+var mySrc = proxyquire('./mySrc', {
+  firebase: require('mockfirebase').MockFirebase.autoFlush()
+});
+// data is logged
+```
+
+Note that the key in the stubs object matches the module name (`'firebase'`) and not the capitalized variable name. 
+
 # Contributing
 
  - Fork the repo
