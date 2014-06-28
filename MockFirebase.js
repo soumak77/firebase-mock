@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.1.3
+ * @version 0.1.4
  */
 (function(exports) {
   var DEBUG = false; // enable lots of console logging (best used while isolating one test case)
@@ -14,19 +14,23 @@
    *     // in windows
    *     <script src="lib/lodash.js"></script> <!-- dependency -->
    *     <script src="lib/MockFirebase.js"></script> <!-- the lib -->
-   *     <!-- not working yet: MockFirebase.stub(window, 'Firebase'); // replace window.Firebase -->
+   *     <script>
+   *       // to override all calls to new Firebase:
+   *       MockFirebase.override();
+   *       // test units can be invoked now...
+   *     </script>
    *
    *     // in node.js
    *     var Firebase = require('../lib/MockFirebase');
    *
    * ## Usage Examples
    *
-   *     var fb = new Firebase('Mock://foo/bar');
+   *     var fb = new MockFirebase('Mock://foo/bar');
    *     fb.on('value', function(snap) {
     *        console.log(snap.val());
     *     });
    *
-   *     // do something async or synchronously...
+   *     // do things async or synchronously, like fb.child('foo').set('bar')...
    *
    *     // trigger callbacks and event listeners
    *     fb.flush();
@@ -45,9 +49,26 @@
    *     var fb = new MockFirebase('Mock://fails/a/lot');
    *     fb.failNext('set', new Error('PERMISSION_DENIED'); // create an error to be invoked on the next set() op
    *     fb.set({foo: bar}, function(err) {
-    *         // err.message === 'PERMISSION_DENIED'
-    *     });
+   *         // err.message === 'PERMISSION_DENIED'
+   *     });
    *     fb.flush();
+   *
+   * ## Building with custom data
+   *
+   *     // change data for all mocks
+   *     MockFirebase.DEFAULT_DATA = {foo: { bar: 'baz'}};
+   *     var fb = new MockFirebase('Mock://foo');
+   *     fb.once('value', function(snap) {
+   *        snap.name(); // foo
+   *        snap.val(); //  {bar: 'baz'}
+   *     });
+   *
+   *     // customize for a single instance
+   *     var fb = new MockFirebase('Mock://foo', {foo: 'bar'});
+   *     fb.once('value', function(snap) {
+   *        snap.name(); // foo
+   *        snap.val(); //  'bar'
+   *     });
    *
    * @param {string} [currentPath] use a relative path here or a url, all .child() calls will append to this
    * @param {Object} [data] specify the data in this Firebase instance (defaults to MockFirebase.DEFAULT_DATA)
@@ -123,7 +144,8 @@
      *
      * This also affects all child and parent paths that were created using .child from the original
      * MockFirebase instance; all events queued before a flush, regardless of the node level in hierarchy,
-     * are processed together.
+     * are processed together. To make child and parent paths fire on a different timeline or out of order,
+     * check out splitFlushQueue() below.
      *
      * <code>
      *   var fbRef = new MockFirebase();
@@ -168,6 +190,23 @@
         delay !== false && this.flush(delay);
       }
       return this;
+    },
+
+    /**
+     * If we can't use fakeEvent() and we need to test events out of order, we can give a child its own flush queue
+     * so that calling flush() does not also trigger parent and siblings in the queue.
+     */
+    splitFlushQueue: function() {
+      this.flushQueue = new FlushQueue();
+    },
+
+    /**
+     * Restore the flush queue after using splitFlushQueue() so that child/sibling/parent queues are flushed in order.
+     */
+    joinFlushQueue: function() {
+      if( this.parent ) {
+        this.flushQueue = this.parent.flushQueue;
+      }
     },
 
     /**
@@ -615,7 +654,7 @@
     },
 
     _addChild: function(key, data, events) {
-      if(_.isObject(this.data) && _.has(this.data, key)) {
+      if(this._hasChild(key)) {
         throw new Error('Tried to add existing object', key);
       }
       if( !_.isObject(this.data) ) {
@@ -629,7 +668,7 @@
     },
 
     _removeChild: function(key, events) {
-      if(_.isObject(this.data) && _.has(this.data, key)) {
+      if(this._hasChild(key)) {
         this._dropKey(key);
         var data = this.data[key];
         delete this.data[key];
@@ -664,8 +703,12 @@
       return err||null;
     },
 
+    _hasChild: function(key) {
+      return _.isObject(this.data) && _.has(this.data, key);
+    },
+
     _childData: function(key) {
-      return _.isObject(this.data) && _.has(this.data, key)? this.data[key] : null;
+      return this._hasChild(key)? this.data[key] : null;
     },
 
     _getPrevChild: function(key) {
