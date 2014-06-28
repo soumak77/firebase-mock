@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.1.2
+ * @version 0.1.3
  */
 (function(exports) {
   var DEBUG = false; // enable lots of console logging (best used while isolating one test case)
@@ -955,16 +955,30 @@
   var sinon = requireLib('sinon');
 
   var spyFactory = (function() {
-    var fn;
+    var spyFunction;
     if( typeof(jasmine) !== 'undefined' ) {
-      fn = function(obj, method) {
+      spyFunction = function(obj, method) {
+        var fn;
         if( arguments.length === 2 ) {
-          return spyOn(obj, method).and.callThrough();
+          var spy = spyOn(obj, method);
+          if( typeof(spy.andCallThrough) === 'function' ) {
+            // karma < 0.12.x
+            fn = spy.andCallThrough();
+          }
+          else {
+            fn = spy.and.callThrough();
+          }
         }
         else {
-          var fn = jasmine.createSpy();
+          fn = jasmine.createSpy();
           if( arguments.length === 1 && typeof(arguments[0]) === 'function' ) {
-            fn.andCallFake(obj);
+            if( typeof(fn.andCallFake) === 'function' ) {
+              // karma < 0.12.x
+              fn.andCallFake(obj);
+            }
+            else {
+              fn.and.callFake(obj);
+            }
           }
           return fn;
         }
@@ -972,9 +986,9 @@
     }
     else {
       var sinon = requireLib('sinon');
-      fn = sinon.spy.bind(sinon);
+      spyFunction = sinon.spy.bind(sinon);
     }
-    return fn;
+    return spyFunction;
   })();
 
   var USER_COUNT = 100;
