@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.1.4
+ * @version 0.1.5
  */
 (function(exports) {
   var DEBUG = false; // enable lots of console logging (best used while isolating one test case)
@@ -476,8 +476,8 @@
 
     transaction: function(valueFn, finishedFn, applyLocally) {
       var self = this;
-      var valueSpy = spyFactory(valueFn);
-      var finishedSpy = spyFactory(finishedFn);
+      var valueSpy = spyFactory(valueFn, 'trxn:valueFn');
+      var finishedSpy = spyFactory(finishedFn, 'trxn:finishedFn');
 
       this._defer(function() {
         var err = self._nextErr('transaction');
@@ -1002,7 +1002,7 @@
     if( typeof(jasmine) !== 'undefined' ) {
       spyFunction = function(obj, method) {
         var fn;
-        if( arguments.length === 2 ) {
+        if( typeof(obj) === 'object' ) {
           var spy = spyOn(obj, method);
           if( typeof(spy.andCallThrough) === 'function' ) {
             // karma < 0.12.x
@@ -1013,7 +1013,7 @@
           }
         }
         else {
-          fn = jasmine.createSpy();
+          fn = jasmine.createSpy(method);
           if( arguments.length === 1 && typeof(arguments[0]) === 'function' ) {
             if( typeof(fn.andCallFake) === 'function' ) {
               // karma < 0.12.x
@@ -1023,8 +1023,8 @@
               fn.and.callFake(obj);
             }
           }
-          return fn;
         }
+        return fn;
       }
     }
     else {
@@ -1300,9 +1300,10 @@
         aBoolean: true
       },
       'c': {
-        bar: 'charlie',
+        aString: 'charlie',
         aNumber: 3,
-        aBoolean: true
+        aBoolean: true,
+        bString: 'b'
       },
       'd': {
         aString: 'delta',
