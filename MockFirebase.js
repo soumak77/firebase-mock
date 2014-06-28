@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.1.1
+ * @version 0.1.2
  */
 (function(exports) {
   var DEBUG = false; // enable lots of console logging (best used while isolating one test case)
@@ -212,6 +212,9 @@
      */
     fakeEvent: function(event, key, data, prevChild, pri) {
       DEBUG && console.log('fakeEvent', event, this.toString(), key);
+      if( arguments.length < 5 ) { pri = null; }
+      if( arguments.length < 4 ) { prevChild = null; }
+      if( arguments.length < 3 ) { data = null; }
       var self = this;
       var ref = event==='value'? self : self.child(key);
       var snap = makeSnap(ref, data, pri);
@@ -219,7 +222,7 @@
         _.each(self._events[event], function (parts) {
           var fn = parts[0], context = parts[1];
           if (_.contains(['child_added', 'child_moved'], event)) {
-            fn.call(context, snap, angular.isUndefined(prevChild) ? null : prevChild);
+            fn.call(context, snap, prevChild);
           }
           else {
             fn.call(context, snap);
@@ -1230,12 +1233,12 @@
   MockFirebase.DEFAULT_DATA  = {
     'data': {
       'a': {
-        foo: 'alpha',
+        aString: 'alpha',
         aNumber: 1,
         aBoolean: false
       },
       'b': {
-        foo: 'bravo',
+        aString: 'bravo',
         aNumber: 2,
         aBoolean: true
       },
@@ -1245,12 +1248,12 @@
         aBoolean: true
       },
       'd': {
-        foo: 'delta',
+        aString: 'delta',
         aNumber: 4,
         aBoolean: true
       },
       'e': {
-        foo: 'echo',
+        aString: 'echo',
         aNumber: 5
       }
     },
