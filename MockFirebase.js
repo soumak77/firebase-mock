@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.1.5
+ * @version 0.1.6
  */
 (function(exports) {
   var DEBUG = false; // enable lots of console logging (best used while isolating one test case)
@@ -229,6 +229,14 @@
     },
 
     /**
+     * Returns keys from the data in this path
+     * @returns {Array}
+     */
+    getKeys: function() {
+      return _.keys(this.data);
+    },
+
+    /**
      * Returns the last automatically generated ID
      * @returns {string|string|*}
      */
@@ -389,11 +397,11 @@
       }
       else {
         function fn(snap) {
-          self.off(event, fn);
+          self.off(event, fn, context);
           callback.call(context, snap);
         }
 
-        this.on(event, fn);
+        this.on(event, fn, context);
       }
     },
 
@@ -569,6 +577,9 @@
             self._updateOrAdd(key, unparsedData[key], events);
           });
         }
+
+        // update order of my child keys
+        self._resort();
 
         // trigger parent notifications after all children have
         // been processed
@@ -1302,8 +1313,7 @@
       'c': {
         aString: 'charlie',
         aNumber: 3,
-        aBoolean: true,
-        bString: 'b'
+        aBoolean: true
       },
       'd': {
         aString: 'delta',
@@ -1318,7 +1328,8 @@
     'index': {
       'b': true,
       'c': 1,
-      'e': false
+      'e': false,
+      'z': true
     }
   };
 
