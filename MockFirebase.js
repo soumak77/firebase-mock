@@ -1040,7 +1040,14 @@
     }
     else {
       var sinon = requireLib('sinon');
-      spyFunction = sinon.spy.bind(sinon);
+      spyFunction = function(obj, method) {
+        if ( typeof (obj) === 'object') {
+          return sinon.spy(obj, method);
+        }
+        else {
+          return sinon.spy(obj);
+        }
+      };
     }
     return spyFunction;
   })();
