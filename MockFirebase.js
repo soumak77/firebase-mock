@@ -334,18 +334,20 @@
       });
     },
 
-    setPriority: function(newPriority) {
+    setPriority: function(newPriority, callback) {
       var self = this;
+      var err = this._nextErr('setPriority');
       DEBUG && console.log('setPriority called', self.toString(), newPriority);
       self._defer(function() {
         DEBUG && console.log('setPriority flushed', self.toString(), newPriority);
         self._priChanged(newPriority);
-      })
+        callback && callback(err);
+      });
     },
 
-    setWithPriority: function(data, pri) {
+    setWithPriority: function(data, pri, callback) {
       this.setPriority(pri);
-      this.set(data);
+      this.set(data, callback);
     },
 
     name: function() {
