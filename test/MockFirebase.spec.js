@@ -121,6 +121,29 @@ describe('MockFirebase', function() {
       var call = spy.getCall(0);
       expect(call.args[1]).equals(lastKey);
     });
+
+    it('should trigger a callback', function() {
+      var spy = sinon.spy();
+      fb.autoFlush();
+      fb.setPriority(100, spy);
+      expect(spy).to.have.been.called;
+    })
+  });
+
+  describe('#setWithPriority', function() {
+    it('should pass the priority to #setPriority', function() {
+      fb.autoFlush();
+      fb.setWithPriority({}, 250);
+      expect(fb.setPriority).to.have.been.calledWith(250);
+    });
+
+    it('should pass the data and callback to #set', function() {
+      var data = {};
+      var callback = sinon.spy();
+      fb.autoFlush();
+      fb.setWithPriority(data, 250, callback);
+      expect(fb.set).to.have.been.calledWith(data, callback);
+    });
   });
 
   describe('#remove', function() {
