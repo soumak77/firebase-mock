@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.1.6
+ * @version 0.1.7
  */
 (function(exports) {
   var DEBUG = false; // enable lots of console logging (best used while isolating one test case)
