@@ -1,6 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
+ * @version 0.2.0
  */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
