@@ -14,7 +14,7 @@
     module.exports = factory(require('lodash'), require('sinon'));
   } else {
     // Browser globals (root is window)
-    root.returnExports = factory(root.lodash, root.sinon);
+    root.returnExports = factory(root._, root.sinon);
   }
 }(this, function (_, sinon) {
   var exports = {};
