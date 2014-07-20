@@ -1502,7 +1502,7 @@
 
   function makeSnap(ref, data, pri) {
     data = _.cloneDeep(data);
-    if(_.isEmpty(data)) { data = null; }
+    if(_.isObject(data) && _.isEmpty(data)) { data = null; }
     return {
       val: function() { return data; },
       ref: function() { return ref; },
