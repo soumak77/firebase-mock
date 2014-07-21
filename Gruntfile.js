@@ -27,7 +27,7 @@ module.exports = function(grunt) {
           reporter: 'spec'
         },
         require: [
-          "chai"
+          "chai", "lodash"
         ],
         log: true,
         src: ['test/*.js']
