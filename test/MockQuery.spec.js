@@ -73,6 +73,31 @@ describe.only('MockQuery', function() {
       });
     });
 
+    describe('once', function() {
+      it('should be triggered if value is null', function() {
+        var spy = sinon.spy();
+        fb.child('notavalidkey').limit(3).once('value', spy);
+        fb.flush();
+        expect(spy).callCount(1);
+      });
+
+      it('should be triggered if value is not null', function() {
+        var spy = sinon.spy();
+        fb.limit(3).once('value', spy);
+        fb.flush();
+        expect(spy).callCount(1);
+      });
+
+      it('should not get triggered twice', function() {
+        var spy = sinon.spy();
+        fb.limit(3).once('value', spy);
+        fb.flush();
+        fb.child('addfortest').set({hello: 'world'});
+        fb.flush();
+        expect(spy).callCount(1);
+      });
+    });
+
     describe('child_added', function() {
       it('should include prevChild');
 
