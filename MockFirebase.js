@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.2.1
+ * @version 0.2.2
  */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -1287,7 +1287,7 @@
         }
         else if( queueProps.limit < numRecords ) {
           out.max = numRecords-1;
-          out.min = Math.max(0, out.max - queueProps.limit);
+          out.min = Math.max(0, numRecords - queueProps.limit);
         }
       }
       return out;
