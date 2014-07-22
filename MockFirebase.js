@@ -423,7 +423,7 @@
 
     remove: function(callback) {
       var self = this;
-      var err = this._nextErr('set');
+      var err = this._nextErr('remove');
       DEBUG && console.log('remove called', this.toString());
       this._defer(function() {
         DEBUG && console.log('remove completed',self.toString());
