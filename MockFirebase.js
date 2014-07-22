@@ -502,7 +502,6 @@
       var self = this;
       var valueSpy = spyFactory(valueFn, 'trxn:valueFn');
       var finishedSpy = spyFactory(finishedFn, 'trxn:finishedFn');
-
       this._defer(function() {
         var err = self._nextErr('transaction');
         // unlike most defer methods, self will use the value as it exists at the time
@@ -510,8 +509,8 @@
         // it would have in reality
         var res = valueSpy(self.getData());
         var newData = _.isUndefined(res) || err? self.getData() : res;
-        finishedSpy(err, err === null && !_.isUndefined(res), makeSnap(self, newData, self.priority));
         self._dataChanged(newData);
+        finishedSpy(err, err === null && !_.isUndefined(res), makeSnap(self, newData, self.priority));
       });
       return [valueSpy, finishedSpy, applyLocally];
     },
@@ -1380,9 +1379,9 @@
     var spyFunction;
     if( typeof(jasmine) !== 'undefined' ) {
       spyFunction = function(obj, method) {
-        var fn;
+        var fn, spy;
         if( typeof(obj) === 'object' ) {
-          var spy = spyOn(obj, method);
+          spy = spyOn(obj, method);
           if( typeof(spy.andCallThrough) === 'function' ) {
             // karma < 0.12.x
             fn = spy.andCallThrough();
@@ -1392,15 +1391,18 @@
           }
         }
         else {
-          fn = jasmine.createSpy(method);
-          if( arguments.length === 1 && typeof(arguments[0]) === 'function' ) {
-            if( typeof(fn.andCallFake) === 'function' ) {
+          spy = jasmine.createSpy(method);
+          if( typeof(arguments[0]) === 'function' ) {
+            if( typeof(spy.andCallFake) === 'function' ) {
               // karma < 0.12.x
-              fn.andCallFake(obj);
+              fn = spy.andCallFake(obj);
             }
             else {
-              fn.and.callFake(obj);
+              fn = spy.and.callFake(obj);
             }
+          }
+          else {
+            fn = spy;
           }
         }
         return fn;
