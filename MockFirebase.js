@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.2.2
+ * @version 0.2.3
  */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -796,6 +796,10 @@
       return new Slice(this);
     },
 
+    getData: function() {
+      return this.slice().data;
+    },
+
     fakeEvent: function(event, snap) {
       _.each(this._subs, function(parts) {
         if( parts[0] === 'event' ) {
@@ -811,12 +815,11 @@
       var self = this, isFirst = true, lastSlice = this.slice(), map;
       var fn = function(snap, prevChild) {
         var slice = new Slice(self, event==='value'? snap : makeRefSnap(snap.ref().parent()));
-        if( (event !== 'value' || !isFirst) && lastSlice.equals(slice) ) {
-          return;
-        }
         switch(event) {
           case 'value':
-            callback.call(context, slice.snap());
+            if( isFirst || !lastSlice.equals(slice) ) {
+              callback.call(context, slice.snap());
+            }
             break;
           case 'child_moved':
             var x = slice.pos(snap.name());
@@ -829,6 +832,12 @@
             }
             break;
           case 'child_added':
+            if( slice.has(snap.name()) && lastSlice.has(snap.name()) ) {
+              // is a child_added for existing event so allow it
+              callback.call(context, snap, prevChild);
+            }
+            map = lastSlice.changeMap(slice);
+            break;
           case 'child_removed':
             map = lastSlice.changeMap(slice);
             break;

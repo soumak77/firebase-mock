@@ -6,7 +6,7 @@ var Mock = require('../MockFirebase.js');
 var Firebase = Mock.MockFirebase;
 var FirebaseSimpleLogin = Mock.MockFirebaseSimpleLogin;
 
-describe.only('MockQuery', function() {
+describe('MockQuery', function() {
   var fb;
 
   beforeEach(function () {
@@ -101,7 +101,17 @@ describe.only('MockQuery', function() {
     describe('child_added', function() {
       it('should include prevChild');
 
-      it('should trigger all keys in range immediately');
+      it('should trigger all keys in initial range', function() {
+        var spy = sinon.spy();
+        var ref = fb.limit(4);
+        var data = ref.slice().data;
+        ref.on('child_added', spy);
+        fb.flush();
+        expect(spy).callCount(4);
+        _.each(_.keys(data), function(k, i) {
+          expect(spy.getCall(i).args[0].name()).equals(k);
+        });
+      });
 
       it('should notify on a new added event after init');
 
