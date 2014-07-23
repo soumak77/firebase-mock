@@ -1,7 +1,7 @@
 /**
  * MockFirebase: A Firebase stub/spy library for writing unit tests
  * https://github.com/katowulf/mockfirebase
- * @version 0.2.3
+ * @version 0.2.4
  */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -235,6 +235,31 @@
     },
 
     /**
+     * Simulate a security error by cancelling any opened listeners on the given path
+     * and returning the error provided. If event/callback/context are provided, then
+     * only listeners exactly matching this signature (same rules as off()) will be cancelled.
+     *
+     * This also invokes off() on the events--they won't be notified of future changes.
+     *
+     * @param {String|Error} error
+     * @param {String} [event]
+     * @param {Function} [callback]
+     * @param {Object} [context]
+     */
+    forceCancel: function(error, event, callback, context) {
+      var self = this, events = self._events;
+      _.each(event? [event] : _.keys(events), function(eventType) {
+        var list = _.filter(events[eventType], function(parts) {
+          return !event || !callback || (callback === parts[0] && context === parts[1]);
+        });
+        _.each(list, function(parts) {
+          parts[2].call(parts[1], error);
+          self.off(event, callback, context);
+        });
+      });
+    },
+
+    /**
      * Returns a copy of the current data
      * @returns {*}
      */
@@ -442,7 +467,6 @@
       }
       else if( arguments.length < 3 ) {
         cancel = function() {};
-        context = null;
       }
 
       var err = this._nextErr('on');
@@ -452,7 +476,7 @@
         });
       }
       else {
-        var eventArr = [callback, context];
+        var eventArr = [callback, context, cancel];
         this._events[event].push(eventArr);
         var self = this;
         if( event === 'value' ) {
