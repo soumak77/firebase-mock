@@ -9,15 +9,13 @@ A Firebase stub useful for unit testing.
 
 ### Node.js
 
-    git clone git@github.com:katowulf/mockfirebase.git
-    cd mockfirebase
-    npm install
+    npm install mockfirebase
 
 ### Web
 
-   <script src="lodash.js"></script>
-   <script src="sinon.js"></script>
-   <script src="MockFirebase.js"></script>
+    <script src="lodash.js"></script>
+    <script src="sinon.js"></script>
+    <script src="MockFirebase.js"></script>
 
 ### Browser Support
 

@@ -13,8 +13,8 @@ module.exports = function(grunt) {
 
     watch: {
       test: {
-        files: ['MockFirebase.js', 'Gruntfile.js', 'test/**'],
-        tasks: ['test']
+        files: ['src/**/*.js', 'Gruntfile.js', 'test/**'],
+        tasks: ['default']
       }
     },
 
@@ -27,7 +27,9 @@ module.exports = function(grunt) {
           reporter: 'spec'
         },
         require: [
-          "chai", "lodash"
+          "chai",
+          "lodash",
+          "src/**/*.js"
         ],
         log: true,
         src: ['test/*.js']
@@ -41,6 +43,16 @@ module.exports = function(grunt) {
           message: 'Build Finished'
         }
       }
+    },
+
+    concat: {
+      app: {
+        options: { banner: '<%= banner %>' },
+        src: [
+          'src/MockFirebase.js'
+        ],
+        dest: 'mockfirebase.js'
+      }
     }
 
   });
@@ -53,5 +65,5 @@ module.exports = function(grunt) {
 
   grunt.registerTask('test', ['mochaTest']);
 
-  grunt.registerTask('default', ['test', 'watch']);
+  grunt.registerTask('default', ['concat', 'test']);
 };

@@ -2,7 +2,7 @@ language: node_js
 node_js: '0.10'
 deploy:
   provider: npm
-  email: '{{npm email}}'
+  email: 'katowulf@gmail.com'
   api_key:
     secure: {{travis encrypt NPM api key}}
   on:
