@@ -1,0 +1,11 @@
+language: node_js
+node_js: '0.10'
+deploy:
+  provider: npm
+  email: '{{npm email}}'
+  api_key:
+    secure: {{travis encrypt NPM api key}}
+  on:
+    tags: true
+    repo: katowulf/mockfirebase
+    all_branches: true

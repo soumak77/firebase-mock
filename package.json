@@ -1,10 +1,10 @@
 {
   "name": "mockfirebase",
   "version": "0.2.4",
-  "description": "A Firebase stub/spy library for writing unit tests ",
+  "description": "A Firebase stub/spy library for writing unit tests",
   "main": "MockFirebase.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "grunt test"
   },
   "repository": {
     "type": "git",
@@ -25,12 +25,13 @@
     "sinon": "~1.9.0"
   },
   "devDependencies": {
-    "grunt": "~0.4.4",
-    "grunt-notify": "~0.2.20",
-    "grunt-contrib-watch": "~0.6.1",
-    "load-grunt-tasks": "~0.4.0",
-    "grunt-mocha-test": "~0.10.2",
     "chai": "~1.9.1",
+    "grunt": "~0.4.4",
+    "grunt-cli": "~0.1.13",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-mocha-test": "~0.10.2",
+    "grunt-notify": "~0.2.20",
+    "load-grunt-tasks": "~0.4.0",
     "sinon-chai": "~2.5.0"
   }
 }
