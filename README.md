@@ -5,6 +5,8 @@ MockFirebase
 
 A Firebase stub useful for unit testing.
 
+[![Build Status](https://travis-ci.org/katowulf/mockfirebase.svg?branch=master)](https://travis-ci.org/katowulf/mockfirebase)
+
 ## Installation
 
 ### Node.js
