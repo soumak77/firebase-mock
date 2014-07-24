@@ -1,8 +1,8 @@
-/**
- * MockFirebase: A Firebase stub/spy library for writing unit tests
- * https://github.com/katowulf/mockfirebase
- * @version 0.2.4
- */
+/*! mockfirebase - v0.2.5 - 2014-07-24
+* https://github.com/katowulf/mockfirebase
+* Copyright (c) 2014 Kato
+* MIT LICENSE */
+
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
