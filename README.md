@@ -1,7 +1,7 @@
 MockFirebase
 ============
 
-**This is an experimental library currently under development. Use with caution and submit PRs for fixes and enhancements.**
+**This is an experimental library. It is not supported by Firebase. Use with caution and submit PRs for fixes and enhancements.**
 
 A Firebase stub useful for unit testing.
 
