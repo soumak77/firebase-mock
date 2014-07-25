@@ -129,9 +129,12 @@ Note that the key in the stubs object matches the module name (`'firebase'`) and
 # Contributing
 
  - Fork the repo
- - make your additions
- - update the version number in package.json and at the top of MockFirebase.js
- - submit a pull request.
+ - `npm install`
+ - `grunt test`
+ - `grunt watch`
+ - make your additions in src/
+ - add test units in test/
+ - submit a pull request when all tests pass
 
 # Support
 
