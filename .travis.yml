@@ -4,13 +4,8 @@ deploy:
   provider: npm
   email: katowulf@gmail.com
   api_key:
-    secure:
-      ? travis encrypt NPM api key: 
-      : 
+    secure: dmXXpp8A8eZdBQpk56y6ZNLTI1paJWUderck7aCb7FIc9x4+Gpk5uaZZlDxKE12d4Qye3yZKcj5RJ2V0PiwV0Rk8w3vgJkuBOQZ0P+0Wr4deRSPIQpHfFoOutbfCSu6gCZPDlAZIH0jadykIc5l/nwIxPtoXy8xkGx6aIWC5iLM=
   on:
     tags: true
     repo: katowulf/mockfirebase
     all_branches: true
-env:
-  global:
-    secure: dmXXpp8A8eZdBQpk56y6ZNLTI1paJWUderck7aCb7FIc9x4+Gpk5uaZZlDxKE12d4Qye3yZKcj5RJ2V0PiwV0Rk8w3vgJkuBOQZ0P+0Wr4deRSPIQpHfFoOutbfCSu6gCZPDlAZIH0jadykIc5l/nwIxPtoXy8xkGx6aIWC5iLM=
