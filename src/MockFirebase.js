@@ -417,7 +417,7 @@
 
     once: function(event, callback, cancel, context) {
       var self = this;
-      if( arguments.length === 3 && !angular.isFunction(cancel) ) {
+      if( arguments.length === 3 && !_.isFunction(cancel) ) {
         context = cancel;
         cancel = function() {};
       }
