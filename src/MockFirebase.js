@@ -1478,10 +1478,6 @@
         out.email = 'email@firebase.com';
         out.md5_hash = MD5(out.email);
         break;
-      case 'persona':
-        out.email = 'email@firebase.com';
-        out.md5_hash = MD5(out.email);
-        break;
       case 'twitter':
         out.accessToken = 'ACCESS_TOKEN'; //todo
         out.accessTokenSecret = 'ACCESS_TOKEN_SECRET'; //todo
@@ -1676,7 +1672,7 @@
 
   MockFirebaseSimpleLogin.DEFAULT_FAIL_WHEN = function(provider, options, user) {
     var res = null;
-    if( ['password', 'persona', 'anonymous', 'twitter', 'facebook', 'google', 'github'].indexOf(provider) === -1 ) {
+    if( ['password', 'anonymous', 'twitter', 'facebook', 'google', 'github'].indexOf(provider) === -1 ) {
       console.error('MockFirebaseSimpleLogin:login() failed: unrecognized authentication provider '+provider);
 //      res = createError();
     }
@@ -1690,7 +1686,7 @@
   };
 
   MockFirebaseSimpleLogin.DEFAULT_USER_DATA = {};
-  _.each(['password', 'persona', 'anonymous', 'facebook', 'twitter', 'google', 'github'], function(provider) {
+  _.each(['password', 'anonymous', 'facebook', 'twitter', 'google', 'github'], function(provider) {
     var user = createDefaultUser(provider);
     if( provider !== 'password' ) {
       MockFirebaseSimpleLogin.DEFAULT_USER_DATA[provider] = user;
