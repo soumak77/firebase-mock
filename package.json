@@ -1,6 +1,6 @@
 {
   "name": "mockfirebase",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "An experimental Firebase stub/spy library for writing unit tests (not supported by Firebase)",
   "main": "MockFirebase.js",
   "scripts": {
