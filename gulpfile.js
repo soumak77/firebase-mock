@@ -34,6 +34,26 @@ gulp.task('test', ['cover'], function () {
     .pipe(plugins.istanbul.writeReports());
 });
 
+gulp.task('karma', function () {
+  return require('karma-as-promised').server.start({
+    frameworks: ['browserify', 'mocha', 'sinon'],
+    browsers: ['PhantomJS'],
+    files: [
+      'node_modules/es5-shim/es5-shim.js',
+      'test/**/*.spec.js'
+    ],
+    preprocessors: {
+      'test/**/*.spec.js': ['browserify']
+    },
+    browserify: {
+      debug: true,
+      transform: ['browserify-shim']
+    },
+    autoWatch: false,
+    singleRun: true
+  });
+});
+
 gulp.task('lint', function () {
   return gulp.src(['./gulpfile.js', './src/**/*.js', './test/**/*.js'])
     .pipe(plugins.jshint())

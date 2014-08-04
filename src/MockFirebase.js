@@ -1,7 +1,6 @@
 var DEBUG = false; // enable lots of console logging (best used while isolating one test case)
 
 var _     = require('lodash');
-var sinon = require('sinon');
 
 /**
  * A mock that simulates Firebase operations for use in unit tests.
@@ -1423,6 +1422,7 @@ var spyFactory = (function() {
   }
   else {
     spyFunction = function(obj, method) {
+      var sinon = require('sinon');
       if ( typeof (obj) === 'object') {
         return sinon.spy(obj, method);
       }
