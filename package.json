@@ -4,7 +4,7 @@
   "description": "An experimental Firebase stub/spy library for writing unit tests (not supported by Firebase)",
   "main": "MockFirebase.js",
   "scripts": {
-    "test": "grunt test"
+    "test": "gulp test"
   },
   "repository": {
     "type": "git",
@@ -15,7 +15,7 @@
     "mock"
   ],
   "author": "Kato",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/katowulf/mockfirebase/issues"
   },
@@ -25,15 +25,15 @@
     "sinon": "~1.9.0"
   },
   "devDependencies": {
+    "browserify": "~5.9.1",
     "chai": "~1.9.1",
-    "grunt": "~0.4.4",
-    "grunt-browserify": "~2.1.4",
-    "grunt-cli": "~0.1.13",
-    "grunt-contrib-concat": "^0.5.0",
-    "grunt-contrib-watch": "~0.6.1",
-    "grunt-mocha-test": "~0.10.2",
-    "grunt-notify": "~0.2.20",
-    "load-grunt-tasks": "~0.4.0",
-    "sinon-chai": "~2.5.0"
+    "gulp": "~3.8.7",
+    "gulp-header": "~1.0.5",
+    "gulp-istanbul": "~0.2.1",
+    "gulp-load-plugins": "~0.5.3",
+    "gulp-mocha": "~0.5.2",
+    "sinon-chai": "~2.5.0",
+    "vinyl-buffer": "0.0.0",
+    "vinyl-source-stream": "~0.1.1"
   }
 }
