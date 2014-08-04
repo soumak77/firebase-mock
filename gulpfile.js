@@ -32,3 +32,10 @@ gulp.task('test', ['cover'], function () {
     .pipe(plugins.mocha())
     .pipe(plugins.istanbul.writeReports());
 });
+
+gulp.task('lint', function () {
+  return gulp.src(['./gulpfile.js', './src/**/*.js', './test/**/*.js'])
+    .pipe(plugins.jshint())
+    .pipe(plugins.jshint.reporter('jshint-stylish'))
+    .pipe(plugins.jshint.reporter('fail'));
+});
