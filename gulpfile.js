@@ -12,6 +12,7 @@ gulp.task('bundle', function () {
     standalone: 'mockfirebase'
   })
   .add('./src/MockFirebase.js')
+  .transform('browserify-shim')
   .bundle()
   .pipe(source('MockFirebase.js'))
   .pipe(buffer())
