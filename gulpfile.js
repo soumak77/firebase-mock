@@ -15,9 +15,10 @@ gulp.task('bundle', function () {
   .bundle()
   .pipe(source('MockFirebase.js'))
   .pipe(buffer())
-  .pipe(plugins.header(fs.readFileSync('./helpers/header.txt', 'utf8'), {
+  .pipe(plugins.header(fs.readFileSync('./helpers/header.txt'), {
     pkg: require('./package.json')
   }))
+  .pipe(plugins.footer(fs.readFileSync('./helpers/globals.js')))
   .pipe(gulp.dest('./dist'));
 });
 
