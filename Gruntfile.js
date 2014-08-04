@@ -11,6 +11,18 @@ module.exports = function(grunt) {
       '* Copyright (c) <%= grunt.template.today("yyyy") %> Kato\n' +
       '* MIT LICENSE */\n\n',
 
+    browserify: {
+      MockFirebase: {
+        src: './src/MockFirebase.js',
+        dest: './dist/MockFirebase.js',
+        options: {
+          bundleOptions: {
+            standalone: 'MockFirebase'
+          }
+        }
+      }
+    },
+
     watch: {
       test: {
         files: ['src/**/*.js', 'Gruntfile.js', 'test/**'],
