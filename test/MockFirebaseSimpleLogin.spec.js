@@ -1,8 +1,9 @@
-var sinon = require('sinon');
-var _ = require('lodash');
-var expect = require('chai').use(require('sinon-chai')).expect;
-var Mock = require('../src/MockFirebase.js');
-var Firebase = Mock.MockFirebase;
+'use strict';
+
+var sinon               = require('sinon');
+var expect              = require('chai').use(require('sinon-chai')).expect;
+var Mock                = require('../src/MockFirebase');
+var Firebase            = Mock.MockFirebase;
 var FirebaseSimpleLogin = Mock.MockFirebaseSimpleLogin;
 
 describe('MockFirebaseSimpleLogin', function() {
@@ -14,7 +15,7 @@ describe('MockFirebaseSimpleLogin', function() {
     // already provides a spy method auth.callback (whether or not a callback is provided)
     callback = sinon.spy();
     fb = new Firebase().child('data');
-    auth= new FirebaseSimpleLogin(fb, callback);
+    auth = new FirebaseSimpleLogin(fb, callback);
   });
 
   describe('#login', function() {
@@ -138,7 +139,7 @@ describe('MockFirebaseSimpleLogin', function() {
       expect(call.args[0]).is.an('object');
       expect(call.args[0].code).equals('INVALID_USER');
       expect(call.args[1]).equals(false);
-    })
+    });
   });
 
   describe('#removeUser', function() {

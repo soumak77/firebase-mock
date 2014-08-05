@@ -1,10 +1,9 @@
+'use strict';
 
-var sinon = require('sinon');
-var _ = require('lodash');
-var expect = require('chai').use(require('sinon-chai')).expect;
-var Mock = require('../src/MockFirebase.js');
-var Firebase = Mock.MockFirebase;
-var FirebaseSimpleLogin = Mock.MockFirebaseSimpleLogin;
+var sinon    = require('sinon');
+var _        = require('lodash');
+var expect   = require('chai').use(require('sinon-chai')).expect;
+var Firebase = require('../src/MockFirebase').MockFirebase;
 
 describe('MockFirebase', function() {
   var fb;
@@ -127,7 +126,7 @@ describe('MockFirebase', function() {
       fb.autoFlush();
       fb.setPriority(100, spy);
       expect(spy).to.have.been.called;
-    })
+    });
   });
 
   describe('#setWithPriority', function() {
@@ -168,7 +167,7 @@ describe('MockFirebase', function() {
 
   describe('#transaction', function() {
     it('should call the transaction function', function(done) {
-      fb.transaction(function(currentValue) {
+      fb.transaction(function() {
         done();
       });
       fb.flush();

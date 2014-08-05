@@ -1,0 +1,10 @@
+{
+  "node": true,
+  "expr": true,
+  "globals": {
+    "describe": false,
+    "beforeEach": false,
+    "it": false,
+    "xit": false
+  }
+}

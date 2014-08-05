@@ -1620,20 +1620,18 @@ MockFirebaseSimpleLogin.DEFAULT_AUTO_FLUSH = false;
 MockFirebase._ = _; // expose for tests
 MockFirebase.Query = MockQuery; // expose for tests
 
-if( typeof(window) !== 'undefined' ) {
-  MockFirebase._origFirebase = window.Firebase;
-  MockFirebase._origFirebaseSimpleLogin = window.FirebaseSimpleLogin;
-  MockFirebase.override = function () {
+MockFirebase.override = function () {
+  /* global window */
+  if (typeof window !== 'undefined') {
+    MockFirebase._origFirebase = window.Firebase;
+    MockFirebase._origFirebaseSimpleLogin = window.FirebaseSimpleLogin;
     window.Firebase = MockFirebase;
     window.FirebaseSimpleLogin = MockFirebaseSimpleLogin;
-  };
-}
-else {
-  MockFirebase.override = function() {
-    console.warn('MockFirebase.override is only useful in a browser environment. See README' +
-      ' for some node.js alternatives.');
-  };
-}
+  }
+  else {
+    console.warn('MockFirebase.override is only useful in a browser environment.');
+  }
+};
 
 MockFirebase.ref = ref;
 MockFirebase.DEFAULT_DATA  = {
