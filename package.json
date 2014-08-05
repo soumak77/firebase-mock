@@ -4,7 +4,7 @@
   "description": "An experimental Firebase stub/spy library for writing unit tests (not supported by Firebase)",
   "main": "./dist/mockfirebase.js",
   "scripts": {
-    "test": "gulp test"
+    "test": "gulp lint && gulp test"
   },
   "repository": {
     "type": "git",
