@@ -22,7 +22,8 @@
   "homepage": "https://github.com/katowulf/mockfirebase",
   "dependencies": {
     "lodash": "~2.4.1",
-    "sinon": "~1.10.3"
+    "sinon": "~1.10.3",
+    "MD5": "~1.2.1"
   },
   "devDependencies": {
     "browserify": "~4.2.3",

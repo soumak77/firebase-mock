@@ -1,6 +1,9 @@
+'use strict';
+
 var DEBUG = false; // enable lots of console logging (best used while isolating one test case)
 
 var _     = require('lodash');
+var md5   = require('MD5');
 
 /**
  * A mock that simulates Firebase operations for use in unit tests.
@@ -97,7 +100,7 @@ function MockFirebase(currentPath, data, parent, name) {
   // allows changes to be propagated between child/parent instances
   this.parentRef = parent||null;
   this.children = {};
-  parent && (parent.children[this.name()] = this);
+  if (parent) parent.children[this.name()] = this;
 
   // stores sorted keys in data for priority ordering
   this.sortedDataKeys = [];
@@ -180,7 +183,7 @@ MockFirebase.prototype = {
         c.autoFlush(delay);
       });
       if( this.parentRef ) { this.parentRef.autoFlush(delay); }
-      delay !== false && this.flush(delay);
+      if (delay !== false) this.flush(delay);
     }
     return this;
   },
@@ -276,7 +279,7 @@ MockFirebase.prototype = {
    * @returns {MockFirebase}
    */
   fakeEvent: function(event, key, data, prevChild, pri) {
-    DEBUG && console.log('fakeEvent', event, this.toString(), key);
+    if (DEBUG) console.log('fakeEvent', event, this.toString(), key);
     if( arguments.length < 5 ) { pri = null; }
     if( arguments.length < 4 ) { prevChild = null; }
     if( arguments.length < 3 ) { data = null; }
@@ -324,13 +327,13 @@ MockFirebase.prototype = {
     var self = this;
     var err = this._nextErr('set');
     data = _.cloneDeep(data);
-    DEBUG && console.log('set called',this.toString(), data);
+    if (DEBUG) console.log('set called',this.toString(), data);
     this._defer(function() {
-      DEBUG && console.log('set completed',self.toString(), data);
+      if (DEBUG) console.log('set completed',self.toString(), data);
       if( err === null ) {
         self._dataChanged(data);
       }
-      callback && callback(err);
+      if (callback) callback(err);
     });
   },
 
@@ -342,24 +345,24 @@ MockFirebase.prototype = {
     var err = this._nextErr('update');
     var base = this.getData();
     var data = _.assign(_.isObject(base)? base : {}, changes);
-    DEBUG && console.log('update called', this.toString(), data);
+    if (DEBUG) console.log('update called', this.toString(), data);
     this._defer(function() {
-      DEBUG && console.log('update flushed', self.toString(), data);
+      if (DEBUG) console.log('update flushed', self.toString(), data);
       if( err === null ) {
         self._dataChanged(data);
       }
-      callback && callback(err);
+      if (callback) callback(err);
     });
   },
 
   setPriority: function(newPriority, callback) {
     var self = this;
     var err = this._nextErr('setPriority');
-    DEBUG && console.log('setPriority called', self.toString(), newPriority);
+    if (DEBUG) console.log('setPriority called', self.toString(), newPriority);
     self._defer(function() {
-      DEBUG && console.log('setPriority flushed', self.toString(), newPriority);
+      if (DEBUG) console.log('setPriority flushed', self.toString(), newPriority);
       self._priChanged(newPriority);
-      callback && callback(err);
+      if (callback) callback(err);
     });
   },
 
@@ -416,10 +419,10 @@ MockFirebase.prototype = {
       });
     }
     else {
-      function fn(snap) {
+      var fn = function (snap) {
         self.off(event, fn, context);
         callback.call(context, snap);
-      }
+      };
 
       this.on(event, fn, context);
     }
@@ -428,13 +431,13 @@ MockFirebase.prototype = {
   remove: function(callback) {
     var self = this;
     var err = this._nextErr('remove');
-    DEBUG && console.log('remove called', this.toString());
+    if (DEBUG) console.log('remove called', this.toString());
     this._defer(function() {
-      DEBUG && console.log('remove completed',self.toString());
+      if (DEBUG) console.log('remove completed',self.toString());
       if( err === null ) {
         self._dataChanged(null);
       }
-      callback && callback(err);
+      if (callback) callback(err);
     });
     return this;
   },
@@ -527,7 +530,7 @@ MockFirebase.prototype = {
    */
   auth: function(token, callback) {
     //todo invoke callback with the parsed token contents
-    callback && this._defer(callback);
+    if (callback) this._defer(callback);
   },
 
   /**
@@ -554,7 +557,7 @@ MockFirebase.prototype = {
     var events = [];
     var childKey = ref.name();
     var data = ref.getData();
-    DEBUG && console.log('_childChanged', this.toString() + ' -> ' + childKey, data);
+    if (DEBUG) console.log('_childChanged', this.toString() + ' -> ' + childKey, data);
     if( data === null ) {
       this._removeChild(childKey, events);
     }
@@ -572,7 +575,7 @@ MockFirebase.prototype = {
       self._priChanged(pri);
     }
     if( !_.isEqual(data, self.data) ) {
-      DEBUG && console.log('_dataChanged', self.toString(), data);
+      if (DEBUG) console.log('_dataChanged', self.toString(), data);
       var oldKeys = _.keys(self.data).sort();
       var newKeys = _.keys(data).sort();
       var keysToRemove = _.difference(oldKeys, newKeys);
@@ -603,7 +606,7 @@ MockFirebase.prototype = {
   },
 
   _priChanged: function(newPriority) {
-    DEBUG && console.log('_priChanged', this.toString(), newPriority);
+    if (DEBUG) console.log('_priChanged', this.toString(), newPriority);
     this.priority = newPriority;
     if( this.parentRef ) {
       this.parentRef._resort(this.name());
@@ -642,7 +645,7 @@ MockFirebase.prototype = {
     }
   },
 
-  _defer: function(fn) {
+  _defer: function() {
     //todo should probably be taking some sort of snapshot of my data here and passing
     //todo that into `fn` for reference
     this.flushQueue.add(Array.prototype.slice.call(arguments, 0));
@@ -650,7 +653,7 @@ MockFirebase.prototype = {
   },
 
   _trigger: function(event, data, pri, key) {
-    DEBUG && console.log('_trigger', event, this.toString(), key);
+    if (DEBUG) console.log('_trigger', event, this.toString(), key);
     var self = this, ref = event==='value'? self : self.child(key);
     var snap = makeSnap(ref, data, pri);
     _.each(self._events[event], function(parts) {
@@ -668,7 +671,7 @@ MockFirebase.prototype = {
     var self = this;
     if( !events.length ) { return; }
     _.each(events, function(event) {
-      event === false || self._trigger.apply(self, event);
+      if (event !== false) self._trigger.apply(self, event);
     });
     self._trigger('value', self.data, self.priority);
     if( self.parentRef ) {
@@ -697,7 +700,7 @@ MockFirebase.prototype = {
     this.data[key] = cleanData(data);
     var c = this.child(key);
     c._dataChanged(data);
-    events && events.push(['child_added', c.getData(), c.priority, key]);
+    if (events) events.push(['child_added', c.getData(), c.priority, key]);
   },
 
   _removeChild: function(key, events) {
@@ -711,7 +714,7 @@ MockFirebase.prototype = {
       if(_.has(this.children, key)) {
         this.children[key]._dataChanged(null);
       }
-      events && events.push(['child_removed', data, null, key]);
+      if (events) events.push(['child_removed', data, null, key]);
     }
   },
 
@@ -721,7 +724,7 @@ MockFirebase.prototype = {
       this.data[key] = cdata;
       var c = this.child(key);
       c._dataChanged(data);
-      events && events.push(['child_changed', c.getData(), c.priority, key]);
+      if (events) events.push(['child_changed', c.getData(), c.priority, key]);
     }
   },
 
@@ -808,7 +811,7 @@ MockQuery.prototype = {
       if( parts[0] === 'event' ) {
         parts[1].call(parts[2], snap);
       }
-    })
+    });
   },
 
   /*******************
@@ -878,14 +881,14 @@ MockQuery.prototype = {
       if( parts[0] === event && parts[1] === callback && parts[2] === context ) {
         ref.off(event, parts[3]);
       }
-    })
+    });
   },
 
   once: function(event, callback, context) {
     var self = this;
     // once is tricky because we want the first match within our range
     // so we use the on() method above which already does the needed legwork
-    function fn(snap, prevChild) {
+    function fn() {
       self.off(event, fn);
       // the snap is already sliced in on() so we can just pass it on here
       callback.apply(context, arguments);
@@ -928,13 +931,13 @@ MockQuery.prototype = {
 function MockFirebaseSimpleLogin(ref, callback, userData) {
   // allows test units to monitor the callback function to make sure
   // it is invoked (even if one is not declared)
-  this.callback = function() { callback.apply(null, Array.prototype.slice.call(arguments, 0))};
+  this.callback = function() { callback.apply(null, Array.prototype.slice.call(arguments, 0)); };
   this.attempts = [];
   this.failMethod = MockFirebaseSimpleLogin.DEFAULT_FAIL_WHEN;
   this.ref = ref; // we don't use ref for anything
   this.autoFlushTime = MockFirebaseSimpleLogin.DEFAULT_AUTO_FLUSH;
   this.userData = _.cloneDeep(MockFirebaseSimpleLogin.DEFAULT_USER_DATA);
-  userData && _.assign(this.userData, userData);
+  if (userData) _.assign(this.userData, userData);
 
   // turn all our public methods into spies so they can be monitored for calls and return values
   // see jasmine spies: https://github.com/pivotal/jasmine/wiki/Spies
@@ -1058,22 +1061,22 @@ MockFirebaseSimpleLogin.prototype = {
   },
 
   createUser: function(email, password, callback) {
-    callback || (callback = _.noop);
+    if (!callback) callback = _.noop;
     this._defer(function() {
       var user = null, err = null;
-      if( this.userData['password'].hasOwnProperty(email) ) {
+      if( this.userData.password.hasOwnProperty(email) ) {
         err = createError('EMAIL_TAKEN', 'The specified email address is already in use.');
       }
       else {
         user = createEmailUser(email, password);
-        this.userData['password'][email] = user;
+        this.userData.password[email] = user;
       }
       callback(err, user);
     });
   },
 
   changePassword: function(email, oldPassword, newPassword, callback) {
-    callback || (callback = _.noop);
+    if (!callback) callback = _.noop;
     this._defer(function() {
       var user = this.getUser('password', {email: email});
       var err = this.failMethod('password', {email: email, password: oldPassword}, user);
@@ -1088,7 +1091,7 @@ MockFirebaseSimpleLogin.prototype = {
   },
 
   sendPasswordResetEmail: function(email, callback) {
-    callback || (callback = _.noop);
+    if (!callback) callback = _.noop;
     this._defer(function() {
       var user = this.getUser('password', {email: email});
       if( !user ) {
@@ -1101,7 +1104,7 @@ MockFirebaseSimpleLogin.prototype = {
   },
 
   removeUser: function(email, password, callback) {
-    callback || (callback = _.noop);
+    if (!callback) callback = _.noop;
     this._defer(function() {
       var user = this.getUser('password', {email: email});
       if( !user ) {
@@ -1111,7 +1114,7 @@ MockFirebaseSimpleLogin.prototype = {
         callback(createError('INVALID_PASSWORD'), false);
       }
       else {
-        delete this.userData['password'][email];
+        delete this.userData.password[email];
         callback(null, true);
       }
     });
@@ -1359,8 +1362,6 @@ FlushQueue.prototype.flush = function(delay) {
   }
 };
 
-/*** UTIL FUNCTIONS ***/
-var lastChildAutoId = null;
 
 function priAndKeyComparator(testPri, testKey, valPri, valKey) {
   var x = 0;
@@ -1379,7 +1380,7 @@ function priorityComparator(a,b) {
       return a === null? -1 : 1;
     }
     if (typeof a !== typeof b) {
-      return typeof a === "number" ? -1 : 1;
+      return typeof a === 'number' ? -1 : 1;
     } else {
       return a > b ? 1 : -1;
     }
@@ -1389,11 +1390,11 @@ function priorityComparator(a,b) {
 
 var spyFactory = (function() {
   var spyFunction;
-  if( typeof(jasmine) !== 'undefined' ) {
+  if( typeof(global.jasmine) !== 'undefined' ) {
     spyFunction = function(obj, method) {
       var fn, spy;
       if( typeof(obj) === 'object' ) {
-        spy = spyOn(obj, method);
+        spy = global.spyOn(obj, method);
         if( typeof(spy.andCallThrough) === 'function' ) {
           // karma < 0.12.x
           fn = spy.andCallThrough();
@@ -1403,7 +1404,7 @@ var spyFactory = (function() {
         }
       }
       else {
-        spy = jasmine.createSpy(method);
+        spy = global.jasmine.createSpy(method);
         if( typeof(arguments[0]) === 'function' ) {
           if( typeof(spy.andCallFake) === 'function' ) {
             // karma < 0.12.x
@@ -1418,7 +1419,7 @@ var spyFactory = (function() {
         }
       }
       return fn;
-    }
+    };
   }
   else {
     spyFunction = function(obj, method) {
@@ -1443,12 +1444,12 @@ function createEmailUser(email, password) {
     email: email,
     password: password,
     provider: 'password',
-    md5_hash: MD5(email),
+    md5_hash: md5(email),
     firebaseAuthToken: 'FIREBASE_AUTH_TOKEN' //todo
   };
 }
 
-function createDefaultUser(provider, i) {
+function createDefaultUser(provider) {
   var id = USER_COUNT++;
 
   var out = {
@@ -1461,7 +1462,7 @@ function createDefaultUser(provider, i) {
   switch(provider) {
     case 'password':
       out.email = 'email@firebase.com';
-      out.md5_hash = MD5(out.email);
+      out.md5_hash = md5(out.email);
       break;
     case 'twitter':
       out.accessToken = 'ACCESS_TOKEN'; //todo
@@ -1497,10 +1498,10 @@ function createDefaultUser(provider, i) {
 }
 
 function ref(path, autoSyncDelay) {
-  var ref = new MockFirebase();
-  ref.flushDelay = _.isUndefined(autoSyncDelay)? true : autoSyncDelay;
-  if( path ) { ref = ref.child(path); }
-  return ref;
+  var reference = new MockFirebase();
+  reference.flushDelay = _.isUndefined(autoSyncDelay)? true : autoSyncDelay;
+  if( path ) { reference = reference.child(path); }
+  return reference;
 }
 
 function mergePaths(base, add) {
@@ -1517,97 +1518,27 @@ function makeSnap(ref, data, pri) {
   return {
     val: function() { return data; },
     ref: function() { return ref; },
-    name: function() { return ref.name() },
+    name: function() { return ref.name(); },
     getPriority: function() { return pri; },
     forEach: function(cb, scope) {
       var self = this;
       _.each(data, function(v, k) {
         var res = cb.call(scope, self.child(k));
-        return !(res === true);
+        return res !== true;
       });
     },
     child: function(key) {
       return makeSnap(ref.child(key), _.isObject(data) && _.has(data, key)? data[key] : null, ref.child(key).priority);
     }
-  }
+  };
 }
 
 function extractName(path) {
   return ((path || '').match(/\/([^.$\[\]#\/]+)$/)||[null, null])[1];
 }
 
-// a polyfill for window.atob to allow JWT token parsing
-// credits: https://github.com/davidchambers/Base64.js
-;(function (object) {
-  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-
-  function InvalidCharacterError(message) {
-    this.message = message;
-  }
-  InvalidCharacterError.prototype = new Error;
-  InvalidCharacterError.prototype.name = 'InvalidCharacterError';
-
-  // encoder
-  // [https://gist.github.com/999166] by [https://github.com/nignag]
-  object.btoa || (
-    object.btoa = function (input) {
-      for (
-        // initialize result and counter
-        var block, charCode, idx = 0, map = chars, output = '';
-        // if the next input index does not exist:
-        //   change the mapping table to "="
-        //   check if d has no fractional digits
-        input.charAt(idx | 0) || (map = '=', idx % 1);
-        // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
-        output += map.charAt(63 & block >> 8 - idx % 1 * 8)
-        ) {
-        charCode = input.charCodeAt(idx += 3/4);
-        if (charCode > 0xFF) {
-          throw new InvalidCharacterError("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.");
-        }
-        block = block << 8 | charCode;
-      }
-      return output;
-    });
-
-  // decoder
-  // [https://gist.github.com/1020396] by [https://github.com/atk]
-  object.atob || (
-    object.atob = function (input) {
-      input = input.replace(/=+$/, '')
-      if (input.length % 4 == 1) {
-        throw new InvalidCharacterError("'atob' failed: The string to be decoded is not correctly encoded.");
-      }
-      for (
-        // initialize result and counters
-        var bc = 0, bs, buffer, idx = 0, output = '';
-        // get next character
-        buffer = input.charAt(idx++);
-        // character found in table? initialize bit storage and add its ascii value;
-        ~buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer,
-          // and if not first of each 4 characters,
-          // convert the first 8 bits to one ascii character
-          bc++ % 4) ? output += String.fromCharCode(255 & bs >> (-2 * bc & 6)) : 0
-        ) {
-        // try to find character in table (0-63, not found => -1)
-        buffer = chars.indexOf(buffer);
-      }
-      return output;
-    });
-
-}(global));
-
-// MD5 (Message-Digest Algorithm) by WebToolkit
-//
-
-var MD5=function(s){function L(k,d){return(k<<d)|(k>>>(32-d))}function K(G,k){var I,d,F,H,x;F=(G&2147483648);H=(k&2147483648);I=(G&1073741824);d=(k&1073741824);x=(G&1073741823)+(k&1073741823);if(I&d){return(x^2147483648^F^H)}if(I|d){if(x&1073741824){return(x^3221225472^F^H)}else{return(x^1073741824^F^H)}}else{return(x^F^H)}}function r(d,F,k){return(d&F)|((~d)&k)}function q(d,F,k){return(d&k)|(F&(~k))}function p(d,F,k){return(d^F^k)}function n(d,F,k){return(F^(d|(~k)))}function u(G,F,aa,Z,k,H,I){G=K(G,K(K(r(F,aa,Z),k),I));return K(L(G,H),F)}function f(G,F,aa,Z,k,H,I){G=K(G,K(K(q(F,aa,Z),k),I));return K(L(G,H),F)}function D(G,F,aa,Z,k,H,I){G=K(G,K(K(p(F,aa,Z),k),I));return K(L(G,H),F)}function t(G,F,aa,Z,k,H,I){G=K(G,K(K(n(F,aa,Z),k),I));return K(L(G,H),F)}function e(G){var Z;var F=G.length;var x=F+8;var k=(x-(x%64))/64;var I=(k+1)*16;var aa=Array(I-1);var d=0;var H=0;while(H<F){Z=(H-(H%4))/4;d=(H%4)*8;aa[Z]=(aa[Z]|(G.charCodeAt(H)<<d));H++}Z=(H-(H%4))/4;d=(H%4)*8;aa[Z]=aa[Z]|(128<<d);aa[I-2]=F<<3;aa[I-1]=F>>>29;return aa}function B(x){var k="",F="",G,d;for(d=0;d<=3;d++){G=(x>>>(d*8))&255;F="0"+G.toString(16);k=k+F.substr(F.length-2,2)}return k}function J(k){k=k.replace(/rn/g,"n");var d="";for(var F=0;F<k.length;F++){var x=k.charCodeAt(F);if(x<128){d+=String.fromCharCode(x)}else{if((x>127)&&(x<2048)){d+=String.fromCharCode((x>>6)|192);d+=String.fromCharCode((x&63)|128)}else{d+=String.fromCharCode((x>>12)|224);d+=String.fromCharCode(((x>>6)&63)|128);d+=String.fromCharCode((x&63)|128)}}}return d}var C=Array();var P,h,E,v,g,Y,X,W,V;var S=7,Q=12,N=17,M=22;var A=5,z=9,y=14,w=20;var o=4,m=11,l=16,j=23;var U=6,T=10,R=15,O=21;s=J(s);C=e(s);Y=1732584193;X=4023233417;W=2562383102;V=271733878;for(P=0;P<C.length;P+=16){h=Y;E=X;v=W;g=V;Y=u(Y,X,W,V,C[P+0],S,3614090360);V=u(V,Y,X,W,C[P+1],Q,3905402710);W=u(W,V,Y,X,C[P+2],N,606105819);X=u(X,W,V,Y,C[P+3],M,3250441966);Y=u(Y,X,W,V,C[P+4],S,4118548399);V=u(V,Y,X,W,C[P+5],Q,1200080426);W=u(W,V,Y,X,C[P+6],N,2821735955);X=u(X,W,V,Y,C[P+7],M,4249261313);Y=u(Y,X,W,V,C[P+8],S,1770035416);V=u(V,Y,X,W,C[P+9],Q,2336552879);W=u(W,V,Y,X,C[P+10],N,4294925233);X=u(X,W,V,Y,C[P+11],M,2304563134);Y=u(Y,X,W,V,C[P+12],S,1804603682);V=u(V,Y,X,W,C[P+13],Q,4254626195);W=u(W,V,Y,X,C[P+14],N,2792965006);X=u(X,W,V,Y,C[P+15],M,1236535329);Y=f(Y,X,W,V,C[P+1],A,4129170786);V=f(V,Y,X,W,C[P+6],z,3225465664);W=f(W,V,Y,X,C[P+11],y,643717713);X=f(X,W,V,Y,C[P+0],w,3921069994);Y=f(Y,X,W,V,C[P+5],A,3593408605);V=f(V,Y,X,W,C[P+10],z,38016083);W=f(W,V,Y,X,C[P+15],y,3634488961);X=f(X,W,V,Y,C[P+4],w,3889429448);Y=f(Y,X,W,V,C[P+9],A,568446438);V=f(V,Y,X,W,C[P+14],z,3275163606);W=f(W,V,Y,X,C[P+3],y,4107603335);X=f(X,W,V,Y,C[P+8],w,1163531501);Y=f(Y,X,W,V,C[P+13],A,2850285829);V=f(V,Y,X,W,C[P+2],z,4243563512);W=f(W,V,Y,X,C[P+7],y,1735328473);X=f(X,W,V,Y,C[P+12],w,2368359562);Y=D(Y,X,W,V,C[P+5],o,4294588738);V=D(V,Y,X,W,C[P+8],m,2272392833);W=D(W,V,Y,X,C[P+11],l,1839030562);X=D(X,W,V,Y,C[P+14],j,4259657740);Y=D(Y,X,W,V,C[P+1],o,2763975236);V=D(V,Y,X,W,C[P+4],m,1272893353);W=D(W,V,Y,X,C[P+7],l,4139469664);X=D(X,W,V,Y,C[P+10],j,3200236656);Y=D(Y,X,W,V,C[P+13],o,681279174);V=D(V,Y,X,W,C[P+0],m,3936430074);W=D(W,V,Y,X,C[P+3],l,3572445317);X=D(X,W,V,Y,C[P+6],j,76029189);Y=D(Y,X,W,V,C[P+9],o,3654602809);V=D(V,Y,X,W,C[P+12],m,3873151461);W=D(W,V,Y,X,C[P+15],l,530742520);X=D(X,W,V,Y,C[P+2],j,3299628645);Y=t(Y,X,W,V,C[P+0],U,4096336452);V=t(V,Y,X,W,C[P+7],T,1126891415);W=t(W,V,Y,X,C[P+14],R,2878612391);X=t(X,W,V,Y,C[P+5],O,4237533241);Y=t(Y,X,W,V,C[P+12],U,1700485571);V=t(V,Y,X,W,C[P+3],T,2399980690);W=t(W,V,Y,X,C[P+10],R,4293915773);X=t(X,W,V,Y,C[P+1],O,2240044497);Y=t(Y,X,W,V,C[P+8],U,1873313359);V=t(V,Y,X,W,C[P+15],T,4264355552);W=t(W,V,Y,X,C[P+6],R,2734768916);X=t(X,W,V,Y,C[P+13],O,1309151649);Y=t(Y,X,W,V,C[P+4],U,4149444226);V=t(V,Y,X,W,C[P+11],T,3174756917);W=t(W,V,Y,X,C[P+2],R,718787259);X=t(X,W,V,Y,C[P+9],O,3951481745);Y=K(Y,h);X=K(X,E);W=K(W,v);V=K(V,g)}var i=B(Y)+B(X)+B(W)+B(V);return i.toLowerCase()};
-
 function createError(code, message) {
   return { code: code||'UNKNOWN_ERROR', message: 'FirebaseSimpleLogin: '+(message||code||'unspecific error') };
-}
-
-function hasMeta(data) {
-  return _.isObject(data) && (_.has(data, '.priority') || _.has(data, '.value'));
 }
 
 function getMeta(data, key, defaultVal) {
@@ -1615,7 +1546,7 @@ function getMeta(data, key, defaultVal) {
   var metaKey = '.' + key;
   if( _.isObject(data) && _.has(data, metaKey) ) {
     val = data[metaKey];
-    delete data[metaKey]
+    delete data[metaKey];
   }
   return val;
 }
@@ -1638,7 +1569,7 @@ function cleanData(data) {
 }
 
 function assertKey(method, key, argNum) {
-  argNum || (argNum = 'first');
+  if (!argNum) argNum = 'first';
   if( typeof(key) !== 'string' || key.match(/[.#$\/\[\]]/) ) {
     throw new Error(method + ' failed: '+argNum+' was an invalid key "'+(key+'')+'. Firebase keys must be non-empty strings and can\'t contain ".", "#", "$", "/", "[", or "]"');
   }
@@ -1646,7 +1577,7 @@ function assertKey(method, key, argNum) {
 
 function assertQuery(method, pri, key) {
   if( pri !== null && typeof(pri) !== 'string' && typeof(pri) !== 'number' ) {
-    throw new Error(method + ' failed: first argument must be a valid firebase priority (a string, number, or null).')
+    throw new Error(method + ' failed: first argument must be a valid firebase priority (a string, number, or null).');
   }
   if(!_.isUndefined(key)) {
     assertKey(method, key, 'second');
@@ -1683,7 +1614,7 @@ _.each(['password', 'anonymous', 'facebook', 'twitter', 'google', 'github'], fun
 });
 
 
-MockFirebase.MD5 = MD5;
+MockFirebase.md5 = md5;
 MockFirebaseSimpleLogin.DEFAULT_AUTO_FLUSH = false;
 
 MockFirebase._ = _; // expose for tests
@@ -1700,7 +1631,7 @@ if( typeof(window) !== 'undefined' ) {
 else {
   MockFirebase.override = function() {
     console.warn('MockFirebase.override is only useful in a browser environment. See README' +
-      ' for some node.js alternatives.')
+      ' for some node.js alternatives.');
   };
 }
 
