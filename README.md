@@ -11,14 +11,16 @@ A Firebase stub useful for unit testing.
 
 ### Node.js
 
-    npm install mockfirebase
+```bash
+$ npm install mockfirebase
+```
 
 ### Web
-
-    <script src="lodash.js"></script>
-    <script src="sinon.js"></script>
-    <script src="MockFirebase.js"></script>
-
+```html
+<!-- include sinon unless you use jasmine -->
+<script src="sinon.js"></script>
+<script src="mockfirebase.js"></script>
+```
 ### Browser Support
 
 Works by default with IE 9 and up. To add support for older versions, just include polyfills for [Function.prototype.bind](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind#Compatibility),
@@ -32,13 +34,15 @@ just include [sinon.js](http://sinonjs.org/) in the browser script tags, Karma c
 MockFirebase is designed to be used synchronously or asynchronously for unit testing by allowing you complete
 control over when each event is triggered, via the `flush()` command.
 
-    var fb = new MockFirebase(ANY_URLISH_STRING); // loads the default data
-    var spy = sinon.spy();
-    fb.on('value', spy);
-    fb.set({ foo: 'bar' });
-    expect(spy.called).to.be(false); // it is!
-    fb.flush();
-    expect(spy.called).to.be(true); // it is!
+```js
+var fb = new MockFirebase(ANY_URLISH_STRING); // loads the default data
+var spy = sinon.spy();
+fb.on('value', spy);
+fb.set({ foo: 'bar' });
+expect(spy.called).to.be(false); // it is!
+fb.flush();
+expect(spy.called).to.be(true); // it is!
+```
 
 See [angularFire's unit tests](https://github.com/firebase/angularFire/blob/master/tests/unit/AngularFire.spec.js) for examples of the MockFirebase in action.
 
@@ -130,10 +134,9 @@ Note that the key in the stubs object matches the module name (`'firebase'`) and
 
  - Fork the repo
  - `npm install`
- - `grunt test`
- - `grunt watch`
  - make your additions in src/
  - add test units in test/
+ - `npm test`
  - submit a pull request when all tests pass
 
 # Support
