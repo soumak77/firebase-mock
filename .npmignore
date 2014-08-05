@@ -1,4 +1,7 @@
-test/*
-Gruntfile.js
+test/
+src/
+gulpfile.js
 .travis.yml
 .npmignore
+helpers/
+coverage/

@@ -1,5 +1,10 @@
 language: node_js
 node_js: '0.10'
+before_script:
+- export PATH="$(npm bin):$PATH"
+script:
+- gulp test
+- gulp karma
 deploy:
   provider: npm
   email: katowulf@gmail.com
