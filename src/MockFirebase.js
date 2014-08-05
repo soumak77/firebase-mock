@@ -1595,7 +1595,7 @@ function extractName(path) {
       return output;
     });
 
-}(exports));
+}(global));
 
 // MD5 (Message-Digest Algorithm) by WebToolkit
 //
