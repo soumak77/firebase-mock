@@ -130,31 +130,6 @@ var mySrc = proxyquire('./mySrc', {
 
 Note that the key in the stubs object matches the module name (`'firebase'`) and not the capitalized variable name. 
 
-# Contributing
-
- - Fork the repo
- - `npm install`
- - make your additions in src/
- - add test units in test/
- - `npm test`
- - submit a pull request when all tests pass
-
 # Support
 
 Use the [issues list](https://github.com/katowulf/mockfirebase/issues) for questions and troubleshooting help.
-
-# Releasing
-
-*For maintainers:*
-
-Call `gulp release` to release a new patch version. For *minor* or *major* releases, use the `--type` flag:
-
-```bash
-$ gulp release --type minor
-```
-
-To push the release commit and tag:
-
-```bash
-$ git push --follow-tags
-```
