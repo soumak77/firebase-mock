@@ -18,21 +18,21 @@ internals.version = function () {
 };
 
 gulp.task('bundle', function () {
-  return browserify({
-    standalone: 'mockfirebase'
-  })
-  .add('./src/MockFirebase.js')
-  .transform('browserify-shim')
-  .bundle()
-  .pipe(source('mockfirebase.js'))
-  .pipe(buffer())
-  .pipe(plugins.header(fs.readFileSync('./helpers/header.txt'), {
-    pkg: _.extend(require('./package.json'), {
-      version: internals.version()
+  return browserify()
+    .add('./src/MockFirebase.js')
+    .transform('browserify-shim')
+    .bundle({
+      standalone: 'mockfirebase'
     })
-  }))
-  .pipe(plugins.footer(fs.readFileSync('./helpers/globals.js')))
-  .pipe(gulp.dest('./dist'));
+    .pipe(source('mockfirebase.js'))
+    .pipe(buffer())
+    .pipe(plugins.header(fs.readFileSync('./helpers/header.txt'), {
+      pkg: _.extend(require('./package.json'), {
+        version: internals.version()
+      })
+    }))
+    .pipe(plugins.footer(fs.readFileSync('./helpers/globals.js')))
+    .pipe(gulp.dest('./dist'));
 });
 
 gulp.task('cover', function () {

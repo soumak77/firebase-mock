@@ -1,4 +1,4 @@
-(function (window) {
+;(function (window) {
   'use strict';
   if (typeof window === 'object') {
     window.MockFirebase = window.mockfirebase.MockFirebase;
