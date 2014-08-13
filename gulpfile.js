@@ -32,7 +32,7 @@ gulp.task('bundle', function () {
       })
     }))
     .pipe(plugins.footer(fs.readFileSync('./helpers/globals.js')))
-    .pipe(gulp.dest('./dist'));
+    .pipe(gulp.dest('./browser'));
 });
 
 gulp.task('cover', function () {
@@ -74,7 +74,7 @@ gulp.task('lint', function () {
 });
 
 gulp.task('release', ['bundle'], function (done) {
-  gulp.src('./dist/mockfirebase.js')
+  gulp.src('./browser/mockfirebase.js')
     .pipe(plugins.git.add({args: '-f'}))
     .on('finish', function () {
       gulp.src(['./package.json', './bower.json'])
@@ -84,7 +84,7 @@ gulp.task('release', ['bundle'], function (done) {
         .on('finish', function () {
           var version = 'v' + internals.version();
           var message = 'Release ' + version;
-          gulp.src(['./package.json', './bower.json', './dist/mockfirebase.js'])
+          gulp.src(['./package.json', './bower.json', './browser/mockfirebase.js'])
             .pipe(plugins.git.commit(message))
             .on('finish', function () {
               plugins.git.tag(version, message, function () {
