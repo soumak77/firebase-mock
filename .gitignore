@@ -1,4 +1,4 @@
 /.idea/
 node_modules
 coverage
-dist
+browser

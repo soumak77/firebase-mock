@@ -117,14 +117,21 @@ ref.on('value', function (snapshot) {
 });
 ```
 
-In order to test the above source code, we use proxyquire like this:
+In order to test the above source code, we can use proxyquire. 
+
+**Example**
 
 ```js
 // ./test.js
-var proxyquire = require('proxyquire');
+var proxyquire   = require('proxyquire');
+var MockFirebase = require('mockfirebase').MockFirebase;
+var mock;
 var mySrc = proxyquire('./mySrc', {
-  firebase: require('mockfirebase').MockFirebase.autoFlush()
+  firebase: function (url) {
+    return (mock = new MockFirebase(url));
+  };
 });
+mock.flush();
 // data is logged
 ```
 

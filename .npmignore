@@ -1,5 +1,5 @@
 test/
-src/
+browser/
 gulpfile.js
 .travis.yml
 .npmignore
