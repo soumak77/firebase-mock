@@ -188,8 +188,9 @@ describe('MockFirebase', function() {
 
   describe('#auth', function() {
     it('should allow fail auth for invalid token', function(done) {
+      fb.failNext('auth', new Error('INVALID_TOKEN'));
       fb.auth('invalidToken', function(error, result) {
-        expect(error).equals('Invalid Token');
+        expect(error.message).equals('INVALID_TOKEN');
         done();
       });
       fb.flush();
