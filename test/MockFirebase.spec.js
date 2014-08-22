@@ -185,5 +185,24 @@ describe('MockFirebase', function() {
       fb.flush();
     });
   });
-});
 
+  describe('#auth', function() {
+    it('should allow fail auth for invalid token', function(done) {
+      fb.auth('invalidToken', function(error, result) {
+        expect(error).equals('Invalid Token');
+        done();
+      });
+      fb.flush();
+    });
+
+    it('should allow auth for any other token and return expires at', function(done) {
+      fb.auth('goodToken', function(error, result) {
+        expect(error).equals(null);
+        expect(result.auth !== null).equals(true);
+        expect(result.expires !== null).equals(true);
+        done();
+      });
+      fb.flush();
+    });
+  });
+});

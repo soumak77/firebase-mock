@@ -530,7 +530,11 @@ MockFirebase.prototype = {
    */
   auth: function(token, callback) {
     //todo invoke callback with the parsed token contents
-    if (callback) this._defer(callback);
+    if (token === 'invalidToken') {
+      if(callback) callback('Invalid Token');
+      return;
+    }
+    if (callback) callback(null, { auth: 'authToken', expires: (new Date()).to_i / 1000 });
   },
 
   /**
