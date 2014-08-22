@@ -533,7 +533,7 @@ MockFirebase.prototype = {
     var err = this._nextErr('auth');
     if (callback) {
       this._defer(function() {
-        var auth = { auth: 'authToken', expires: (new Date()).to_i / 1000 };
+        var auth = { auth: { id: 'test', _token: token }, expires: (new Date()).to_i / 1000 };
         if( err === null ) {
           callback(null, auth);
         } else {
