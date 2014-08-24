@@ -44,7 +44,7 @@ fb.flush();
 expect(spy.called).to.be(true); // it is!
 ```
 
-See [angularFire's unit tests](https://github.com/firebase/angularFire/blob/master/tests/unit/AngularFire.spec.js) for examples of the MockFirebase in action.
+See [angularFire's unit tests](https://github.com/firebase/angularfire/tree/master/tests/unit) for examples of the MockFirebase in action.
 
 ## Specifying data
 
