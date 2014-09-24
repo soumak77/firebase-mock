@@ -310,7 +310,7 @@ MockFirebase.prototype = {
 
   child: function(childPath) {
     if( !childPath ) { throw new Error('bad child path '+this.toString()); }
-    var parts = _.isArray(childPath)? childPath : childPath.split('/');
+    var parts = _.isArray(childPath)? childPath : _.compact(childPath.split('/'));
     var childKey = parts.shift();
     var child = this.children[childKey];
     if( !child ) {
