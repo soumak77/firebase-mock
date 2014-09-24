@@ -12,7 +12,17 @@ describe('MockFirebase', function() {
     fb = new Firebase().child('data');
   });
 
-  it('should have test units');
+  describe('#child', function () {
+
+    it('can use leading slashes (#23)', function () {
+      expect(fb.child('/children').currentPath).to.equal('Mock://data/children');
+    });
+
+    it('can use trailing slashes (#23)', function () {
+      expect(fb.child('children/').currentPath).to.equal('Mock://data/children');
+    });
+
+  });
 
   describe('#set', function() {
     it('//todo');
