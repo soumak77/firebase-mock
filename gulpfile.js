@@ -73,24 +73,22 @@ gulp.task('lint', function () {
     .pipe(plugins.jshint.reporter('fail'));
 });
 
-gulp.task('release', ['bundle'], function (done) {
-  gulp.src('./browser/mockfirebase.js')
-    .pipe(plugins.git.add({args: '-f'}))
-    .on('finish', function () {
-      gulp.src(['./package.json', './bower.json'])
-        .pipe(plugins.bump({version: internals.version()}))
-        .pipe(gulp.dest('./'))
-        .pipe(plugins.git.add())
-        .on('finish', function () {
-          var version = 'v' + internals.version();
-          var message = 'Release ' + version;
-          gulp.src(['./package.json', './bower.json', './browser/mockfirebase.js'])
-            .pipe(plugins.git.commit(message))
-            .on('finish', function () {
-              plugins.git.tag(version, message, function () {
-                done();
-              });
-            });
-        });
-    });
+var pkgs = ['./package.json', './bower.json'];
+gulp.task('bump', function () {
+  return gulp.src(pkgs)
+    .pipe(plugins.bump({
+      version: internals.version()
+    }))
+    .pipe(gulp.dest('./'));
+});
+
+gulp.task('release', ['bundle', 'bump'], function () {
+  var version = 'v' + internals.version();
+  var message = 'Release ' + version;
+  return plugins.shell.task([
+    'git add -f ./browser/mockfirebase.js',
+    'git add ' + pkgs.join(' '),
+    'git commit -m "' + message + '"',
+    'git tag ' + version
+  ])();
 });
