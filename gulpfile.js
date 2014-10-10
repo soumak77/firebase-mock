@@ -78,7 +78,8 @@ gulp.task('bump', function () {
   return gulp.src(pkgs)
     .pipe(plugins.bump({
       version: internals.version()
-    }));
+    }))
+    .pipe(gulp.dest('./'));
 });
 
 gulp.task('release', ['bundle', 'bump'], function () {
