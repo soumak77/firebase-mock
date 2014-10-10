@@ -87,7 +87,7 @@ gulp.task('release', ['bundle', 'bump'], function () {
   return plugins.shell.task([
     'git add -f ./browser/mockfirebase.js',
     'git add ' + pkgs.join(' '),
-    'git commit -m ' + message
-    'git tag ' + version + ' -m ' + message
+    'git commit -m "' + message + '"',
+    'git tag ' + version
   ])();
 });
