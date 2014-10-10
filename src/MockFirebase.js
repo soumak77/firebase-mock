@@ -424,7 +424,7 @@ MockFirebase.prototype = {
         callback.call(context, snap);
       };
 
-      this.on(event, fn, context);
+      this.on(event, fn, cancel, context);
     }
   },
 
