@@ -73,19 +73,21 @@ gulp.task('lint', function () {
     .pipe(plugins.jshint.reporter('fail'));
 });
 
-gulp.task('release', ['bundle'], function () {
-  var pkgs = ['./package.json', './bower.json'];
+var pkgs = ['./package.json', './bower.json'];
+gulp.task('bump', function () {
+  return gulp.src(pkgs)
+    .pipe(plugins.bump({
+      version: internals.version()
+    }));
+});
+
+gulp.task('release', ['bundle', 'bump'], function () {
   var version = 'v' + internals.version();
   var message = 'Release ' + version;
-  return gulp.src(pkgs)
-    .pipe(plugins.shell([
-      'git add -f ./browser/mockfirebase.js'
-    ]))
-    .pipe(plugins.bump({version: internals.version()}))
-    .pipe(gulp.dest('./'))
-    .pipe(plugins.shell([
-      'git add ' + pkgs.join(' '),
-      'git commit -m ' + message,
-      'git tag ' + version + ' -m ' + message
-    ]));
+  return plugins.shell.task([
+    'git add -f ./browser/mockfirebase.js',
+    'git add ' + pkgs.join(' '),
+    'git commit -m ' + message
+    'git tag ' + version + ' -m ' + message
+  ])();
 });
