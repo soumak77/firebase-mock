@@ -1,4 +1,4 @@
-/** mockfirebase - v0.3.0
+/** mockfirebase - v0.3.1
 https://github.com/katowulf/mockfirebase
 * Copyright (c) 2014 Kato
 * License: MIT */
@@ -8781,7 +8781,7 @@ MockFirebase.prototype = {
 
   child: function(childPath) {
     if( !childPath ) { throw new Error('bad child path '+this.toString()); }
-    var parts = _.isArray(childPath)? childPath : childPath.split('/');
+    var parts = _.isArray(childPath)? childPath : _.compact(childPath.split('/'));
     var childKey = parts.shift();
     var child = this.children[childKey];
     if( !child ) {
@@ -8895,7 +8895,7 @@ MockFirebase.prototype = {
         callback.call(context, snap);
       };
 
-      this.on(event, fn, context);
+      this.on(event, fn, cancel, context);
     }
   },
 
@@ -9001,7 +9001,17 @@ MockFirebase.prototype = {
    */
   auth: function(token, callback) {
     //todo invoke callback with the parsed token contents
-    if (callback) this._defer(callback);
+    var err = this._nextErr('auth');
+    if (callback) {
+      this._defer(function() {
+        var auth = { auth: { id: 'test', _token: token }, expires: (new Date()).to_i / 1000 };
+        if( err === null ) {
+          callback(null, auth);
+        } else {
+          callback(err);
+        }
+      });
+    }
   },
 
   /**
