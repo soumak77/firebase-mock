@@ -629,7 +629,7 @@ MockFirebase.prototype = {
 
   _resort: function(childKeyMoved) {
     var self = this;
-    self.sortedDataKeys.sort(self.childComparator.bind(self));
+    self.sortedDataKeys.sort(_.bind(self.childComparator, self));
     // resort the data object to match our keys so value events return ordered content
     var oldDat = _.assign({}, self.data);
     _.each(oldDat, function(v,k) { delete self.data[k]; });
@@ -764,7 +764,7 @@ MockFirebase.prototype = {
     if( i === -1 ) {
       keys = keys.slice();
       keys.push(key);
-      keys.sort(this.childComparator.bind(this));
+      keys.sort(_.bind(this.childComparator, this));
       i = _.indexOf(keys, key);
     }
     return i === 0? null : keys[i-1];
@@ -977,7 +977,7 @@ MockFirebaseSimpleLogin.prototype = {
   flush: function(milliseconds) {
     var self = this;
     if(_.isNumber(milliseconds) ) {
-      setTimeout(self.flush.bind(self), milliseconds);
+      setTimeout(_.bind(self.flush, self), milliseconds);
     }
     else {
       var attempts = self.attempts;
