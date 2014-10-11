@@ -170,19 +170,18 @@ describe('MockFirebase', function() {
   });
 
   describe('#setWithPriority', function() {
+
     it('should pass the priority to #setPriority', function() {
-      fb.autoFlush();
       fb.setWithPriority({}, 250);
       expect(fb.setPriority).to.have.been.calledWith(250);
     });
 
     it('should pass the data and callback to #set', function() {
       var data = {};
-      var callback = sinon.spy();
-      fb.autoFlush();
-      fb.setWithPriority(data, 250, callback);
-      expect(fb.set).to.have.been.calledWith(data, callback);
+      fb.setWithPriority(data, 250, spy);
+      expect(fb.set).to.have.been.calledWith(data, spy);
     });
+
   });
 
   describe('#remove', function() {
