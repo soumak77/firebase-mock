@@ -42,7 +42,9 @@ gulp.task('cover', function () {
 
 gulp.task('test', ['cover'], function () {
   return gulp.src('test/**/*.js')
-    .pipe(plugins.mocha())
+    .pipe(plugins.mocha({
+      grep: argv.grep
+    }))
     .pipe(plugins.istanbul.writeReports());
 });
 
@@ -50,6 +52,9 @@ gulp.task('karma', function () {
   return require('karma-as-promised').server.start({
     frameworks: ['browserify', 'mocha', 'sinon'],
     browsers: ['PhantomJS'],
+    client: {
+      args: ['--grep', argv.grep]
+    },
     files: [
       'node_modules/es5-shim/es5-shim.js',
       'test/**/*.spec.js'
