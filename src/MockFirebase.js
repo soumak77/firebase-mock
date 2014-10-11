@@ -34,9 +34,6 @@ var md5   = require('MD5');
  *     // trigger callbacks and event listeners
  *     fb.flush();
  *
- *     // spy on methods
- *     expect(fb.on.called).toBe(true);
- *
  * ## Trigger events automagically instead of calling flush()
  *
  *     var fb = new MockFirebase('Mock://hello/world');
