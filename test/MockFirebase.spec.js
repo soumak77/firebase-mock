@@ -6,7 +6,7 @@ var expect   = require('chai').use(require('sinon-chai')).expect;
 var Firebase = require('../').MockFirebase;
 
 describe('MockFirebase', function() {
-  
+
   var fb;
   beforeEach(function() {
     fb = new Firebase().child('data');
@@ -152,26 +152,27 @@ describe('MockFirebase', function() {
   });
 
   describe('#setPriority', function() {
+
+    beforeEach(function () {
+      fb.autoFlush();
+    });
+
     it('should trigger child_moved with correct prevChildName', function() {
       var spy = sinon.spy();
-      fb.autoFlush();
-      var keys = _.keys(fb.getData());
-      expect(keys.length).above(1); // need 2 or more
-      var firstKey = keys[0];
-      var lastKey = keys.pop();
+      var keys = Object.keys(fb.getData());
+      expect(keys).to.have.length.above(1);
       fb.on('child_moved', spy);
-      fb.child(firstKey).setPriority(250);
-      expect(spy.callCount).equals(1);
-      var call = spy.getCall(0);
-      expect(call.args[1]).equals(lastKey);
+      fb.child(keys[0]).setPriority(250);
+      expect(spy).to.have.been.calledOnce;
+      expect(spy.firstCall.args[1]).to.equal(keys[keys.length - 1]);
     });
 
     it('should trigger a callback', function() {
       var spy = sinon.spy();
-      fb.autoFlush();
       fb.setPriority(100, spy);
       expect(spy).to.have.been.called;
     });
+
   });
 
   describe('#setWithPriority', function() {
