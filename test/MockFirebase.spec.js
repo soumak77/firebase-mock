@@ -205,25 +205,26 @@ describe('MockFirebase', function () {
 
   });
 
-  describe('#transaction', function() {
-    it('should call the transaction function', function(done) {
-      fb.transaction(function() {
-        done();
-      });
+  describe('#transaction', function () {
+
+    it('should call the transaction function', function () {
+      fb.transaction(spy);
       fb.flush();
+      expect(spy).to.have.been.called;
     });
-    it('should fire the callback with a "committed" boolean and error message', function(done) {
-      fb.transaction(function(currentValue) {
+
+    it('should fire the callback with a "committed" boolean and error message', function () {
+      fb.transaction(function (currentValue) {
         currentValue.transacted = 'yes';
         return currentValue;
-      }, function(error, committed, snapshot) {
-        expect(error).equals(null);
-        expect(committed).equals(true);
-        expect(snapshot.val().transacted).equals('yes');
-        done();
+      }, function (error, committed, snapshot) {
+        expect(error).to.be.null;
+        expect(committed).to.be.true;
+        expect(snapshot.val().transacted).to.equal('yes');
       });
       fb.flush();
     });
+    
   });
 
   describe('#auth', function () {
