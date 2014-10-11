@@ -185,11 +185,26 @@ describe('MockFirebase', function () {
   });
 
   describe('#remove', function () {
-    it('//todo');
 
-    it('should call child_removed for any children');
+    beforeEach(function () {
+      fb.autoFlush();
+    });
 
-    it('should change to null if last child is removed');
+    it('should call child_removed for children', function () {
+      fb.on('child_removed', spy);
+      fb.child('a').remove();
+      expect(spy).to.have.been.called;
+      var snapshot = spy.firstCall.args[0];
+      expect(snapshot.name()).to.equal('a');
+    });
+
+    it('should change to null if all children are removed', function () {
+      for (var key in fb.getData()) {
+        fb.child(key).remove();
+      }
+      expect(fb.getData()).to.be.null;
+    });
+
   });
 
   describe('#on', function () {
