@@ -193,14 +193,16 @@ describe('MockFirebase', function() {
   });
 
   describe('#on', function() {
+
     it('should work when initial value is null', function() {
       fb.on('value', spy);
       fb.flush();
-      expect(spy.callCount).equals(1);
+      expect(spy).to.have.been.calledOnce;
       fb.set('foo');
       fb.flush();
-      expect(spy.callCount).equals(2);
+      expect(spy).to.have.been.calledTwice;
     });
+
   });
 
   describe('#transaction', function() {
