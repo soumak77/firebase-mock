@@ -7,9 +7,10 @@ var Firebase = require('../').MockFirebase;
 
 describe('MockFirebase', function() {
 
-  var fb;
+  var fb, spy;
   beforeEach(function() {
-    fb = new Firebase().child('data');
+    fb  = new Firebase().child('data');
+    spy = sinon.spy();
   });
 
   describe('#child', function () {
@@ -49,8 +50,7 @@ describe('MockFirebase', function() {
           '.value': 'b'
         }
       });
-      var data = fb.getData();
-      expect(data).to.contain({
+      expect(fb.getData()).to.contain({
         a: 'a',
         b: 'b'
       });
@@ -59,7 +59,6 @@ describe('MockFirebase', function() {
     });
 
     it('should have correct priority in snapshot if added with set', function() {
-      var spy = sinon.spy();
       fb.on('child_added', spy);
       var previousCallCount = spy.callCount;
       fb.set({
@@ -74,7 +73,6 @@ describe('MockFirebase', function() {
     });
 
     it('should fire child_added events with correct prevChildName', function() {
-      var spy = sinon.spy();
       fb = new Firebase('Empty://', null).autoFlush();
       fb.set({
         alpha: {
@@ -112,7 +110,6 @@ describe('MockFirebase', function() {
           foo: 'charlie'
         }
       };
-      var spy = sinon.spy();
       fb = new Firebase('Empty://', null).autoFlush();
       fb.set(data);
       fb.on('child_added', spy);
@@ -125,7 +122,6 @@ describe('MockFirebase', function() {
     });
 
     it('should trigger child_removed if child keys are missing', function() {
-      var spy = sinon.spy();
       fb.on('child_removed', spy);
       var data = fb.getData();
       var keys = Object.keys(data);
@@ -158,7 +154,6 @@ describe('MockFirebase', function() {
     });
 
     it('should trigger child_moved with correct prevChildName', function() {
-      var spy = sinon.spy();
       var keys = Object.keys(fb.getData());
       expect(keys).to.have.length.above(1);
       fb.on('child_moved', spy);
@@ -168,7 +163,6 @@ describe('MockFirebase', function() {
     });
 
     it('should trigger a callback', function() {
-      var spy = sinon.spy();
       fb.setPriority(100, spy);
       expect(spy).to.have.been.called;
     });
@@ -201,7 +195,6 @@ describe('MockFirebase', function() {
 
   describe('#on', function() {
     it('should work when initial value is null', function() {
-      var spy = sinon.spy();
       fb.on('value', spy);
       fb.flush();
       expect(spy.callCount).equals(1);
