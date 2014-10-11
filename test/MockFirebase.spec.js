@@ -5,10 +5,10 @@ var _        = require('lodash');
 var expect   = require('chai').use(require('sinon-chai')).expect;
 var Firebase = require('../').MockFirebase;
 
-describe('MockFirebase', function() {
+describe('MockFirebase', function () {
 
   var fb, spy;
-  beforeEach(function() {
+  beforeEach(function () {
     fb  = new Firebase().child('data');
     spy = sinon.spy();
   });
@@ -31,7 +31,7 @@ describe('MockFirebase', function() {
       fb.autoFlush();
     });
 
-    it('should remove old keys from data', function() {
+    it('should remove old keys from data', function () {
       fb.set({
         alpha: true,
         bravo: false
@@ -39,7 +39,7 @@ describe('MockFirebase', function() {
       expect(fb.getData().a).to.be.undefined;
     });
 
-    it('should set priorities on children if included in data', function() {
+    it('should set priorities on children if included in data', function () {
       fb.set({
         a: {
           '.priority': 100,
@@ -58,7 +58,7 @@ describe('MockFirebase', function() {
       expect(fb.child('b')).to.have.property('priority', 200);
     });
 
-    it('should have correct priority in snapshot if added with set', function() {
+    it('should have correct priority in snapshot if added with set', function () {
       fb.on('child_added', spy);
       var previousCallCount = spy.callCount;
       fb.set({
@@ -72,7 +72,7 @@ describe('MockFirebase', function() {
       expect(snapshot.getPriority()).to.equal(100);
     });
 
-    it('should fire child_added events with correct prevChildName', function() {
+    it('should fire child_added events with correct prevChildName', function () {
       fb = new Firebase('Empty://', null).autoFlush();
       fb.set({
         alpha: {
@@ -95,7 +95,7 @@ describe('MockFirebase', function() {
       });
     });
 
-    it('should fire child_added events with correct priority', function() {
+    it('should fire child_added events with correct priority', function () {
       var data = {
         alpha: {
           '.priority': 200,
@@ -121,7 +121,7 @@ describe('MockFirebase', function() {
       }
     });
 
-    it('should trigger child_removed if child keys are missing', function() {
+    it('should trigger child_removed if child keys are missing', function () {
       fb.on('child_removed', spy);
       var data = fb.getData();
       var keys = Object.keys(data);
@@ -133,7 +133,7 @@ describe('MockFirebase', function() {
       expect(spy).to.have.been.calledOnce;
     });
 
-    it('should change parent from null to object when child is set', function() {
+    it('should change parent from null to object when child is set', function () {
       fb.set(null);
       fb.child('newkey').set({
         foo: 'bar'
@@ -147,13 +147,13 @@ describe('MockFirebase', function() {
 
   });
 
-  describe('#setPriority', function() {
+  describe('#setPriority', function () {
 
     beforeEach(function () {
       fb.autoFlush();
     });
 
-    it('should trigger child_moved with correct prevChildName', function() {
+    it('should trigger child_moved with correct prevChildName', function () {
       var keys = Object.keys(fb.getData());
       expect(keys).to.have.length.above(1);
       fb.on('child_moved', spy);
@@ -162,21 +162,21 @@ describe('MockFirebase', function() {
       expect(spy.firstCall.args[1]).to.equal(keys[keys.length - 1]);
     });
 
-    it('should trigger a callback', function() {
+    it('should trigger a callback', function () {
       fb.setPriority(100, spy);
       expect(spy).to.have.been.called;
     });
 
   });
 
-  describe('#setWithPriority', function() {
+  describe('#setWithPriority', function () {
 
-    it('should pass the priority to #setPriority', function() {
+    it('should pass the priority to #setPriority', function () {
       fb.setWithPriority({}, 250);
       expect(fb.setPriority).to.have.been.calledWith(250);
     });
 
-    it('should pass the data and callback to #set', function() {
+    it('should pass the data and callback to #set', function () {
       var data = {};
       fb.setWithPriority(data, 250, spy);
       expect(fb.set).to.have.been.calledWith(data, spy);
@@ -184,7 +184,7 @@ describe('MockFirebase', function() {
 
   });
 
-  describe('#remove', function() {
+  describe('#remove', function () {
     it('//todo');
 
     it('should call child_removed for any children');
@@ -192,9 +192,9 @@ describe('MockFirebase', function() {
     it('should change to null if last child is removed');
   });
 
-  describe('#on', function() {
+  describe('#on', function () {
 
-    it('should work when initial value is null', function() {
+    it('should work when initial value is null', function () {
       fb.on('value', spy);
       fb.flush();
       expect(spy).to.have.been.calledOnce;
@@ -226,7 +226,7 @@ describe('MockFirebase', function() {
     });
   });
 
-  describe('#auth', function() {
+  describe('#auth', function () {
     it('should allow fail auth for invalid token', function(done) {
       fb.failNext('auth', new Error('INVALID_TOKEN'));
       fb.auth('invalidToken', function(error, result) {
