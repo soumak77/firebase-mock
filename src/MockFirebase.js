@@ -497,19 +497,19 @@ MockFirebase.prototype = {
 
   transaction: function(valueFn, finishedFn, applyLocally) {
     var self = this;
-    var valueSpy = spyFactory(valueFn, 'trxn:valueFn');
-    var finishedSpy = spyFactory(finishedFn, 'trxn:finishedFn');
     this._defer(function() {
       var err = self._nextErr('transaction');
       // unlike most defer methods, self will use the value as it exists at the time
       // the transaction is actually invoked, which is the eventual consistent value
       // it would have in reality
-      var res = valueSpy(self.getData());
+      var res = valueFn(self.getData());
       var newData = _.isUndefined(res) || err? self.getData() : res;
       self._dataChanged(newData);
-      finishedSpy(err, err === null && !_.isUndefined(res), makeSnap(self, newData, self.priority));
+      if (typeof finishedFn === 'function') {
+        finishedFn(err, err === null && !_.isUndefined(res), makeSnap(self, newData, self.priority));
+      }
     });
-    return [valueSpy, finishedSpy, applyLocally];
+    return [valueFn, finishedFn, applyLocally];
   },
 
   /**
@@ -939,15 +939,6 @@ function MockFirebaseSimpleLogin(ref, callback, userData) {
   this.autoFlushTime = MockFirebaseSimpleLogin.DEFAULT_AUTO_FLUSH;
   this.userData = _.cloneDeep(MockFirebaseSimpleLogin.DEFAULT_USER_DATA);
   if (userData) _.assign(this.userData, userData);
-
-  // turn all our public methods into spies so they can be monitored for calls and return values
-  // see jasmine spies: https://github.com/pivotal/jasmine/wiki/Spies
-  // the constructor can be spied on using spyOn(window, 'FirebaseSimpleLogin') from within the test unit
-  for(var key in this) {
-    if( !key.match(/^_/) && typeof(this[key]) === 'function' ) {
-      spyFactory(this, key);
-    }
-  }
 }
 
 MockFirebaseSimpleLogin.prototype = {
@@ -1388,53 +1379,6 @@ function priorityComparator(a,b) {
   }
   return 0;
 }
-
-var spyFactory = (function() {
-  var spyFunction;
-  if( typeof(global.jasmine) !== 'undefined' ) {
-    spyFunction = function(obj, method) {
-      var fn, spy;
-      if( typeof(obj) === 'object' ) {
-        spy = global.spyOn(obj, method);
-        if( typeof(spy.andCallThrough) === 'function' ) {
-          // karma < 0.12.x
-          fn = spy.andCallThrough();
-        }
-        else {
-          fn = spy.and.callThrough();
-        }
-      }
-      else {
-        spy = global.jasmine.createSpy(method);
-        if( typeof(arguments[0]) === 'function' ) {
-          if( typeof(spy.andCallFake) === 'function' ) {
-            // karma < 0.12.x
-            fn = spy.andCallFake(obj);
-          }
-          else {
-            fn = spy.and.callFake(obj);
-          }
-        }
-        else {
-          fn = spy;
-        }
-      }
-      return fn;
-    };
-  }
-  else {
-    spyFunction = function(obj, method) {
-      var sinon = require('sinon');
-      if ( typeof (obj) === 'object') {
-        return sinon.spy(obj, method);
-      }
-      else {
-        return sinon.spy(obj);
-      }
-    };
-  }
-  return spyFunction;
-})();
 
 var USER_COUNT = 100;
 function createEmailUser(email, password) {
