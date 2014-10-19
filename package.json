@@ -22,7 +22,6 @@
   "homepage": "https://github.com/katowulf/mockfirebase",
   "dependencies": {
     "lodash": "~2.4.1",
-    "sinon": "~1.10.3",
     "MD5": "~1.2.1"
   },
   "devDependencies": {
@@ -47,6 +46,7 @@
     "karma-phantomjs-launcher": "~0.1.4",
     "karma-sinon": "~1.0.3",
     "semver": "~3.0.1",
+    "sinon": "~1.10.3",
     "sinon-chai": "~2.5.0",
     "vinyl-buffer": "0.0.0",
     "vinyl-source-stream": "~0.1.1",
