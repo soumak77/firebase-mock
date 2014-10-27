@@ -22,7 +22,6 @@ gulp.task('bundle', function () {
       standalone: 'mockfirebase'
     })
     .add('./src/MockFirebase.js')
-    .transform('browserify-shim')
     .bundle()
     .pipe(source('mockfirebase.js'))
     .pipe(buffer())
@@ -63,8 +62,7 @@ gulp.task('karma', function () {
       'test/**/*.spec.js': ['browserify']
     },
     browserify: {
-      debug: true,
-      transform: ['browserify-shim']
+      debug: true
     },
     autoWatch: false,
     singleRun: true
