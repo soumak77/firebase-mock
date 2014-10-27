@@ -18,12 +18,12 @@ internals.version = function () {
 };
 
 gulp.task('bundle', function () {
-  return browserify()
-    .add('./src/MockFirebase.js')
-    .transform('browserify-shim')
-    .bundle({
+  return browserify({
       standalone: 'mockfirebase'
     })
+    .add('./src/MockFirebase.js')
+    .transform('browserify-shim')
+    .bundle()
     .pipe(source('mockfirebase.js'))
     .pipe(buffer())
     .pipe(plugins.header(fs.readFileSync('./helpers/header.txt'), {
