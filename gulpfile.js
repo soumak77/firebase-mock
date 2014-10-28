@@ -45,7 +45,7 @@ gulp.task('cover', function () {
 });
 
 gulp.task('test', ['cover'], function () {
-  return gulp.src('test/**/*.js')
+  return gulp.src('test/unit/*.js')
     .pipe(plugins.mocha({
       grep: argv.grep
     }))
