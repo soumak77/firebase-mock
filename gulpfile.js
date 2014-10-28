@@ -115,12 +115,12 @@ gulp.task('bump', function () {
 });
 
 gulp.task('release', ['bundle', 'bump'], function () {
-  var version = 'v' + version();
-  var message = 'Release ' + version;
+  var versionString = 'v' + version();
+  var message = 'Release ' + versionString;
   return plugins.shell.task([
     'git add -f ./browser/mockfirebase.js',
     'git add ' + pkgs.join(' '),
     'git commit -m "' + message + '"',
-    'git tag ' + version
+    'git tag ' + versionString
   ])();
 });
