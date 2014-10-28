@@ -8,14 +8,13 @@ var source     = require('vinyl-source-stream');
 var buffer     = require('vinyl-buffer');
 var fs         = require('fs');
 var argv       = require('yargs').argv;
-var internals  = {};
 
-var version;
-internals.version = function () {
+var v;
+function version () {
   var previous = require('./package.json').version;
-  if (!version) version = require('semver').inc(previous, argv.type || 'patch');
-  return version;
-};
+  if (!v) v = require('semver').inc(previous, argv.type || 'patch');
+  return v;
+}
 
 gulp.task('bundle', function () {
   return browserify({
@@ -27,7 +26,7 @@ gulp.task('bundle', function () {
     .pipe(buffer())
     .pipe(plugins.header(fs.readFileSync('./helpers/header.txt'), {
       pkg: _.extend(require('./package.json'), {
-        version: internals.version()
+        version: version()
       })
     }))
     .pipe(plugins.footer(fs.readFileSync('./helpers/globals.js')))
@@ -80,13 +79,13 @@ var pkgs = ['./package.json', './bower.json'];
 gulp.task('bump', function () {
   return gulp.src(pkgs)
     .pipe(plugins.bump({
-      version: internals.version()
+      version: version()
     }))
     .pipe(gulp.dest('./'));
 });
 
 gulp.task('release', ['bundle', 'bump'], function () {
-  var version = 'v' + internals.version();
+  var version = 'v' + version();
   var message = 'Release ' + version;
   return plugins.shell.task([
     'git add -f ./browser/mockfirebase.js',
