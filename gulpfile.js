@@ -16,7 +16,7 @@ function version () {
   return v;
 }
 
-gulp.task('bundle', function () {
+function bundle () {
   return browserify({
       standalone: 'mockfirebase'
     })
@@ -29,8 +29,11 @@ gulp.task('bundle', function () {
         version: version()
       })
     }))
-    .pipe(plugins.footer(fs.readFileSync('./helpers/globals.js')))
-    .pipe(gulp.dest('./browser'));
+    .pipe(plugins.footer(fs.readFileSync('./helpers/globals.js')));
+}
+
+gulp.task('bundle', function () {
+  return bundle().pipe(gulp.dest('./browser'));
 });
 
 gulp.task('cover', function () {
@@ -55,10 +58,10 @@ gulp.task('karma', function () {
     },
     files: [
       'node_modules/es5-shim/es5-shim.js',
-      'test/**/*.spec.js'
+      'test/unit/*.js'
     ],
     preprocessors: {
-      'test/**/*.spec.js': ['browserify']
+      'test/unit/*.js': ['browserify']
     },
     browserify: {
       debug: true

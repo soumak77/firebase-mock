@@ -2,7 +2,7 @@
 
 var sinon               = require('sinon');
 var expect              = require('chai').use(require('sinon-chai')).expect;
-var Mock                = require('../');
+var Mock                = require('../../');
 var Firebase            = Mock.MockFirebase;
 var FirebaseSimpleLogin = Mock.MockFirebaseSimpleLogin;
 
