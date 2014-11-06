@@ -1,9 +1,10 @@
 'use strict';
 
-var sinon    = require('sinon');
-var _        = require('lodash');
-var expect   = require('chai').use(require('sinon-chai')).expect;
-var Firebase = require('../../').MockFirebase;
+var sinon     = require('sinon');
+var _         = require('lodash');
+var expect    = require('chai').use(require('sinon-chai')).expect;
+var MockQuery = require('../../src/query');
+var Firebase  = require('../../').MockFirebase;
 
 describe('MockQuery', function() {
   var fb;
@@ -14,7 +15,7 @@ describe('MockQuery', function() {
 
   describe('construct', function() {
     it('should be instanceof MockQuery', function() {
-      expect(fb.limit(2)).instanceof(Firebase.Query);
+      expect(fb.limit(2)).instanceof(MockQuery);
     });
   });
 
