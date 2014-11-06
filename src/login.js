@@ -255,7 +255,6 @@ function createEmailUser (email, password) {
 }
 
 function createDefaultUser (provider) {
-  console.log(USER_COUNT);
   var id = USER_COUNT++;
 
   var out = {
