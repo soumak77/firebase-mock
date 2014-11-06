@@ -57,14 +57,14 @@ var DEBUG = false;
  *     MockFirebase.DEFAULT_DATA = {foo: { bar: 'baz'}};
  *     var fb = new MockFirebase('Mock://foo');
  *     fb.once('value', function(snap) {
- *        snap.name(); // foo
+ *        snap.key(); // foo
  *        snap.val(); //  {bar: 'baz'}
  *     });
  *
  *     // customize for a single instance
  *     var fb = new MockFirebase('Mock://foo', {foo: 'bar'});
  *     fb.once('value', function(snap) {
- *        snap.name(); // foo
+ *        snap.key(); // foo
  *        snap.val(); //  'bar'
  *     });
  *
@@ -99,7 +99,7 @@ function MockFirebase(currentPath, data, parent, name) {
   // allows changes to be propagated between child/parent instances
   this.parentRef = parent||null;
   this.children = {};
-  if (parent) parent.children[this.name()] = this;
+  if (parent) parent.children[this.key()] = this;
 
   // stores sorted keys in data for priority ordering
   this.sortedDataKeys = [];
@@ -307,7 +307,7 @@ MockFirebase.prototype = {
     var child = this.children[childKey];
     if( !child ) {
       child = new MockFirebase(utils.mergePaths(this.currentPath, childKey), this._childData(childKey), this, childKey);
-      this.children[child.name()] = child;
+      this.children[child.key()] = child;
     }
     if( parts.length ) {
       child = child.child(parts);
@@ -363,8 +363,13 @@ MockFirebase.prototype = {
     this.set(data, callback);
   },
 
-  name: function() {
+  key: function() {
     return this.myName;
+  },
+
+  name: function() {
+    console.warn('ref.name() is deprecated. Use ref.key()');
+    return this.key.apply(this, arguments);
   },
 
   ref: function() {
@@ -557,7 +562,7 @@ MockFirebase.prototype = {
 
   _childChanged: function(ref) {
     var events = [];
-    var childKey = ref.name();
+    var childKey = ref.key();
     var data = ref.getData();
     if (DEBUG) console.log('_childChanged', this.toString() + ' -> ' + childKey, data);
     if( data === null ) {
@@ -611,7 +616,7 @@ MockFirebase.prototype = {
     if (DEBUG) console.log('_priChanged', this.toString(), newPriority);
     this.priority = newPriority;
     if( this.parentRef ) {
-      this.parentRef._resort(this.name());
+      this.parentRef._resort(this.key());
     }
   },
 

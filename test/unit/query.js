@@ -109,7 +109,7 @@ describe('MockQuery', function() {
         fb.flush();
         expect(spy).callCount(4);
         _.each(_.keys(data), function(k, i) {
-          expect(spy.getCall(i).args[0].name()).equals(k);
+          expect(spy.getCall(i).args[0].key()).equals(k);
         });
       });
 

@@ -117,7 +117,7 @@ describe('MockFirebase', function () {
       for (var i = 0; i < 3; i++) {
         var snapshot = spy.getCall(i).args[0];
         expect(snapshot.getPriority())
-          .to.equal(data[snapshot.name()]['.priority']);
+          .to.equal(data[snapshot.key()]['.priority']);
       }
     });
 
@@ -200,7 +200,7 @@ describe('MockFirebase', function () {
       fb.child('a').remove();
       expect(spy).to.have.been.called;
       var snapshot = spy.firstCall.args[0];
-      expect(snapshot.name()).to.equal('a');
+      expect(snapshot.key()).to.equal('a');
     });
 
     it('should change to null if all children are removed', function () {

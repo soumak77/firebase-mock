@@ -8,7 +8,11 @@ exports.makeSnap = function makeSnap (ref, data, pri) {
   return {
     val: function () { return data; },
     ref: function () { return ref; },
-    name: function () { return ref.name(); },
+    name: function () {
+      console.warn('DataSnapshot.name() is deprecated. Use DataSnapshot.key()');
+      return this.key.apply(this, arguments);
+    },
+    key: function () { return ref.key(); },
     getPriority: function () { return pri; },
     forEach: function(cb, scope) {
       var self = this;
