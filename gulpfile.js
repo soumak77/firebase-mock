@@ -20,10 +20,11 @@ function version () {
 }
 
 function bundle () {
+  var pkg = require('./package.json');
   return browserify({
       standalone: 'mockfirebase'
     })
-    .add('./src/MockFirebase.js')
+    .add(pkg.main)
     .bundle()
     .pipe(source('mockfirebase.js'))
     .pipe(buffer())
@@ -74,7 +75,7 @@ gulp.task('karma', function () {
   });
 });
 
-gulp.task('smoke:globals', function () {
+gulp.task('smoke', function () {
   var name = Date.now() + '-mockfirebase.js';
   var dir = os.tmpdir();
   var bundlePath = path.join(dir, name);
