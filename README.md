@@ -7,19 +7,27 @@ A Firebase stub useful for unit testing.
 
 [![Build Status](https://travis-ci.org/katowulf/mockfirebase.svg?branch=master)](https://travis-ci.org/katowulf/mockfirebase)
 
-## Installation
+## Setup
 
-### Node.js
+### Node/Browserify
 
 ```bash
 $ npm install mockfirebase
 ```
 
-### Web
+```js
+var MockFirebase = require('mockfirebase').MockFirebase;
+```
+
+### AMD / Browser
+
+```bash
+$ bower install mockfirebase
+```
+
 ```html
 <!-- include sinon unless you use jasmine -->
-<script src="sinon.js"></script>
-<script src="mockfirebase.js"></script>
+<script src="./bower_components/mockfirebase/browser/mockfirebase.js"></script>
 ```
 ### Browser Support
 
