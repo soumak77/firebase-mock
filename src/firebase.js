@@ -1,8 +1,9 @@
 'use strict';
 
-var _     = require('lodash');
-var Query = require('./query');
-var utils = require('./utils');
+var _      = require('lodash');
+var assert = require('assert');
+var Query  = require('./query');
+var utils  = require('./utils');
 
 // TODO(Ben): Replace with real logging service
 var DEBUG = false;
@@ -301,16 +302,16 @@ MockFirebase.prototype = {
   },
 
   child: function(childPath) {
-    if( !childPath ) { throw new Error('bad child path '+this.toString()); }
-    var parts = _.isArray(childPath)? childPath : _.compact(childPath.split('/'));
+    assert(childPath, 'A child path is required');
+    var parts = _.compact(childPath.split('/'));
     var childKey = parts.shift();
     var child = this.children[childKey];
-    if( !child ) {
+    if (!child) {
       child = new MockFirebase(utils.mergePaths(this.currentPath, childKey), this._childData(childKey), this, childKey);
       this.children[child.key()] = child;
     }
-    if( parts.length ) {
-      child = child.child(parts);
+    if (parts.length) {
+      child = child.child(parts.join('/'));
     }
     return child;
   },

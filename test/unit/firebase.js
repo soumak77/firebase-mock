@@ -15,6 +15,21 @@ describe('MockFirebase', function () {
 
   describe('#child', function () {
 
+    it('requires a path', function () {
+      expect(fb.child.bind(fb)).to.throw();
+    });
+
+    it('caches children', function () {
+      expect(fb.child('foo')).to.equal(fb.child('foo'));
+    });
+
+    it('calls child recursively for multi-segment paths', function () {
+      var child = fb.child('foo');
+      sinon.spy(child, 'child');
+      fb.child('foo/bar');
+      expect(child.child).to.have.been.calledWith('bar');
+    });
+
     it('can use leading slashes (#23)', function () {
       expect(fb.child('/children').currentPath).to.equal('Mock://data/children');
     });
