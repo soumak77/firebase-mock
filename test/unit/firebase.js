@@ -238,6 +238,50 @@ describe('MockFirebase', function () {
       expect(spy).to.have.been.calledTwice;
     });
 
+    it('can take the context as the 3rd argument', function () {
+      var context = {};
+      fb.on('value', spy, context);
+      fb.flush();
+      expect(spy).to.have.been.calledOn(context);
+    });
+
+    it('can simulate an error', function () {
+      var context = {};
+      var err = new Error();
+      var success = spy;
+      var fail = sinon.spy();
+      fb.failNext('on', err);
+      fb.on('value', success, fail, context);
+      fb.flush();
+      expect(fail)
+        .to.have.been.calledWith(err)
+        .and.calledOn(context);
+      expect(success).to.not.have.been.called;
+    });
+
+    it('can simulate an error', function () {
+      var context = {};
+      var err = new Error();
+      var success = spy;
+      var fail = sinon.spy();
+      fb.failNext('on', err);
+      fb.on('value', success, fail, context);
+      fb.flush();
+      expect(fail)
+        .to.have.been.calledWith(err)
+        .and.calledOn(context);
+      expect(success).to.not.have.been.called;
+    });
+
+    it('is cancelled by an off call before flush', function () {
+      fb.on('value', spy);
+      fb.on('child_added', spy);
+      fb._events.value = [];
+      fb._events.child_added = [];
+      fb.flush();
+      expect(spy).to.not.have.been.called;
+    });
+
   });
 
   describe('#transaction', function () {

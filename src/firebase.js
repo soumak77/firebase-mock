@@ -441,35 +441,36 @@ MockFirebase.prototype = {
   },
 
   on: function(event, callback, cancel, context) {
-    if( arguments.length === 3 && !_.isFunction(cancel) ) {
+    if (arguments.length === 3 && typeof cancel !== 'function') {
       context = cancel;
-      cancel = function() {};
+      cancel = noop;
     }
-    else if( arguments.length < 3 ) {
-      cancel = function() {};
+    else if (arguments.length < 3) {
+      cancel = noop;
     }
 
     var err = this._nextErr('on');
-    if( err ) {
+    console.log(err);
+    if (err) {
       this._defer(function() {
         cancel.call(context, err);
       });
     }
     else {
-      var eventArr = [callback, context, cancel];
-      this._events[event].push(eventArr);
+      var handlers = [callback, context, cancel];
+      this._events[event].push(handlers);
       var self = this;
-      if( event === 'value' ) {
+      if (event === 'value') {
         self._defer(function() {
           // make sure off() wasn't called in the interim
-          if( self._events[event].indexOf(eventArr) > -1) {
+          if (self._events[event].indexOf(handlers) > -1) {
             callback.call(context, utils.makeSnap(self, self.getData(), self.priority));
           }
         });
       }
-      else if( event === 'child_added' ) {
+      else if (event === 'child_added') {
         self._defer(function() {
-          if( self._events[event].indexOf(eventArr) > -1) {
+          if (self._events[event].indexOf(handlers) > -1) {
             var prev = null;
             _.each(self.sortedDataKeys, function (k) {
               var child = self.child(k);
@@ -825,5 +826,7 @@ FlushQueue.prototype.flush = function(delay) {
 function extractName(path) {
   return ((path || '').match(/\/([^.$\[\]#\/]+)$/)||[null, null])[1];
 }
+
+function noop () {}
 
 module.exports = MockFirebase;
