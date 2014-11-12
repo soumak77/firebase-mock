@@ -442,7 +442,6 @@ MockFirebase.prototype = {
     }
 
     var err = this._nextErr('on');
-    console.log(err);
     if (err) {
       this._defer(function() {
         cancel.call(context, err);
