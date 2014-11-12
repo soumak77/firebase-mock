@@ -323,13 +323,11 @@ MockFirebase.prototype = {
   },
 
   update: function(changes, callback) {
-    if( !_.isObject(changes) ) {
-      throw new Error('First argument must be an object when calling $update');
-    }
+    assert.equal(typeof changes, 'object', 'First argument must be an object when calling $update');
     var self = this;
     var err = this._nextErr('update');
     var base = this.getData();
-    var data = _.assign(_.isObject(base)? base : {}, changes);
+    var data = _.assign(_.isObject(base) ? base : {}, changes);
     if (DEBUG) console.log('update called', this.toString(), data);
     this._defer(function() {
       if (DEBUG) console.log('update flushed', self.toString(), data);

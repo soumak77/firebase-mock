@@ -204,6 +204,34 @@ describe('MockFirebase', function () {
 
   });
 
+  describe('#update', function () {
+
+    it('must be called with an object', function () {
+      expect(fb.update).to.throw();
+    });
+
+    it('extends the data', function () {
+      fb.update({
+        foo: 'bar'
+      });
+      fb.flush();
+      expect(fb.getData()).to.have.property('foo', 'bar');
+    });
+
+    it('can be called on an empty reference', function () {
+      fb.set(null);
+      fb.flush();
+      fb.update({
+        foo: 'bar'
+      });
+      fb.flush();
+      expect(fb.getData()).to.deep.equal({
+        foo: 'bar'
+      });
+    });
+
+  });
+
   describe('#remove', function () {
 
     beforeEach(function () {
