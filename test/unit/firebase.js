@@ -230,6 +230,16 @@ describe('MockFirebase', function () {
       });
     });
 
+    it('can simulate an error', function () {
+      var err = new Error();
+      fb.failNext('update', err);
+      fb.update({
+        foo: 'bar'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.calledWith(err);
+    });
+
   });
 
   describe('#remove', function () {

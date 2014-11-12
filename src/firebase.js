@@ -323,7 +323,7 @@ MockFirebase.prototype = {
     var base = this.getData();
     var data = _.assign(_.isObject(base) ? base : {}, changes);
     this._defer(function() {
-      if( err === null ) {
+      if (!err) {
         self._dataChanged(data);
       }
       if (callback) callback(err);
