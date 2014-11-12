@@ -251,14 +251,6 @@ MockFirebase.prototype = {
   },
 
   /**
-   * Returns the last automatically generated ID
-   * @returns {string|string|*}
-   */
-  getLastAutoId: function() {
-    return this._lastAutoId;
-  },
-
-  /**
    * Generates a fake event that does not affect or derive from the actual data in this
    * mock. Great for quick event handling tests that won't rely on longer-term consistency
    * or for creating out-of-order networking conditions that are hard to produce
