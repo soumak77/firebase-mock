@@ -344,6 +344,15 @@ describe('MockFirebase', function () {
 
   });
 
+  describe('#root', function () {
+
+    it('traverses to the top of the reference', function () {
+      expect(fb.child('foo/bar').root().currentPath)
+        .to.equal('Mock://');
+    });
+
+  });
+
   describe('#auth', function () {
 
     it('should allow fail auth for invalid token', function () {

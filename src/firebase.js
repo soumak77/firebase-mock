@@ -363,7 +363,7 @@ MockFirebase.prototype = {
 
   root: function() {
     var next = this;
-    while(next.parentRef) {
+    while (next.parentRef) {
       next = next.parentRef;
     }
     return next;
