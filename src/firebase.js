@@ -5,9 +5,6 @@ var assert = require('assert');
 var Query  = require('./query');
 var utils  = require('./utils');
 
-// TODO(Ben): Replace with real logging service
-var DEBUG = false;
-
 /**
  * A mock that simulates Firebase operations for use in unit tests.
  *
@@ -264,7 +261,6 @@ MockFirebase.prototype = {
    * @returns {MockFirebase}
    */
   fakeEvent: function(event, key, data, prevChild, pri) {
-    if (DEBUG) console.log('fakeEvent', event, this.toString(), key);
     if( arguments.length < 5 ) { pri = null; }
     if( arguments.length < 4 ) { prevChild = null; }
     if( arguments.length < 3 ) { data = null; }
@@ -312,9 +308,7 @@ MockFirebase.prototype = {
     var self = this;
     var err = this._nextErr('set');
     data = _.cloneDeep(data);
-    if (DEBUG) console.log('set called',this.toString(), data);
     this._defer(function() {
-      if (DEBUG) console.log('set completed',self.toString(), data);
       if( err === null ) {
         self._dataChanged(data);
       }
@@ -328,9 +322,7 @@ MockFirebase.prototype = {
     var err = this._nextErr('update');
     var base = this.getData();
     var data = _.assign(_.isObject(base) ? base : {}, changes);
-    if (DEBUG) console.log('update called', this.toString(), data);
     this._defer(function() {
-      if (DEBUG) console.log('update flushed', self.toString(), data);
       if( err === null ) {
         self._dataChanged(data);
       }
@@ -341,9 +333,7 @@ MockFirebase.prototype = {
   setPriority: function(newPriority, callback) {
     var self = this;
     var err = this._nextErr('setPriority');
-    if (DEBUG) console.log('setPriority called', self.toString(), newPriority);
     self._defer(function() {
-      if (DEBUG) console.log('setPriority flushed', self.toString(), newPriority);
       self._priChanged(newPriority);
       if (callback) callback(err);
     });
@@ -419,9 +409,7 @@ MockFirebase.prototype = {
   remove: function(callback) {
     var self = this;
     var err = this._nextErr('remove');
-    if (DEBUG) console.log('remove called', this.toString());
     this._defer(function() {
-      if (DEBUG) console.log('remove completed',self.toString());
       if( err === null ) {
         self._dataChanged(null);
       }
@@ -555,7 +543,6 @@ MockFirebase.prototype = {
     var events = [];
     var childKey = ref.key();
     var data = ref.getData();
-    if (DEBUG) console.log('_childChanged', this.toString() + ' -> ' + childKey, data);
     if( data === null ) {
       this._removeChild(childKey, events);
     }
@@ -573,7 +560,6 @@ MockFirebase.prototype = {
       self._priChanged(pri);
     }
     if( !_.isEqual(data, self.data) ) {
-      if (DEBUG) console.log('_dataChanged', self.toString(), data);
       var oldKeys = _.keys(self.data).sort();
       var newKeys = _.keys(data).sort();
       var keysToRemove = _.difference(oldKeys, newKeys);
@@ -604,7 +590,6 @@ MockFirebase.prototype = {
   },
 
   _priChanged: function(newPriority) {
-    if (DEBUG) console.log('_priChanged', this.toString(), newPriority);
     this.priority = newPriority;
     if( this.parentRef ) {
       this.parentRef._resort(this.key());
@@ -651,7 +636,6 @@ MockFirebase.prototype = {
   },
 
   _trigger: function(event, data, pri, key) {
-    if (DEBUG) console.log('_trigger', event, this.toString(), key);
     var self = this, ref = event==='value'? self : self.child(key);
     var snap = utils.makeSnap(ref, data, pri);
     _.each(self._events[event], function(parts) {
