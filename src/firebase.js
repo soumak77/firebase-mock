@@ -372,8 +372,8 @@ MockFirebase.prototype = {
   push: function(data, callback) {
     var child = this.child(this._newAutoId());
     var err = this._nextErr('push');
-    if( err ) { child.failNext('set', err); }
-    if( arguments.length && data !== null ) {
+    if (err) child.failNext('set', err);
+    if (arguments.length && data !== null) {
       // currently, callback only invoked if child exists
       child.set(data, callback);
     }

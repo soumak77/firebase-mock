@@ -344,6 +344,39 @@ describe('MockFirebase', function () {
 
   });
 
+  describe('#push', function () {
+
+    it('can add data by auto id', function () {
+      var id = fb._newAutoId();
+      sinon.stub(fb, '_newAutoId').returns(id);
+      fb.push({
+        foo: 'bar'
+      });
+      fb.flush();
+      expect(fb.child(id).getData()).to.deep.equal({
+        foo: 'bar'
+      });
+    });
+
+    it('can simulate an error', function () {
+      var err = new Error();
+      fb.failNext('push', err);
+      fb.push({}, spy);
+      fb.flush();
+      expect(spy).to.have.been.calledWith(err);
+    });
+
+    it('avoids calling set when unnecessary', function () {
+      var id = fb._newAutoId();
+      sinon.stub(fb, '_newAutoId').returns(id);
+      var set = sinon.stub(fb.child(id), 'set');
+      fb.push();
+      fb.push(null);
+      expect(set).to.not.have.been.called;
+    });
+
+  });
+
   describe('#root', function () {
 
     it('traverses to the top of the reference', function () {
