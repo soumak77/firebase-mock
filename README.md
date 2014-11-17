@@ -88,7 +88,7 @@ this to false disabled autoFlush
 
 ### failNext
 
-    @param {String} methodName currently only supports `set` and `transaction`
+    @param {String} methodName currently only supports `set`, `update`, `push` (with data) and `transaction`
     @param {String|Error} error
 
 Simulate a failure by specifying that the next invocation of methodName should fail with the provided error.
@@ -101,7 +101,7 @@ Returns a copy of the current data
 
 # Proxying Firebase
 
-When writing unit tests, you'll probably want to patch calls to `Firebase` in your source code with `MockFirebase`. 
+When writing unit tests, you'll probably want to patch calls to `Firebase` in your source code with `MockFirebase`.
 
 ## Browser
 
@@ -125,7 +125,7 @@ ref.on('value', function (snapshot) {
 });
 ```
 
-In order to test the above source code, we can use proxyquire. 
+In order to test the above source code, we can use proxyquire.
 
 **Example**
 
@@ -143,7 +143,7 @@ mock.flush();
 // data is logged
 ```
 
-Note that the key in the stubs object matches the module name (`'firebase'`) and not the capitalized variable name. 
+Note that the key in the stubs object matches the module name (`'firebase'`) and not the capitalized variable name.
 
 # Support
 
