@@ -81,7 +81,7 @@ gulp.task('smoke', function () {
   var bundlePath = path.join(dir, name);
   return streamToPromise(bundle()
     .pipe(plugins.rename(name))
-    .pipe(gulp.dest(dir, name)))
+    .pipe(gulp.dest(dir)))
     .then(function () {
       return require('karma-as-promised').server.start({
         frameworks: ['mocha', 'chai'],
