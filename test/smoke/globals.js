@@ -30,7 +30,7 @@ describe('Custom UMD Build', function () {
   describe('#restore', function () {
 
     it('is a noop before #override is called', function () {
-      mockfirebase.restore();
+      MockFirebase.restore();
       expect(window)
         .to.have.property('Firebase')
         .that.equals(OriginalFirebase);
@@ -40,8 +40,8 @@ describe('Custom UMD Build', function () {
     });
 
     it('can restore Firebase', function () {
-      mockfirebase.override();
-      mockfirebase.restore();
+      MockFirebase.override();
+      MockFirebase.restore();
       expect(window)
         .to.have.property('Firebase')
         .that.equals(OriginalFirebase);
@@ -55,7 +55,7 @@ describe('Custom UMD Build', function () {
   describe('#override', function () {
 
     it('can override Firebase', function () {
-      mockfirebase.override();
+      MockFirebase.override();
       expect(window)
         .to.have.property('Firebase')
         .that.equals(mockfirebase.MockFirebase);
