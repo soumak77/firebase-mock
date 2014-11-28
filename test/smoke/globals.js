@@ -1,7 +1,7 @@
 'use strict';
 
 /* jshint browser:true */
-/* globals expect:false, mockfirebase:false */
+/* globals expect:false */
 
 describe('Custom UMD Build', function () {
 
@@ -18,19 +18,19 @@ describe('Custom UMD Build', function () {
   it('exposes "MockFirebase" on the window', function () {
     expect(window)
       .to.have.property('MockFirebase')
-      .that.equals(mockfirebase.MockFirebase);
+      .that.equals(window.mockfirebase.MockFirebase);
   });
 
   it('exposes "MockFirebaseSimpleLogin" on the window', function () {
     expect(window)
       .to.have.property('MockFirebaseSimpleLogin')
-      .that.equals(mockfirebase.MockFirebaseSimpleLogin);
+      .that.equals(window.mockfirebase.MockFirebaseSimpleLogin);
   });
 
   describe('#restore', function () {
 
     it('is a noop before #override is called', function () {
-      MockFirebase.restore();
+      window.MockFirebase.restore();
       expect(window)
         .to.have.property('Firebase')
         .that.equals(OriginalFirebase);
@@ -40,8 +40,8 @@ describe('Custom UMD Build', function () {
     });
 
     it('can restore Firebase', function () {
-      MockFirebase.override();
-      MockFirebase.restore();
+      window.MockFirebase.override();
+      window.MockFirebase.restore();
       expect(window)
         .to.have.property('Firebase')
         .that.equals(OriginalFirebase);
@@ -55,13 +55,13 @@ describe('Custom UMD Build', function () {
   describe('#override', function () {
 
     it('can override Firebase', function () {
-      MockFirebase.override();
+      window.MockFirebase.override();
       expect(window)
         .to.have.property('Firebase')
-        .that.equals(mockfirebase.MockFirebase);
+        .that.equals(window.mockfirebase.MockFirebase);
       expect(window)
         .to.have.property('FirebaseSimpleLogin')
-        .that.equals(mockfirebase.MockFirebaseSimpleLogin);
+        .that.equals(window.mockfirebase.MockFirebaseSimpleLogin);
     });
 
   });
