@@ -4,6 +4,7 @@ var _        = require('lodash');
 var assert   = require('assert');
 var Query    = require('./query');
 var Snapshot = require('./snapshot');
+var Queue    = require('./queue');
 var utils    = require('./utils');
 
 /**
@@ -90,7 +91,7 @@ function MockFirebase(currentPath, data, parent, name) {
 
   // see autoFlush() and flush()
   this.flushDelay = parent? parent.flushDelay : false;
-  this.flushQueue = parent? parent.flushQueue : new FlushQueue();
+  this.flushQueue = parent? parent.flushQueue : new Queue();
 
   // stores the listeners for various event types
   this._events = { value: [], child_added: [], child_removed: [], child_changed: [], child_moved: [] };
@@ -184,7 +185,7 @@ MockFirebase.prototype = {
    * so that calling flush() does not also trigger parent and siblings in the queue.
    */
   splitFlushQueue: function() {
-    this.flushQueue = new FlushQueue();
+    this.flushQueue = new Queue();
   },
 
   /**
@@ -753,47 +754,6 @@ MockFirebase.prototype = {
       }
     }
     return x;
-  }
-};
-
-/***
- * FLUSH QUEUE
- * A utility to make sure events are flushed in the order
- * they are invoked.
- ***/
-function FlushQueue() {
-  this.queuedEvents = [];
-}
-
-FlushQueue.prototype.add = function(args) {
-  this.queuedEvents.push(args);
-};
-
-FlushQueue.prototype.flush = function(delay) {
-  if( !this.queuedEvents.length ) { return; }
-
-  // make a copy of event list and reset, this allows
-  // multiple calls to flush to queue various events out
-  // of order, and ensures that events that are added
-  // while flushing go into the next flush and not this one
-  var list = this.queuedEvents;
-
-  // events could get added as we invoke
-  // the list, so make a copy and reset first
-  this.queuedEvents = [];
-
-  function process() {
-    // invoke each event
-    list.forEach(function(parts) {
-      parts[0].apply(null, parts.slice(1));
-    });
-  }
-
-  if( _.isNumber(delay) ) {
-    setTimeout(process, delay);
-  }
-  else {
-    process();
   }
 };
 
