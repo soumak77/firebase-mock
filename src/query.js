@@ -1,7 +1,8 @@
 'use strict';
 
-var _     = require('lodash');
-var utils = require('./utils');
+var _        = require('lodash');
+var Snapshot = require('./snapshot');
+var utils    = require('./utils');
 
 /*******************************************************************************
  * MOCK QUERY
@@ -209,7 +210,7 @@ Slice.prototype = {
       ref = ref.child(key);
       pri = this.pri(key);
     }
-    return utils.makeSnap(ref, data, pri);
+    return new Snapshot(ref, data, pri);
   },
 
   get: function(key) {
