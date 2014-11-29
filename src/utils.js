@@ -1,34 +1,10 @@
 'use strict';
 
-var _ = require('lodash');
-
-exports.makeSnap = function makeSnap (ref, data, pri) {
-  data = _.cloneDeep(data);
-  if (_.isObject(data) && _.isEmpty(data)) { data = null; }
-  return {
-    val: function () { return data; },
-    ref: function () { return ref; },
-    name: function () {
-      console.warn('DataSnapshot.name() is deprecated. Use DataSnapshot.key()');
-      return this.key.apply(this, arguments);
-    },
-    key: function () { return ref.key(); },
-    getPriority: function () { return pri; },
-    forEach: function(cb, scope) {
-      var self = this;
-      _.each(data, function (v, k) {
-        var res = cb.call(scope, self.child(k));
-        return res !== true;
-      });
-    },
-    child: function (key) {
-      return makeSnap(ref.child(key), _.isObject(data) && _.has(data, key)? data[key] : null, ref.child(key).priority);
-    }
-  };
-};
+var Snapshot = require('./snapshot');
+var _        = require('lodash');
 
 exports.makeRefSnap = function makeRefSnap(ref) {
-  return exports.makeSnap(ref, ref.getData(), ref.priority);
+  return new Snapshot(ref, ref.getData(), ref.priority);
 };
 
 exports.mergePaths = function mergePaths (base, add) {

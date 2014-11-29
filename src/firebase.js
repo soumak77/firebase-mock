@@ -1,9 +1,10 @@
 'use strict';
 
-var _      = require('lodash');
-var assert = require('assert');
-var Query  = require('./query');
-var utils  = require('./utils');
+var _        = require('lodash');
+var assert   = require('assert');
+var Query    = require('./query');
+var Snapshot = require('./snapshot');
+var utils    = require('./utils');
 
 /**
  * A mock that simulates Firebase operations for use in unit tests.
@@ -266,7 +267,7 @@ MockFirebase.prototype = {
     if( arguments.length < 3 ) { data = null; }
     var self = this;
     var ref = event==='value'? self : self.child(key);
-    var snap = utils.makeSnap(ref, data, pri);
+    var snap = new Snapshot(ref, data, pri);
     self._defer(function() {
       _.each(self._events[event], function (parts) {
         var fn = parts[0], context = parts[1];
@@ -441,7 +442,7 @@ MockFirebase.prototype = {
         self._defer(function() {
           // make sure off() wasn't called in the interim
           if (self._events[event].indexOf(handlers) > -1) {
-            callback.call(context, utils.makeSnap(self, self.getData(), self.priority));
+            callback.call(context, new Snapshot(self, self.getData(), self.priority));
           }
         });
       }
@@ -451,7 +452,7 @@ MockFirebase.prototype = {
             var prev = null;
             _.each(self.sortedDataKeys, function (k) {
               var child = self.child(k);
-              callback.call(context, utils.makeSnap(child, child.getData(), child.priority), prev);
+              callback.call(context, new Snapshot(child, child.getData(), child.priority), prev);
               prev = k;
             });
           }
@@ -491,7 +492,7 @@ MockFirebase.prototype = {
       var newData = _.isUndefined(res) || err? self.getData() : res;
       self._dataChanged(newData);
       if (typeof finishedFn === 'function') {
-        finishedFn(err, err === null && !_.isUndefined(res), utils.makeSnap(self, newData, self.priority));
+        finishedFn(err, err === null && !_.isUndefined(res), new Snapshot(self, newData, self.priority));
       }
     });
     return [valueFn, finishedFn, applyLocally];
@@ -637,7 +638,7 @@ MockFirebase.prototype = {
 
   _trigger: function(event, data, pri, key) {
     var self = this, ref = event==='value'? self : self.child(key);
-    var snap = utils.makeSnap(ref, data, pri);
+    var snap = new Snapshot(ref, data, pri);
     _.each(self._events[event], function(parts) {
       var fn = parts[0], context = parts[1];
       if(_.contains(['child_added', 'child_moved'], event)) {
