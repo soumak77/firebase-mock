@@ -633,7 +633,7 @@ MockFirebase.prototype = {
   _defer: function() {
     //todo should probably be taking some sort of snapshot of my data here and passing
     //todo that into `fn` for reference
-    this.flushQueue.add(Array.prototype.slice.call(arguments, 0));
+    this.flushQueue.push(Array.prototype.slice.call(arguments, 0));
     if( this.flushDelay !== false ) { this.flush(this.flushDelay); }
   },
 

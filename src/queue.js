@@ -6,7 +6,7 @@ function FlushQueue () {
   this.events = [];
 }
 
-FlushQueue.prototype.add = function(args) {
+FlushQueue.prototype.push = function(args) {
   this.events.push(args);
 };
 
