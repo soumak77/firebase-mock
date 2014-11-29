@@ -4,27 +4,25 @@ var _        = require('lodash');
 var Snapshot = require('./snapshot');
 var utils    = require('./utils');
 
-/*******************************************************************************
- * MOCK QUERY
- ******************************************************************************/
-function MockQuery(ref) {
-  this._ref = ref;
+function MockQuery (ref) {
+  this.ref = function () {
+    return ref;
+  };
   this._subs = [];
   // startPri, endPri, startKey, endKey, and limit
   this._q = {};
 }
 
 MockQuery.prototype = {
-  /*******************
-   * UTILITY FUNCTIONS
-   *******************/
-  flush: function() {
-    this.ref().flush.apply(this.ref(), arguments);
+  flush: function () {
+    var ref = this.ref();
+    ref.flush.apply(ref, arguments);
     return this;
   },
 
-  autoFlush: function() {
-    this.ref().autoFlush.apply(this.ref(), arguments);
+  autoFlush: function () {
+    var ref = this.ref();
+    ref.autoFlush.apply(ref, arguments);
     return this;
   },
 
@@ -44,9 +42,6 @@ MockQuery.prototype = {
     });
   },
 
-  /*******************
-   *   API FUNCTIONS
-   *******************/
   on: function(event, callback, cancelCallback, context) {
     var self = this, isFirst = true, lastSlice = this.slice(), map;
     var fn = function(snap, prevChild) {
@@ -147,10 +142,6 @@ MockQuery.prototype = {
     var q = new MockQuery(this.ref());
     _.extend(q._q, this._q, {endKey: key, endPri: priority});
     return q;
-  },
-
-  ref: function() {
-    return this._ref;
   }
 };
 
