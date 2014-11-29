@@ -6,31 +6,27 @@ var expect    = require('chai').use(require('sinon-chai')).expect;
 var MockQuery = require('../../src/query');
 var Firebase  = require('../../').MockFirebase;
 
-describe('MockQuery', function() {
-  var fb;
+describe('MockQuery', function () {
 
+  var ref;
   beforeEach(function () {
-    fb = new Firebase().child('ordered');
+    ref = new Firebase().child('ordered');
   });
 
-  describe('construct', function() {
-    it('should be instanceof MockQuery', function() {
-      expect(fb.limit(2)).instanceof(MockQuery);
-    });
-  });
+  describe('#ref', function() {
 
-  describe('ref', function() {
     it('should return ref used to create the query', function() {
-      expect(fb.limit(2).startAt('a').ref()).to.equal(fb);
+      expect(ref.limit(2).startAt('a').ref()).to.equal(ref);
     });
+
   });
 
   describe('on', function() {
     describe('value', function() {
       it('should provide value immediately', function() {
         var spy = sinon.spy();
-        fb.limit(2).on('value', spy);
-        fb.flush();
+        ref.limit(2).on('value', spy);
+        ref.flush();
         expect(spy).called;
       });
 
@@ -38,8 +34,8 @@ describe('MockQuery', function() {
         var spy = sinon.spy(function(snap) {
           expect(snap.val()).equals(null);
         });
-        fb.limit(2).startAt('foo').endAt('foo').on('value', spy);
-        fb.flush();
+        ref.limit(2).startAt('foo').endAt('foo').on('value', spy);
+        ref.flush();
         expect(spy).called;
       });
 
@@ -47,28 +43,28 @@ describe('MockQuery', function() {
         var spy = sinon.spy(function(snap) {
           expect(_.keys(snap.val())).eql(['num_3', 'char_a_1', 'char_a_2']);
         });
-        fb.startAt(3).endAt('a').on('value', spy);
-        fb.flush();
+        ref.startAt(3).endAt('a').on('value', spy);
+        ref.flush();
         expect(spy).called;
       });
 
       it('should update on change', function() {
         var spy = sinon.spy();
-        fb.startAt(3, 'num_3').limit(2).on('value', spy);
-        fb.flush();
+        ref.startAt(3, 'num_3').limit(2).on('value', spy);
+        ref.flush();
         expect(spy).callCount(1);
-        fb.child('num_3').set({foo: 'bar'});
-        fb.flush();
+        ref.child('num_3').set({foo: 'bar'});
+        ref.flush();
         expect(spy).callCount(2);
       });
 
       it('should not update on change outside range', function() {
         var spy = sinon.spy();
-        fb.limit(1).on('value', spy);
-        fb.flush();
+        ref.limit(1).on('value', spy);
+        ref.flush();
         expect(spy).callCount(1);
-        fb.child('num_3').set('apple');
-        fb.flush();
+        ref.child('num_3').set('apple');
+        ref.flush();
         expect(spy).callCount(1);
       });
     });
@@ -76,24 +72,24 @@ describe('MockQuery', function() {
     describe('once', function() {
       it('should be triggered if value is null', function() {
         var spy = sinon.spy();
-        fb.child('notavalidkey').limit(3).once('value', spy);
-        fb.flush();
+        ref.child('notavalidkey').limit(3).once('value', spy);
+        ref.flush();
         expect(spy).callCount(1);
       });
 
       it('should be triggered if value is not null', function() {
         var spy = sinon.spy();
-        fb.limit(3).once('value', spy);
-        fb.flush();
+        ref.limit(3).once('value', spy);
+        ref.flush();
         expect(spy).callCount(1);
       });
 
       it('should not get triggered twice', function() {
         var spy = sinon.spy();
-        fb.limit(3).once('value', spy);
-        fb.flush();
-        fb.child('addfortest').set({hello: 'world'});
-        fb.flush();
+        ref.limit(3).once('value', spy);
+        ref.flush();
+        ref.child('addfortest').set({hello: 'world'});
+        ref.flush();
         expect(spy).callCount(1);
       });
     });
@@ -103,10 +99,10 @@ describe('MockQuery', function() {
 
       it('should trigger all keys in initial range', function() {
         var spy = sinon.spy();
-        var ref = fb.limit(4);
-        var data = ref.slice().data;
-        ref.on('child_added', spy);
-        fb.flush();
+        var query = ref.limit(4);
+        var data = query.slice().data;
+        query.on('child_added', spy);
+        query.flush();
         expect(spy).callCount(4);
         _.each(_.keys(data), function(k, i) {
           expect(spy.getCall(i).args[0].key()).equals(k);
