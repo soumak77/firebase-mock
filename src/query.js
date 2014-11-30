@@ -45,27 +45,30 @@ MockQuery.prototype.fakeEvent = function (event, snapshot) {
 };
 
 MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
-  var self = this, isFirst = true, lastSlice = this.slice(), map;
-  var fn = function (snap, prevChild) {
-    var slice = new Slice(self, event==='value'? snap : utils.makeRefSnap(snap.ref().parent()));
-    switch(event) {
+  var self = this;
+  var isFirst = true;
+  var lastSlice = this.slice();
+  var map;
+  function handleRefEvent (snap, prevChild) {
+    var slice = new Slice(self, event === 'value' ? snap : utils.makeRefSnap(snap.ref().parent()));
+    switch (event) {
       case 'value':
-        if( isFirst || !lastSlice.equals(slice) ) {
+        if (isFirst || !lastSlice.equals(slice)) {
           callback.call(context, slice.snap());
         }
         break;
       case 'child_moved':
         var x = slice.pos(snap.key());
         var y = slice.insertPos(snap.key());
-        if( x > -1 && y > -1 ) {
+        if (x > -1 && y > -1) {
           callback.call(context, snap, prevChild);
         }
-        else if( x > -1 || y > -1 ) {
+        else if (x > -1 || y > -1) {
           map = lastSlice.changeMap(slice);
         }
         break;
       case 'child_added':
-        if( slice.has(snap.key()) && lastSlice.has(snap.key()) ) {
+        if (slice.has(snap.key()) && lastSlice.has(snap.key())) {
           // is a child_added for existing event so allow it
           callback.call(context, snap, prevChild);
         }
@@ -78,10 +81,10 @@ MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
         callback.call(context, snap);
         break;
       default:
-        throw new Error('Invalid event: '+event);
+        throw new Error('Invalid event: ' + event);
     }
 
-    if( map ) {
+    if (map) {
       var newSnap = slice.snap();
       var oldSnap = lastSlice.snap();
       _.each(map.added, function (addKey) {
@@ -95,11 +98,8 @@ MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
     isFirst = false;
     lastSlice = slice;
   };
-  var cancelFn = function (err) {
-    cancelCallback.call(context, err);
-  };
-  self._events.push([event, callback, context, fn]);
-  this.ref().on(event, fn, cancelFn);
+  self._events.push([event, callback, context, handleRefEvent]);
+  this.ref().on(event, handleRefEvent, _.bind(cancelCallback || _.noop, context));
 };
 
 MockQuery.prototype.off = function (event, callback, context) {
