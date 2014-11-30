@@ -3,20 +3,53 @@
 var sinon     = require('sinon');
 var _         = require('lodash');
 var expect    = require('chai').use(require('sinon-chai')).expect;
-var MockQuery = require('../../src/query');
+var Query     = require('../../src/query');
 var Firebase  = require('../../').MockFirebase;
 
 describe('MockQuery', function () {
 
-  var ref;
+  var ref, query;
   beforeEach(function () {
     ref = new Firebase().child('ordered');
+    query = new Query(ref);
   });
 
   describe('#ref', function() {
 
-    it('should return ref used to create the query', function() {
+    it('returns the ref used to create the query', function() {
       expect(ref.limit(2).startAt('a').ref()).to.equal(ref);
+    });
+
+  });
+
+  describe('#flush', function () {
+
+    it('flushes the ref', function () {
+      sinon.stub(ref, 'flush');
+      expect(query.flush(1, 2)).to.equal(query);
+      expect(ref.flush)
+        .to.have.been.calledOn(ref)
+        .and.calledWith(1, 2);
+    });
+
+  });
+
+  describe('#autoFlush', function () {
+
+    it('autoFlushes the ref', function () {
+      sinon.stub(ref, 'autoFlush');
+      expect(query.autoFlush(1, 2)).to.equal(query);
+      expect(ref.autoFlush)
+        .to.have.been.calledOn(ref)
+        .and.calledWith(1, 2);
+    });
+
+  });
+
+  describe('#getData', function () {
+
+    it('gets data from the slice', function () {
+      expect(query.getData()).to.deep.equal(query.slice().data);
     });
 
   });
