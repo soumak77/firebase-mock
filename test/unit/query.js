@@ -54,6 +54,23 @@ describe('MockQuery', function () {
 
   });
 
+  describe('#fakeEvent', function () {
+
+    it('fires the matched event with a snapshot', function () {
+      var added = sinon.spy();
+      var snapshot = {};
+      var context = {};
+      var removed = sinon.spy();
+      query.on('child_added', added, void 0, context)
+      query.on('child_removed', removed);
+      query.fakeEvent('child_added', snapshot);
+      expect(added)
+        .to.have.been.calledWith(snapshot)
+        .and.calledOn(context);
+      expect(removed).to.not.have.been.called;
+    });
+  })
+
   describe('on', function() {
     describe('value', function() {
       it('should provide value immediately', function() {

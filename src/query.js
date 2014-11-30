@@ -9,7 +9,7 @@ function MockQuery (ref) {
   this.ref = function () {
     return ref;
   };
-  this._subs = [];
+  this._events = [];
   // startPri, endPri, startKey, endKey, and limit
   this._q = {};
 }
@@ -34,12 +34,14 @@ MockQuery.prototype.getData = function () {
   return this.slice().data;
 };
 
-MockQuery.prototype.fakeEvent = function (event, snap) {
-  _.each(this._subs, function (parts) {
-    if( parts[0] === 'event' ) {
-      parts[1].call(parts[2], snap);
-    }
-  });
+MockQuery.prototype.fakeEvent = function (event, snapshot) {
+  _(this._events)
+    .filter(function (parts) {
+      return parts[0] === event;
+    })
+    .each(function (parts) {
+      parts[1].call(parts[2], snapshot);
+    });
 };
 
 MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
@@ -96,13 +98,13 @@ MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
   var cancelFn = function (err) {
     cancelCallback.call(context, err);
   };
-  self._subs.push([event, callback, context, fn]);
+  self._events.push([event, callback, context, fn]);
   this.ref().on(event, fn, cancelFn);
 };
 
 MockQuery.prototype.off = function (event, callback, context) {
   var ref = this.ref();
-  _.each(this._subs, function (parts) {
+  _.each(this._events, function (parts) {
     if( parts[0] === event && parts[1] === callback && parts[2] === context ) {
       ref.off(event, parts[3]);
     }
