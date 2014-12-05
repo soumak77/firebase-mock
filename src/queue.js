@@ -11,7 +11,9 @@ FlushQueue.prototype.push = function(args) {
 };
 
 FlushQueue.prototype.flush = function (delay) {
-  if (!this.events.length) return;
+  if (!this.events.length) {
+    throw new Error('No deferred tasks to be flushed');
+  }
   var list = this.events;
   this.events = [];
   function process () {

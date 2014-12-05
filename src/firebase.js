@@ -175,7 +175,6 @@ MockFirebase.prototype = {
         c.autoFlush(delay);
       });
       if( this.parentRef ) { this.parentRef.autoFlush(delay); }
-      if (delay !== false) this.flush(delay);
     }
     return this;
   },

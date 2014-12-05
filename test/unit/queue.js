@@ -32,8 +32,8 @@ describe('FlushQueue', function () {
 
   describe('#flush', function () {
 
-    it('is a noop with no events', function () {
-      queue.flush();
+    it('is throws when there are no deferreds', function () {
+      expect(queue.flush.bind(queue)).to.throw('No deferred');
     });
 
     it('fires the events synchoronously by default', function () {

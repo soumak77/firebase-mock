@@ -68,23 +68,21 @@ All the regular Firebase methods are(?) supported. In addition, the following te
     @param {boolean|int} [delay] in milliseconds
     @returns {MockFirebase}
 
-Invoke all the operations that have been queued thus far. If a numeric delay is specified, this
-occurs asynchronously. Otherwise, it is a synchronous event (at the time flush is called).
+Invoke all the operations that have been queued thus far. If a numeric delay is passed, this
+occurs asynchronously. Otherwise, it is a synchronous event (at the time `flush` is called).
 
 This allows Firebase to be used in synchronous tests without waiting for async callbacks. It also
 provides a rudimentary mechanism for simulating locally cached data (events are triggered
-synchronously when you do on('value') or on('child_added'))
+synchronously when you do `on('value')` or `on('child_added')`)
 
 If you call this multiple times with different delay values, you can invoke the events out
-of order, as might happen on a network with some latency, or if multiple users update values "simultaneously".
+of order, as might happen on a network with some latency, or if multiple users update values in rapid succession.
 
 ### autoFlush
 
     @param {int|boolean} [delay] in milliseconds
 
-Automatically trigger a flush event after each operation. If a numeric delay is specified, this is an
-asynchronous event. If value is set to true, it is synchronous (flush is triggered immediately). Setting
-this to false disabled autoFlush
+Automatically trigger a `flush` after each operation. If a numeric delay is passed, the flush is performed asychronously after the delay. If `true` is passed, `flush` is triggered synchronously, immediately after data is changed or handlers are added. Passing `false` disables `autoFlush`
 
 ### failNext
 
