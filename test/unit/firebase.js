@@ -9,7 +9,9 @@ describe('MockFirebase', function () {
 
   var fb, spy;
   beforeEach(function () {
-    fb  = new Firebase().child('data');
+    fb = new Firebase().child('data');
+    fb.set(require('./data.json').data);
+    fb.flush();
     spy = sinon.spy();
   });
 

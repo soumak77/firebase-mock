@@ -11,6 +11,8 @@ describe('MockQuery', function () {
   var ref, query;
   beforeEach(function () {
     ref = new Firebase().child('ordered');
+    ref.set(require('./data.json').ordered);
+    ref.flush();
     query = new Query(ref);
   });
 
