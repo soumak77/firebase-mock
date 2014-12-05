@@ -1,7 +1,6 @@
 'use strict';
 
 var _        = require('lodash');
-var Snapshot = require('./snapshot');
 var Slice    = require('./slice');
 var utils    = require('./utils');
 
@@ -97,7 +96,7 @@ MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
 
     isFirst = false;
     lastSlice = slice;
-  };
+  }
   self._events.push([event, callback, context, handleRefEvent]);
   this.ref().on(event, handleRefEvent, _.bind(cancelCallback || _.noop, context));
 };
