@@ -5,6 +5,7 @@ var md5 = require('MD5');
 
 /*******************************************************************************
  * SIMPLE LOGIN
+ * @deprecated
  ******************************************************************************/
 function MockFirebaseSimpleLogin (ref, callback, userData) {
   // allows test units to monitor the callback function to make sure

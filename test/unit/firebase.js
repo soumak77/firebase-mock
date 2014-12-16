@@ -1,7 +1,6 @@
 'use strict';
 
 var sinon    = require('sinon');
-var _        = require('lodash');
 var expect   = require('chai').use(require('sinon-chai')).expect;
 var Firebase = require('../../').MockFirebase;
 
@@ -188,7 +187,7 @@ describe('MockFirebase', function () {
 
   describe('#setWithPriority', function () {
 
-    it('should pass the priority to #setPriority', function() {
+    it('should pass the priority to #setPriority', function () {
       fb.autoFlush();
       sinon.spy(fb, 'setPriority');
       fb.setWithPriority({}, 250);
@@ -390,23 +389,749 @@ describe('MockFirebase', function () {
 
   describe('#auth', function () {
 
-    it('should allow fail auth for invalid token', function () {
-      fb.failNext('auth', new Error('INVALID_TOKEN'));
-      fb.auth('invalidToken', function (error, result) {
+    it('should fail auth if failNext is set', function () {
+      spy = sinon.spy(function (error, result) {
         expect(error.message).to.equal('INVALID_TOKEN');
+        expect(result).to.be.null;
       });
+      fb.failNext('auth', new Error('INVALID_TOKEN'));
+      fb.auth('invalidToken', spy);
       fb.flush();
+      expect(spy).to.have.been.called;
     });
 
-    it('should allow auth for any other token and return expires at', function () {
-      fb.auth('goodToken', function (error, result) {
+    it('should invoke callback if no failNext is set and changeAuthState is triggered', function () {
+      var userData = {
+        uid: 'kato'
+      };
+      spy = sinon.spy(function (error, authData) {
         expect(error).to.be.null;
-        expect(result.auth).to.not.be.null;
-        expect(result.expires).to.not.be.null;
+        expect(authData).to.deep.equal(userData);
       });
+      fb.auth('goodToken', spy);
+      fb.changeAuthState(userData);
       fb.flush();
+      expect(spy).to.have.been.called;
     });
 
   });
 
+  describe('#authWithCustomToken', function () {
+
+    it('should return error if failNext is set', function () {
+      spy = sinon.spy(function (error, result) {
+        expect(error.message).to.equal('INVALID_TOKEN');
+        expect(result).to.be.null;
+      });
+      fb.failNext('authWithCustomToken', new Error('INVALID_TOKEN'));
+      fb.authWithCustomToken('invalidToken', spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+    });
+
+    it('should invoke callback if no failNext is set and changeAuthState is triggered', function () {
+      var userData = {
+        uid: 'kato'
+      };
+      spy = sinon.spy(function(error, authData) {
+        expect(error).to.be.null;
+        expect(authData).to.deep.equal(userData);
+      });
+      fb.authWithCustomToken('goodToken', spy);
+      fb.changeAuthState(userData);
+      fb.flush();
+      expect(spy).to.have.been.called;
+    });
+
+  });
+
+  describe('#authAnonymously', function () {
+
+    it('should fail auth if failNext is set', function () {
+      spy = sinon.spy(function (error, result) {
+        expect(error.message).to.equal('INVALID_TOKEN');
+        expect(result).to.be.null;
+      });
+      fb.failNext('authAnonymously', new Error('INVALID_TOKEN'));
+      fb.authAnonymously(spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+    });
+
+    it('should invoke callback if no failNext is set and changeAuthState is triggered', function () {
+      var userData = {uid: 'anon123'
+    };
+      spy = sinon.spy(function (error, authData) {
+        expect(error).to.be.null;
+        expect(authData).to.deep.equal(userData);
+      });
+      fb.authAnonymously(spy);
+      fb.changeAuthState(userData);
+      fb.flush();
+      expect(spy).to.have.been.called;
+    });
+
+  });
+
+  //todo tie this into user accounts?
+  describe('#authWithPassword', function () {
+    it('should fail auth if failNext is set', function () {
+      spy = sinon.spy(function (error, result) {
+        expect(error.message).to.equal('INVALID_TOKEN');
+        expect(result).to.be.null;
+      });
+      fb.failNext('authWithPassword', new Error('INVALID_TOKEN'));
+      fb.authWithPassword({
+        email: 'kato',
+        password: 'kato'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+    });
+
+    it('should invoke callback if no failNext is set and changeAuthState is triggered', function () {
+      var userData = {
+        uid: 'anon123'
+      };
+      spy = sinon.spy(function (error, authData) {
+        expect(error).to.be.null;
+        expect(authData).to.deep.equal(userData);
+      });
+      fb.authWithPassword({
+        email: 'kato',
+        password: 'kato'
+      }, spy);
+      fb.changeAuthState(userData);
+      fb.flush();
+      expect(spy).to.have.been.called;
+    });
+
+  });
+
+  describe('#authWithOAuthPopup', function () {
+
+    it('should fail auth if failNext is set', function () {
+      spy = sinon.spy(function (error, result) {
+        expect(error.message).to.equal('INVALID_TOKEN');
+        expect(result).to.be.null;
+      });
+      fb.failNext('authWithOAuthPopup', new Error('INVALID_TOKEN'));
+      fb.authWithOAuthPopup('facebook', spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+    });
+
+    it('should invoke callback if no failNext is set and changeAuthState is triggered', function () {
+      var userData = {
+        uid: 'anon123'
+      };
+      spy = sinon.spy(function (error, authData) {
+        expect(error).to.be.null;
+        expect(authData).to.deep.equal(userData);
+      });
+      fb.authWithOAuthPopup('facebook', spy);
+      fb.changeAuthState(userData);
+      fb.flush();
+      expect(spy).to.have.been.called;
+    });
+
+  });
+
+  describe('#authWithOAuthRedirect', function () {
+
+    it('should fail auth if failNext is set', function () {
+      spy = sinon.spy(function (error, result) {
+        expect(error.message).to.equal('INVALID_TOKEN');
+        expect(result).to.be.null;
+      });
+      fb.failNext('authWithOAuthRedirect', new Error('INVALID_TOKEN'));
+      fb.authWithOAuthRedirect('facebook', spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+    });
+
+    it('should invoke callback if no failNext is set and changeAuthState is triggered', function () {
+      var userData = {
+        uid: 'anon123'
+      };
+      spy = sinon.spy(function (error, authData) {
+        expect(error).to.be.null;
+        expect(authData).to.deep.equal(userData);
+      });
+      fb.authWithOAuthRedirect('facebook', spy);
+      fb.changeAuthState(userData);
+      fb.flush();
+      expect(spy).to.have.been.called;
+    });
+
+  });
+
+  describe('authWithOAuthToken', function () {
+
+    it('should fail auth if failNext is set', function () {
+      spy = sinon.spy(function (error, result) {
+        expect(error.message).to.equal('INVALID_TOKEN');
+        expect(result).to.be.null;
+      });
+      fb.failNext('authWithOAuthToken', new Error('INVALID_TOKEN'));
+      fb.authWithOAuthToken('twitter', 'invalid_token', spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+    });
+
+    it('should invoke callback if no failNext is set and changeAuthState is triggered', function () {
+      var userData = {
+        uid: 'anon123'
+      };
+      spy = sinon.spy(function (error, authData) {
+        expect(error).to.be.null;
+        expect(authData).to.deep.equal(userData);
+      });
+      fb.authWithOAuthToken('twitter', 'valid_token', spy);
+      fb.changeAuthState(userData);
+      fb.flush();
+      expect(spy).to.have.been.called;
+    });
+
+  });
+
+  describe('#getAuth', function () {
+
+    it('should be null by default', function () {
+      expect(fb.getAuth()).to.be.null;
+    });
+
+    it('should be set to whatever is passed into changeAuthState', function () {
+      fb.changeAuthState({
+        foo: 'bar'
+      });
+      fb.flush();
+      expect(fb.getAuth()).to.deep.equal({
+        foo: 'bar'
+      });
+    });
+
+  });
+
+  describe('#onAuth', function () {
+
+    it('should be triggered when changeAuthState() modifies data', function () {
+      fb.onAuth(spy);
+      fb.changeAuthState({uid: 'kato'
+    });
+      fb.flush();
+      expect(spy).to.have.been.called;
+    });
+
+    it('should return same value as getAuth()', function () {
+      fb.onAuth(spy);
+      fb.changeAuthState({uid: 'kato'
+    });
+      fb.flush();
+      expect(spy.args[0][0]).to.deep.equal(fb.getAuth());
+    });
+
+    it('should not be triggered if auth state does not change', function () {
+      fb.onAuth(spy);
+      fb.changeAuthState({uid: 'kato'
+    });
+      fb.flush();
+      fb.changeAuthState({uid: 'kato'
+    });
+      fb.flush();
+      expect(spy).to.have.been.calledOnce;
+    });
+
+    it('should set context when callback triggered', function () {
+      var context = {};
+      fb.onAuth(spy, context);
+      fb.changeAuthState({
+        uid: 'kato'
+      });
+      fb.flush();
+      expect(spy).to.have.been.calledOn(context);
+    });
+
+  });
+
+  describe('#offAuth', function () {
+
+    it('should not trigger callback after being called', function () {
+      fb.onAuth(spy);
+      fb.changeAuthState({uid: 'kato1'
+    });
+      fb.flush();
+      expect(spy).to.have.been.calledOnce;
+      fb.offAuth(spy);
+      fb.changeAuthState({uid: 'kato1'
+    });
+      fb.flush();
+      expect(spy).to.have.been.calledOnce;
+    });
+
+    it('should only remove callback that matches context', function () {
+      var context1 = {};
+      var context2 = {};
+      fb.onAuth(spy);
+      fb.onAuth(spy, context1);
+      fb.onAuth(spy, context2);
+      fb.changeAuthState({
+        uid: 'kato1'
+      });
+      fb.flush();
+      expect(spy).to.have.been.calledThrice;
+      fb.offAuth(spy, context1);
+      fb.changeAuthState({
+        uid: 'kato2'
+      });
+      fb.flush();
+      expect(spy.callCount).to.equal(5);
+    });
+
+  });
+
+  describe('#unauth', function () {
+
+    it('should set auth data to null', function () {
+      fb.changeAuthState({
+        uid: 'kato'
+      });
+      fb.flush();
+      expect(fb.getAuth()).not.to.be.null;
+      fb.unauth();
+      expect(fb.getAuth()).to.be.null;
+    });
+
+    it('should trigger onAuth callback if auth data is non-null', function () {
+      fb.changeAuthState({
+        uid: 'kato'
+      });
+      fb.flush();
+      fb.onAuth(spy);
+      fb.unauth();
+      expect(spy).to.have.been.called;
+    });
+
+    it('should not trigger onAuth callback if auth data is null', function () {
+      fb.onAuth(spy);
+      expect(fb.getAuth()).to.be.null;
+      fb.unauth();
+      expect(spy).to.not.have.been.called;
+    });
+    
+  });
+
+  describe('createUser', function () {
+
+    it('should not generate error if credentials are valid', function () {
+      fb.createUser({
+        email: 'new1@new1.com',
+        password: 'new1'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      expect(spy.firstCall.args[0]).to.be.null;
+    });
+
+    it('should assign each user a unique id', function () {
+      fb.createUser({
+        email: 'new1@new1.com',
+        password: 'new1'
+      }, spy);
+      fb.createUser({
+        email: 'new2@new2.com',
+        password: 'new2'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.calledTwice;
+      expect(spy.firstCall.args[1].uid).to.equal('simplelogin:1');
+      expect(spy.secondCall.args[1].uid).to.equal('simplelogin:2');
+    });
+
+    it('should fail if credentials is not an object', function () {
+      fb.createUser(29, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var args = spy.firstCall.args;
+      var err = args[0];
+      var user = args[1];
+      expect(err.message).to.contain('must be a valid object.');
+      expect(user).to.be.null;
+    });
+
+    it('should fail if email is not a string', function () {
+      fb.createUser({
+        email: true,
+        password: 'foo'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var err = spy.firstCall.args[0];
+      var user = spy.firstCall.args[1];
+      expect(err.message).to.contain('must contain the key "email"');
+      expect(user).to.be.null;
+    });
+
+    it('should fail if password is not a string', function () {
+      fb.createUser({
+        email: 'new1@new1.com',
+        password: null
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var err = spy.firstCall.args[0];
+      var user = spy.firstCall.args[1];
+      expect(err.message).to.contain('must contain the key "password"');
+      expect(user).to.be.null;
+    });
+
+    it('should fail if user already exists', function () {
+      fb.createUser({
+        email: 'duplicate@dup.com',
+        password: 'foo'
+      }, noop);
+      fb.flush();
+      fb.createUser({
+        email: 'duplicate@dup.com',
+        password: 'bar'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var err = spy.firstCall.args[0];
+      var user = spy.firstCall.args[1];
+      expect(err.message).to.contain('email address is already in use');
+      expect(err.code).to.equal('EMAIL_TAKEN');
+      expect(user).to.be.null;
+    });
+
+    it('should fail if failNext is set', function () {
+      fb.failNext('createUser', {
+        foo: 'bar'
+      });
+      fb.createUser({
+        email: 'hello',
+        password: 'world'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var args = spy.firstCall.args;
+      expect(args[0]).to.deep.equal({
+        foo: 'bar'
+      });
+      expect(args[1]).to.be.null;
+    });
+
+  });
+
+  describe('changePassword', function () {
+
+    it('should change the password', function () {
+      fb.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.changePassword({
+        email: 'kato@kato.com',
+        oldPassword: 'kato',
+        newPassword: 'kato!'
+      }, noop);
+      fb.flush();
+      expect(fb.getEmailUser('kato@kato.com').password).to.equal('kato!');
+    });
+
+    it('should fail if credentials is not an object', function () {
+      fb.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.changePassword(29, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var err = spy.firstCall.args[0];
+      expect(err.message).to.contain('must be a valid object.');
+    });
+
+    it('should fail if email is not a string', function () {
+      fb.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.changePassword({
+        email: true,
+        oldPassword: 'foo',
+        newPassword: 'bar'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var err = spy.firstCall.args[0];
+      expect(err.message).to.contain('must contain the key "email"');
+    });
+
+    it('should fail if oldPassword is not a string', function () {
+      fb.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.changePassword({
+        email: 'new1@new1.com',
+        oldPassword: null,
+        newPassword: 'bar'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var err = spy.firstCall.args[0];
+      expect(err.message).to.contain('must contain the key "oldPassword"');
+    });
+
+    it('should fail if newPassword is not a string', function () {
+      fb.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.changePassword({
+        email: 'new1@new1.com',
+        oldPassword: 'foo'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var err = spy.firstCall.args[0];
+      expect(err.message).to.contain('must contain the key "newPassword"');
+    });
+
+    it('should fail if failNext is set', function () {
+      fb.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.failNext('changePassword', {
+        foo: 'bar'
+      });
+      fb.changePassword({
+        email: 'hello',
+        oldPassword: 'foo',
+        newPassword: 'bar'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var args = spy.firstCall.args;
+      expect(args[0]).to.deep.equal({
+        foo: 'bar'
+      });
+    });
+
+    it('should fail if user does not exist', function () {
+      fb.changePassword({
+        email: 'hello',
+        oldPassword: 'foo',
+        newPassword: 'bar'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var err = spy.firstCall.args[0];
+      expect(err.code).to.equal('INVALID_USER');
+      expect(err.message).to.equal('The specified user does not exist.');
+    });
+
+    it('should fail if password is invalid', function () {
+      fb.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.changePassword({
+        email: 'kato@kato.com',
+        oldPassword: 'foo',
+        newPassword: 'bar'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var err = spy.firstCall.args[0];
+      expect(err.code).to.equal('INVALID_PASSWORD');
+      expect(err.message).to.equal('The specified password is incorrect.');
+    });
+  });
+
+  describe('removeUser', function () {
+
+    it('should remove the account', function () {
+      fb.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.flush();
+      expect(fb.getEmailUser('kato@kato.com')).to.deep.equal({uid: 'simplelogin:1', email: 'kato@kato.com',
+        password: 'kato'
+      });
+      fb.removeUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.flush();
+      expect(fb.getEmailUser('kato@kato.com')).to.be.null;
+    });
+
+    it('should fail if credentials is not an object', function () {
+      fb.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.removeUser(29, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var err = spy.firstCall.args[0];
+      expect(err.message).to.contain('must be a valid object.');
+    });
+
+    it('should fail if email is not a string', function () {
+      fb.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.removeUser({
+        email: true,
+        password: 'foo'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var err = spy.firstCall.args[0];
+      expect(err.message).to.equal('Firebase.removeUser failed: First argument must contain the key "email" with type "string"');
+    });
+
+    it('should fail if password is not a string', function () {
+      fb.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.removeUser({
+        email: 'new1@new1.com',
+        password: null
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var err = spy.firstCall.args[0];
+      expect(err.message).to.equal('Firebase.removeUser failed: First argument must contain the key "password" with type "string"');
+    });
+
+    it('should fail if failNext is set', function () {
+      fb.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.failNext('removeUser', {
+        foo: 'bar'
+      });
+      fb.removeUser({
+        email: 'hello',
+        password: 'foo'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var args = spy.firstCall.args;
+      expect(args[0]).to.deep.equal({
+        foo: 'bar'
+      });
+    });
+
+    it('should fail if user does not exist', function () {
+      fb.removeUser({
+        email: 'hello',
+        password: 'foo'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var err = spy.firstCall.args[0];
+      expect(err.code).to.equal('INVALID_USER');
+      expect(err.message).to.equal('The specified user does not exist.');
+    });
+
+    it('should fail if password is invalid', function () {
+      fb.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.removeUser({
+        email: 'kato@kato.com',
+        password: 'foo'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var err = spy.firstCall.args[0];
+      expect(err.code).to.equal('INVALID_PASSWORD');
+      expect(err.message).to.equal('The specified password is incorrect.');
+    });
+  });
+
+  describe('resetPassword', function () {
+
+    it('should simulate reset if credentials are valid', function () {
+      fb.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.resetPassword({
+        email: 'kato@kato.com'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      expect(spy.firstCall.args[0]).to.be.null;
+    });
+
+    it('should fail if credentials is not an object', function () {
+      fb.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.resetPassword(29, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var err = spy.firstCall.args[0];
+      expect(err.message).to.equal('Firebase.resetPassword failed: First argument must be a valid object.');
+    });
+
+    it('should fail if email is not a string', function () {
+      fb.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.resetPassword({
+        email: true}, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var err = spy.firstCall.args[0];
+      expect(err.message).to.equal('Firebase.resetPassword failed: First argument must contain the key "email" with type "string"');
+    });
+
+    it('should fail if failNext is set', function () {
+      fb.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, noop);
+      fb.failNext('resetPassword', {
+        foo: 'bar'
+      });
+      fb.resetPassword({
+        email: 'kato@kato.com',
+        password: 'foo'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var args = spy.firstCall.args;
+      expect(args[0]).to.deep.equal({
+        foo: 'bar'
+      });
+    });
+
+    it('should fail if user does not exist', function () {
+      fb.resetPassword({
+        email: 'hello'
+      }, spy);
+      fb.flush();
+      expect(spy).to.have.been.called;
+      var err = spy.firstCall.args[0];
+      expect(err.code).to.equal('INVALID_USER');
+      expect(err.message).to.equal('The specified user does not exist.');
+    });
+
+  });
+
+  function noop () {}
 });
