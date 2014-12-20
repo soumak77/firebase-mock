@@ -97,6 +97,14 @@ Simulate a failure by specifying that the next invocation of methodName should f
 
 Returns a copy of the current data
 
+## changeAuthState
+
+Manually set user data with the parameters specified in the Firebase [`auth`](https://www.firebase.com/docs/web/api/firebase/onauth.html) docs
+
+## getEmailUser
+
+Get a user that was created with [createUser](https://www.firebase.com/docs/web/api/firebase/createuser.html)
+
 # Proxying Firebase
 
 When writing unit tests, you'll probably want to patch calls to `Firebase` in your source code with `MockFirebase`.
