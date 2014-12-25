@@ -49,11 +49,6 @@ fb.flush();
 assert(gotValue === true);
 ```
 
-## Specifying data
-
-You can specify the default data to be used by setting `MockFirebase.DEFAULT_DATA` to an object. You can also
-specify data per-instance by adding a second arg to the constructor:  `new MockFirebase(ANY_URLISH_STRING, dataToUse);`
-
 ## API
 
 All the regular Firebase methods are(?) supported. In addition, the following test-related methods exist:
