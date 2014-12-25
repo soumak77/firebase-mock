@@ -12,6 +12,7 @@ function FirebaseAuth () {
     uidCounter: 1
   };
 }
+
 FirebaseAuth.prototype.changeAuthState = function (userData) {
   this._defer(function() {
     if (!_.isEqual(this._auth.userData, userData)) {
@@ -20,32 +21,41 @@ FirebaseAuth.prototype.changeAuthState = function (userData) {
     }
   });
 };
+
 FirebaseAuth.prototype.getEmailUser = function (email) {
   var users = this._auth.users;
   return users.hasOwnProperty(email) ? _.clone(users[email]) : null;
 };
+
 FirebaseAuth.prototype.auth = function (token, callback) {
   console.warn('FIREBASE WARNING: FirebaseRef.auth() being deprecated. Please use FirebaseRef.authWithCustomToken() instead.');
   this._authEvent('auth', callback);
 };
+
 FirebaseAuth.prototype.authWithCustomToken = function (token, onComplete) {
   this._authEvent('authWithCustomToken', onComplete);
 };
+
 FirebaseAuth.prototype.authAnonymously = function (onComplete) {
   this._authEvent('authAnonymously', onComplete);
 };
+
 FirebaseAuth.prototype.authWithPassword = function (credentials, onComplete) {
   this._authEvent('authWithPassword', onComplete);
 };
+
 FirebaseAuth.prototype.authWithOAuthPopup = function (provider, onComplete) {
   this._authEvent('authWithOAuthPopup', onComplete);
 };
+
 FirebaseAuth.prototype.authWithOAuthRedirect = function (provider, onComplete) {
   this._authEvent('authWithOAuthRedirect', onComplete);
 };
+
 FirebaseAuth.prototype.authWithOAuthToken = function (provider, credentials, onComplete) {
   this._authEvent('authWithOAuthToken', onComplete);
 };
+
 FirebaseAuth.prototype._authEvent = function (method, callback) {
   var err = this._nextErr(method);
   if (!callback) return;
@@ -62,6 +72,7 @@ FirebaseAuth.prototype._authEvent = function (method, callback) {
     this._auth.completionListeners.push({fn: callback});
   }
 };
+
 FirebaseAuth.prototype._triggerAuthEvent = function () {
   var list = this._auth.completionListeners;
   // clear the completion list before triggering callbacks
@@ -76,26 +87,31 @@ FirebaseAuth.prototype._triggerAuthEvent = function () {
     parts.fn.call(parts.ctx, _.cloneDeep(user));
   });
 };
+
 FirebaseAuth.prototype.getAuth = function () {
   return this._auth.userData;
 };
+
 FirebaseAuth.prototype.onAuth = function (onComplete, context) {
   this._auth.listeners.push({fn: onComplete, ctx: context});
 };
+
 FirebaseAuth.prototype.offAuth = function (onComplete, context) {
-  var index = _.findIndex(this._auth.listeners, function(v) {
-    return v.fn === onComplete && v.ctx === context;
+  var index = _.findIndex(this._auth.listeners, function (listener) {
+    return listener.fn === onComplete && listener.ctx === context;
   });
   if (index > -1) {
     this._auth.listeners.splice(index, 1);
   }
 };
+
 FirebaseAuth.prototype.unauth = function () {
   if (this._auth.userData !== null) {
     this._auth.userData = null;
     this._triggerAuthEvent();
   }
 };
+
 FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
   var err = this._nextErr('createUser');
   var users = this._auth.users;
@@ -112,6 +128,7 @@ FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
     onComplete(err, user);
   }, this));
 };
+
 FirebaseAuth.prototype.changePassword = function (credentials, onComplete) {
   var err = this._nextErr('changePassword');
   this._defer(_.bind(function() {
@@ -127,6 +144,7 @@ FirebaseAuth.prototype.changePassword = function (credentials, onComplete) {
     onComplete(err);
   }, this));
 };
+
 FirebaseAuth.prototype.removeUser = function (credentials, onComplete) {
   var err = this._nextErr('removeUser');
   this._defer(_.bind(function() {
@@ -140,6 +158,7 @@ FirebaseAuth.prototype.removeUser = function (credentials, onComplete) {
     onComplete(err);
   }, this));
 };
+
 FirebaseAuth.prototype.resetPassword = function (credentials, onComplete) {
   var err = this._nextErr('resetPassword');
   this._defer(_.bind(function() {
@@ -149,9 +168,11 @@ FirebaseAuth.prototype.resetPassword = function (credentials, onComplete) {
     onComplete(err);
   }, this));
 };
+
 FirebaseAuth.prototype._nextUid = function () {
   return 'simplelogin:'+(this._auth.uidCounter++);
 };
+
 FirebaseAuth.prototype._validateNewEmail = function (creds) {
   creds = _.assign({}, creds);
   if( this._auth.users.hasOwnProperty(creds.email) ) {
@@ -161,6 +182,7 @@ FirebaseAuth.prototype._validateNewEmail = function (creds) {
   }
   return null;
 };
+
 FirebaseAuth.prototype._validateExistingEmail = function (creds) {
   creds = _.assign({}, creds);
   if( !this._auth.users.hasOwnProperty(creds.email) ) {
@@ -170,6 +192,7 @@ FirebaseAuth.prototype._validateExistingEmail = function (creds) {
   }
   return null;
 };
+
 FirebaseAuth.prototype._validPass = function (obj, name) {
   var err = null;
   var key = obj.email;

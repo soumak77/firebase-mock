@@ -387,6 +387,18 @@ describe('MockFirebase', function () {
 
   });
 
+  describe('#changeAuthState', function () {
+
+    it('sets the auth data to null if a non-object is passed', function () {
+      fb.changeAuthState({});
+      fb.flush();
+      fb.changeAuthState('auth');
+      fb.flush();
+      expect(fb.getAuth()).to.be.null;
+    });
+
+  });
+
   describe('#auth', function () {
 
     it('should fail auth if failNext is set', function () {
@@ -441,6 +453,10 @@ describe('MockFirebase', function () {
       fb.changeAuthState(userData);
       fb.flush();
       expect(spy).to.have.been.called;
+    });
+
+    it('handles no callback', function () {
+      fb.authWithCustomToken('goodToken');
     });
 
   });
@@ -625,8 +641,9 @@ describe('MockFirebase', function () {
 
     it('should return same value as getAuth()', function () {
       fb.onAuth(spy);
-      fb.changeAuthState({uid: 'kato'
-    });
+      fb.changeAuthState({
+        uid: 'kato'
+      });
       fb.flush();
       expect(spy.args[0][0]).to.deep.equal(fb.getAuth());
     });
@@ -658,13 +675,15 @@ describe('MockFirebase', function () {
 
     it('should not trigger callback after being called', function () {
       fb.onAuth(spy);
-      fb.changeAuthState({uid: 'kato1'
-    });
+      fb.changeAuthState({
+        uid: 'kato1'
+      });
       fb.flush();
       expect(spy).to.have.been.calledOnce;
       fb.offAuth(spy);
-      fb.changeAuthState({uid: 'kato1'
-    });
+      fb.changeAuthState({
+        uid: 'kato1'
+      });
       fb.flush();
       expect(spy).to.have.been.calledOnce;
     });
@@ -680,6 +699,8 @@ describe('MockFirebase', function () {
       });
       fb.flush();
       expect(spy).to.have.been.calledThrice;
+      // unmatched context
+      fb.offAuth(spy, {});
       fb.offAuth(spy, context1);
       fb.changeAuthState({
         uid: 'kato2'
