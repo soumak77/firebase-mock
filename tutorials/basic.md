@@ -14,18 +14,21 @@ In this example, our source code will listen for new people on a reference we pr
 ##### Source
 
 ```js
+var ref;
 var people = {
   ref: function () {
-    return new Firebase('htttps://example.firebaseio.com/people')
+    if (!ref) ref = new Firebase('htttps://example.firebaseio.com/people');
+    return ref;
   },
   greet: function (person) {
     console.log('hi ' + person.first);
+  },
+  listen: function () {
+    people.ref().on('child_added', function (snapshot) {
+      people.greet(snapshot.val());
+    });
   }
 };
-
-people.ref().on('child_added', function (snapshot) {
-  people.greet(snapshot.val());
-});
 ```
 
 In our tests, we'll override the `greet` method to verify that it's being called properly.
@@ -34,7 +37,7 @@ In our tests, we'll override the `greet` method to verify that it's being called
 
 ```js
 MockFirebase.override();
-var ref = people.ref();
+people.listen();
 var greeted = [];
 people.greet = function (person) {
   greeted.push(person);
@@ -70,7 +73,7 @@ people.create = function (first) {
 ##### Test
 
 ```js
-var newPersonRef = person.create('James');
+var newPersonRef = people.create('James');
 ref.flush();
 var autoId = newPersonRef.key();
 var data = ref.getData();
