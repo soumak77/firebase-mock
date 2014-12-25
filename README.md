@@ -31,22 +31,23 @@ $ bower install mockfirebase
 Works by default with IE 9 and up. To add support for older versions, just include polyfills for [Function.prototype.bind](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind#Compatibility),
 [Array.prototype.indexOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf#Polyfill), and [Array.prototype.forEach](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach#Polyfill).
 
-## Usage
+## API
 
-MockFirebase is designed to be used synchronously or asynchronously for unit testing by allowing you complete
-control over when each event is triggered, via the `flush()` command.
+MockFirebase supports the normal [Firebase API](https://www.firebase.com/docs/web/api/) plus a small set of utility methods documented fully in the [API Reference](API.md). Rather than make a server call that is actually asynchronous, MockFirebase allow you to either trigger callbacks synchronously or asynchronously with a specified delay ([`ref.flush`](API.md#flushdelay---ref)).
 
 ```js
-var fb = new MockFirebase(ANY_URLISH_STRING); // loads the default data
-var spy = sinon.spy();
-fb.on('value', spy);
-fb.set({ foo: 'bar' });
-expect(spy.called).to.be(false); // it is!
+var ref = new MockFirebase('Mock://firebase');
+var gotValue = false;
+fb.on('value', function (snapshot) {
+  gotValue = true;
+});
+fb.set({
+  foo: 'bar'
+});
+assert(gotValue === false);
 fb.flush();
-expect(spy.called).to.be(true); // it is!
+assert(gotValue === true);
 ```
-
-See [angularFire's unit tests](https://github.com/firebase/angularfire/tree/master/tests/unit) for examples of the MockFirebase in action.
 
 ## Specifying data
 
