@@ -32,9 +32,9 @@ Example:
 ref.set({
   foo: 'bar'
 });
-assert(ref.getData() === null);
+console.assert(ref.getData() === null, 'ref does not have data');
 ref.flush();
-assert(ref.getData().foo === 'bar');
+console.assert(ref.getData().foo === 'bar', 'ref has data');
 ```
 
 <hr>
@@ -58,9 +58,9 @@ var err;
 ref.set('data', function onComplete (_err_) {
   err = _err_;
 });
-assert(typeof err === 'undefined');
+console.assert(typeof err === 'undefined', 'no err');
 ref.flush();
-assert(err === error);
+console.assert(err === error, 'err passed to callback');
 ```
 
 <hr>
@@ -72,18 +72,15 @@ Simulate a security error by cancelling listeners (callbacks registered with `on
 Example:
 
 ```js
-var cancelled = false;
 var error = new Error();
 function onValue (snapshot) {}
 function onCancel (_err_) {
-  cancelled = true;
   err = _err_; 
 }
 ref.on('value', onValue, onCancel);
 ref.flush();
 ref.forceCancel(error, 'value', onValue);
-assert(err === error);
-assert(cancelled);
+console.assert(err === error, 'err passed to onCancel');
 ```
 
 <hr>
@@ -116,10 +113,10 @@ ref.set({
   foo: 'bar';
 });
 ref.flush();
-assert(ref.getData().foo === 'bar');
+console.assert(ref.getData().foo === 'bar', 'data has foo');
 ref.fakeEvent('value', undefined, null);
 ref.flush();
-assert(ref.getData() === null);
+console.assert(ref.getData() === null, 'data is null');
 ```
 
 <hr>
@@ -147,7 +144,7 @@ ref.changeAuthState({
   }
 });
 ref.flush();
-assert(ref.getAuth().auth.myAuthProperty);
+console.assert(ref.getAuth().auth.myAuthProperty, 'authData has custom property');
 ```
 
 <hr>
