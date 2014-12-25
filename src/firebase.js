@@ -25,7 +25,7 @@ function MockFirebase(currentPath, data, parent, name) {
 
   // see autoFlush() and flush()
   this.flushDelay = parent? parent.flushDelay : false;
-  this.flushQueue = parent? parent.flushQueue : new Queue();
+  this.queue = parent? parent.queue : new Queue();
 
   // stores the listeners for various event types
   this._events = { value: [], child_added: [], child_removed: [], child_changed: [], child_moved: [] };
@@ -50,7 +50,7 @@ function MockFirebase(currentPath, data, parent, name) {
 
 MockFirebase.prototype = {
   flush: function(delay) {
-    this.flushQueue.flush(delay);
+    this.queue.flush(delay);
     return this;
   },
 
@@ -66,13 +66,13 @@ MockFirebase.prototype = {
     return this;
   },
 
-  splitFlushQueue: function() {
-    this.flushQueue = new Queue();
+  splitQueue: function() {
+    this.queue = new Queue();
   },
 
-  joinFlushQueue: function() {
+  joinQueue: function() {
     if( this.parent ) {
-      this.flushQueue = this.parent.flushQueue;
+      this.queue = this.parent.queue;
     }
   },
 
@@ -81,16 +81,18 @@ MockFirebase.prototype = {
   },
 
   forceCancel: function(error, event, callback, context) {
-    var self = this, events = self._events;
-    _.each(event? [event] : _.keys(events), function(eventType) {
-      var list = _.filter(events[eventType], function(parts) {
-        return !event || !callback || (callback === parts[0] && context === parts[1]);
+    var events = this._events;
+    (event ? [event] : _.keys(events))
+      .forEach(function (eventName) {
+        events[eventName]
+          .filter(function (parts) {
+            return !event || !callback || (callback === parts[0] && context === parts[1]);
+          })
+          .forEach(function (parts) {
+            parts[2].call(parts[1], error);
+            this.off(event, callback, context);
+          }, this);
       });
-      _.each(list, function(parts) {
-        parts[2].call(parts[1], error);
-        self.off(event, callback, context);
-      });
-    });
   },
 
   getData: function() {
@@ -105,19 +107,23 @@ MockFirebase.prototype = {
     if( arguments.length < 5 ) { pri = null; }
     if( arguments.length < 4 ) { prevChild = null; }
     if( arguments.length < 3 ) { data = null; }
-    var self = this;
-    var ref = event==='value'? self : self.child(key);
-    var snap = new Snapshot(ref, data, pri);
-    self._defer(function() {
-      _.each(self._events[event], function (parts) {
-        var fn = parts[0], context = parts[1];
-        if (_.contains(['child_added', 'child_moved'], event)) {
-          fn.call(context, snap, prevChild);
-        }
-        else {
-          fn.call(context, snap);
-        }
-      });
+    var ref = event==='value'? this : this.child(key);
+    var snapshot = new Snapshot(ref, data, pri);
+    this._defer(function() {
+      this._events[event]
+        .map(function (parts) {
+          return {
+            fn: parts[0],
+            args: [snapshot],
+            context: parts[1]
+          };
+        })
+        .forEach(function (data) {
+          if ('child_added' === event || 'child_moved' === event) {
+            data.args.push(prevChild);
+          }
+          data.fn.apply(data.context.concat(data.args));
+        });
     });
     return this;
   },
@@ -142,12 +148,11 @@ MockFirebase.prototype = {
   },
 
   set: function(data, callback) {
-    var self = this;
     var err = this._nextErr('set');
     data = _.cloneDeep(data);
     this._defer(function() {
       if( err === null ) {
-        self._dataChanged(data);
+        this._dataChanged(data);
       }
       if (callback) callback(err);
     });
@@ -155,23 +160,21 @@ MockFirebase.prototype = {
 
   update: function(changes, callback) {
     assert.equal(typeof changes, 'object', 'First argument must be an object when calling $update');
-    var self = this;
     var err = this._nextErr('update');
     var base = this.getData();
     var data = _.assign(_.isObject(base) ? base : {}, changes);
     this._defer(function() {
       if (!err) {
-        self._dataChanged(data);
+        this._dataChanged(data);
       }
       if (callback) callback(err);
     });
   },
 
   setPriority: function(newPriority, callback) {
-    var self = this;
     var err = this._nextErr('setPriority');
-    self._defer(function() {
-      self._priChanged(newPriority);
+    this._defer(function() {
+      this._priChanged(newPriority);
       if (callback) callback(err);
     });
   },
@@ -218,7 +221,6 @@ MockFirebase.prototype = {
   },
 
   once: function(event, callback, cancel, context) {
-    var self = this;
     if( arguments.length === 3 && !_.isFunction(cancel) ) {
       context = cancel;
       cancel = function() {};
@@ -235,20 +237,19 @@ MockFirebase.prototype = {
     }
     else {
       var fn = function (snap) {
-        self.off(event, fn, context);
+        this.off(event, fn, context);
         callback.call(context, snap);
-      };
+      }.bind(this);
 
       this.on(event, fn, cancel, context);
     }
   },
 
   remove: function(callback) {
-    var self = this;
     var err = this._nextErr('remove');
     this._defer(function() {
       if( err === null ) {
-        self._dataChanged(null);
+        this._dataChanged(null);
       }
       if (callback) callback(err);
     });
@@ -273,24 +274,24 @@ MockFirebase.prototype = {
     else {
       var handlers = [callback, context, cancel];
       this._events[event].push(handlers);
-      var self = this;
       if (event === 'value') {
-        self._defer(function() {
+        this._defer(function() {
           // make sure off() wasn't called in the interim
-          if (self._events[event].indexOf(handlers) > -1) {
-            callback.call(context, new Snapshot(self, self.getData(), self.priority));
+          if (this._events[event].indexOf(handlers) > -1) {
+            callback.call(context, new Snapshot(this, this.getData(), this.priority));
           }
         });
       }
       else if (event === 'child_added') {
-        self._defer(function() {
-          if (self._events[event].indexOf(handlers) > -1) {
-            var prev = null;
-            _.each(self.sortedDataKeys, function (k) {
-              var child = self.child(k);
-              callback.call(context, new Snapshot(child, child.getData(), child.priority), prev);
-              prev = k;
-            });
+        this._defer(function() {
+          if (this._events[event].indexOf(handlers) > -1) {
+            var previous = null;
+            this.sortedDataKeys
+              .forEach(function (key) {
+                var child = this.child(key);
+                callback.call(context, new Snapshot(child, child.getData(), child.priority), previous);
+                previous = key;
+              }, this);
           }
         });
       }
@@ -318,17 +319,13 @@ MockFirebase.prototype = {
   },
 
   transaction: function(valueFn, finishedFn, applyLocally) {
-    var self = this;
     this._defer(function() {
-      var err = self._nextErr('transaction');
-      // unlike most defer methods, self will use the value as it exists at the time
-      // the transaction is actually invoked, which is the eventual consistent value
-      // it would have in reality
-      var res = valueFn(self.getData());
-      var newData = _.isUndefined(res) || err? self.getData() : res;
-      self._dataChanged(newData);
+      var err = this._nextErr('transaction');
+      var res = valueFn(this.getData());
+      var newData = _.isUndefined(res) || err? this.getData() : res;
+      this._dataChanged(newData);
       if (typeof finishedFn === 'function') {
-        finishedFn(err, err === null && !_.isUndefined(res), new Snapshot(self, newData, self.priority));
+        finishedFn(err, err === null && !_.isUndefined(res), new Snapshot(this, newData, this.priority));
       }
     });
     return [valueFn, finishedFn, applyLocally];
@@ -364,39 +361,38 @@ MockFirebase.prototype = {
   },
 
   _dataChanged: function(unparsedData) {
-    var self = this;
-    var pri = utils.getMeta(unparsedData, 'priority', self.priority);
+    var pri = utils.getMeta(unparsedData, 'priority', this.priority);
     var data = utils.cleanData(unparsedData);
-    if( pri !== self.priority ) {
-      self._priChanged(pri);
+    if( pri !== this.priority ) {
+      this._priChanged(pri);
     }
-    if( !_.isEqual(data, self.data) ) {
-      var oldKeys = _.keys(self.data).sort();
+    if( !_.isEqual(data, this.data) ) {
+      var oldKeys = _.keys(this.data).sort();
       var newKeys = _.keys(data).sort();
       var keysToRemove = _.difference(oldKeys, newKeys);
       var keysToChange = _.difference(newKeys, keysToRemove);
       var events = [];
 
-      _.each(keysToRemove, function(key) {
-        self._removeChild(key, events);
-      });
+      keysToRemove.forEach(function(key) {
+        this._removeChild(key, events);
+      }, this);
 
       if(!_.isObject(data)) {
         events.push(false);
-        self.data = data;
+        this.data = data;
       }
       else {
-        _.each(keysToChange, function(key) {
-          self._updateOrAdd(key, unparsedData[key], events);
-        });
+        keysToChange.forEach(function(key) {
+          this._updateOrAdd(key, unparsedData[key], events);
+        }, this);
       }
 
       // update order of my child keys
-      self._resort();
+      this._resort();
 
       // trigger parent notifications after all children have
       // been processed
-      self._triggerAll(events);
+      this._triggerAll(events);
     }
   },
 
@@ -412,16 +408,15 @@ MockFirebase.prototype = {
   },
 
   _resort: function(childKeyMoved) {
-    var self = this;
-    self.sortedDataKeys.sort(_.bind(self.childComparator, self));
+    this.sortedDataKeys.sort(_.bind(this.childComparator, this));
     // resort the data object to match our keys so value events return ordered content
-    var oldDat = _.assign({}, self.data);
-    _.each(oldDat, function(v,k) { delete self.data[k]; });
-    _.each(self.sortedDataKeys, function(k) {
-      self.data[k] = oldDat[k];
-    });
-    if( !_.isUndefined(childKeyMoved) && _.has(self.data, childKeyMoved) ) {
-      self._trigger('child_moved', self.data[childKeyMoved], self._getPri(childKeyMoved), childKeyMoved);
+    var oldData = _.assign({}, this.data);
+    _.each(oldData, function(v,k) { delete this.data[k]; }, this);
+    _.each(this.sortedDataKeys, function(k) {
+      this.data[k] = oldData[k];
+    }, this);
+    if( !_.isUndefined(childKeyMoved) && _.has(this.data, childKeyMoved) ) {
+      this._trigger('child_moved', this.data[childKeyMoved], this._getPri(childKeyMoved), childKeyMoved);
     }
   },
 
@@ -440,35 +435,34 @@ MockFirebase.prototype = {
   },
 
   _defer: function (callback) {
-    //todo should probably be taking some sort of snapshot of my data here and passing
-    //todo that into `fn` for reference
-    this.flushQueue.push(callback);
-    if( this.flushDelay !== false ) { this.flush(this.flushDelay); }
+    this.queue.push(_.bind(callback, this));
+    if (this.flushDelay !== false) {
+      this.flush(this.flushDelay);
+    }
   },
 
   _trigger: function(event, data, pri, key) {
-    var self = this, ref = event==='value'? self : self.child(key);
+    var ref = event==='value'? this : this.child(key);
     var snap = new Snapshot(ref, data, pri);
-    _.each(self._events[event], function(parts) {
+    _.each(this._events[event], function(parts) {
       var fn = parts[0], context = parts[1];
       if(_.contains(['child_added', 'child_moved'], event)) {
-        fn.call(context, snap, self._getPrevChild(key));
+        fn.call(context, snap, this._getPrevChild(key));
       }
       else {
         fn.call(context, snap);
       }
-    });
+    }, this);
   },
 
   _triggerAll: function(events) {
-    var self = this;
-    if( !events.length ) { return; }
-    _.each(events, function(event) {
-      if (event !== false) self._trigger.apply(self, event);
-    });
-    self._trigger('value', self.data, self.priority);
-    if( self.parentRef ) {
-      self.parentRef._childChanged(self);
+    if (!events.length) return;
+    events.forEach(function(event) {
+      if (event !== false) this._trigger.apply(this, event);
+    }, this);
+    this._trigger('value', this.data, this.priority);
+    if (this.parentRef) {
+      this.parentRef._childChanged(this);
     }
   },
 

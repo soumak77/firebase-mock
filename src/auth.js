@@ -13,11 +13,10 @@ function FirebaseAuth () {
   };
 }
 FirebaseAuth.prototype.changeAuthState = function (userData) {
-  var self = this;
   this._defer(function() {
-    if (!_.isEqual(self._auth.userData, userData)) {
-      self._auth.userData = _.isObject(userData) ? userData : null;
-      self._triggerAuthEvent();
+    if (!_.isEqual(this._auth.userData, userData)) {
+      this._auth.userData = _.isObject(userData) ? userData : null;
+      this._triggerAuthEvent();
     }
   });
 };
