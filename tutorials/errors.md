@@ -1,4 +1,4 @@
-## Tutorial: Simulating Errors
+# Tutorial: Simulating Errors
 
 Except for user management methods like `createUser` that validate their arguments, MockFirebase calls will never results in asynchronous errors since all data is maintained locally. Instead, MockFirebase gives you two options for testing error handling behavior for both data and authentication methods:
 
