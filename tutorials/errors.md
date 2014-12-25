@@ -43,7 +43,7 @@ var errors = [];
 log.error = function (err) {
   errors.push(err);
 };
-people.failNext('set');
+people.failNext('push');
 people.create({
   first: 'Ben'
 });
