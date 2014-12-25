@@ -60,8 +60,8 @@ Testing writes is especially easy with MockFirebase because it allows you to ins
 ##### Source
 
 ```js
-person.create = function (first) {
-  return person.ref().push({
+people.create = function (first) {
+  return people.ref().push({
     first: first
   });
 };
