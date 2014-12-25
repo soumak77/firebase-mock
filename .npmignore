@@ -5,3 +5,4 @@ gulpfile.js
 .npmignore
 helpers/
 coverage/
+bower.json
