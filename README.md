@@ -49,52 +49,6 @@ fb.flush();
 assert(gotValue === true);
 ```
 
-## API
-
-All the regular Firebase methods are(?) supported. In addition, the following test-related methods exist:
-
-### flush
-
-    @param {boolean|int} [delay] in milliseconds
-    @returns {MockFirebase}
-
-Invoke all the operations that have been queued thus far. If a numeric delay is passed, this
-occurs asynchronously. Otherwise, it is a synchronous event (at the time `flush` is called).
-
-This allows Firebase to be used in synchronous tests without waiting for async callbacks. It also
-provides a rudimentary mechanism for simulating locally cached data (events are triggered
-synchronously when you do `on('value')` or `on('child_added')`)
-
-If you call this multiple times with different delay values, you can invoke the events out
-of order, as might happen on a network with some latency, or if multiple users update values in rapid succession.
-
-### autoFlush
-
-    @param {int|boolean} [delay] in milliseconds
-
-Automatically trigger a `flush` after each operation. If a numeric delay is passed, the flush is performed asychronously after the delay. If `true` is passed, `flush` is triggered synchronously, immediately after data is changed or handlers are added. Passing `false` disables `autoFlush`
-
-### failNext
-
-    @param {String} methodName currently only supports `set`, `update`, `push` (with data) and `transaction`
-    @param {String|Error} error
-
-Simulate a failure by specifying that the next invocation of methodName should fail with the provided error.
-
-## getData
-
-@returns {*}
-
-Returns a copy of the current data
-
-## changeAuthState
-
-Manually set user data with the parameters specified in the Firebase [`auth`](https://www.firebase.com/docs/web/api/firebase/onauth.html) docs
-
-## getEmailUser
-
-Get a user that was created with [createUser](https://www.firebase.com/docs/web/api/firebase/createuser.html)
-
 # Proxying Firebase
 
 When writing unit tests, you'll probably want to patch calls to `Firebase` in your source code with `MockFirebase`.
