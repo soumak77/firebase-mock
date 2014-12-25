@@ -22,7 +22,6 @@ $ bower install mockfirebase
 ```
 
 ```html
-<!-- include sinon unless you use jasmine -->
 <script src="./bower_components/mockfirebase/browser/mockfirebase.js"></script>
 ```
 
