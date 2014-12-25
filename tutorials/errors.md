@@ -1,6 +1,6 @@
 ## Tutorial: Simulating Errors
 
-Except for user management methods like `createUser` that validate their arguments, MockFirebase calls will never results in asynchronous errors since all data is maintained locally. Instead, MockFirebase gives you two options for testing error handling behavior for both data and authentication methods:
+Except for user management methods like `createUser` that validate their arguments, MockFirebase calls will never result in asynchronous errors since all data is maintained locally. Instead, MockFirebase gives you two options for testing error handling behavior for both data and authentication methods:
 
 1. [`failNext(method, err)`](../API.md#failnextmethod-err---undefined): specifies that the next invocation of `method` should call its completion callback with `err`
 2. [`forceCancel(err [, event] [, callback] [, context]`)](../API.md#forcecancelerr--event--callback--context---undefined): cancels all data event listeners registered with `on` that match the provided arguments
