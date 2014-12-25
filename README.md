@@ -1,7 +1,7 @@
 MockFirebase [![Build Status](https://travis-ci.org/katowulf/mockfirebase.svg?branch=master)](https://travis-ci.org/katowulf/mockfirebase)
 ============
 
-**This is an experimental library and is not supported by Firebase**
+*This is an experimental library and is not supported by Firebase*
 
 ## Setup
 
