@@ -5,7 +5,7 @@
   "authors": [
     "Kato"
   ],
-  "description": "An experimental Firebase stub/spy library for writing unit tests (not supported by Firebase)",
+  "description": "Firebase mock library for writing unit tests",
   "main": "./browser/mockfirebase.js",
   "moduleType": [
     "amd",
