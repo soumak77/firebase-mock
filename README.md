@@ -15,7 +15,7 @@ $ npm install mockfirebase
 var MockFirebase = require('mockfirebase').MockFirebase;
 ```
 
-### AMD / Browser
+### AMD/Browser
 
 ```bash
 $ bower install mockfirebase
