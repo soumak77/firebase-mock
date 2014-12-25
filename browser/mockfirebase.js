@@ -1,4 +1,4 @@
-/** mockfirebase - v0.8.0
+/** mockfirebase - v0.8.1
 https://github.com/katowulf/mockfirebase
 * Copyright (c) 2014 Kato
 * License: MIT */
@@ -9473,56 +9473,6 @@ var Snapshot = require('./snapshot');
 var Queue    = require('./queue');
 var utils    = require('./utils');
 
-/**
- * A mock that simulates Firebase operations for use in unit tests.
- *
- * ## Setup
- *
- *     // in windows
- *     <script src="lib/lodash.js"></script> <!-- dependency -->
- *     <script src="lib/MockFirebase.js"></script> <!-- the lib -->
- *     <script>
- *       // to override all calls to new Firebase:
- *       MockFirebase.override();
- *       // test units can be invoked now...
- *     </script>
- *
- *     // in node.js
- *     var Firebase = require('../lib/MockFirebase');
- *
- * ## Usage Examples
- *
- *     var fb = new MockFirebase('Mock://foo/bar');
- *     fb.on('value', function(snap) {
-  *        console.log(snap.val());
-  *     });
- *
- *     // do things async or synchronously, like fb.child('foo').set('bar')...
- *
- *     // trigger callbacks and event listeners
- *     fb.flush();
- *
- * ## Trigger events automagically instead of calling flush()
- *
- *     var fb = new MockFirebase('Mock://hello/world');
- *     fb.autoFlush(1000); // triggers events after 1 second (asynchronous)
- *     fb.autoFlush(); // triggers events immediately (synchronous)
- *
- * ## Simulating Errors
- *
- *     var fb = new MockFirebase('Mock://fails/a/lot');
- *     fb.failNext('set', new Error('PERMISSION_DENIED'); // create an error to be invoked on the next set() op
- *     fb.set({foo: bar}, function(err) {
- *         // err.message === 'PERMISSION_DENIED'
- *     });
- *     fb.flush();
- *
- * @param {string} [currentPath] use a relative path here or a url, all .child() calls will append to this
- * @param {Object} [data] specify the data in this Firebase instance (defaults to MockFirebase.DEFAULT_DATA)
- * @param {MockFirebase} [parent] for internal use
- * @param {string} [name] for internal use
- * @constructor
- */
 function MockFirebase(currentPath, data, parent, name) {
   // represents the fake url
   //todo should unwrap nested paths; Firebase
@@ -9568,58 +9518,11 @@ function MockFirebase(currentPath, data, parent, name) {
 }
 
 MockFirebase.prototype = {
-  /*****************************************************
-   * Test Unit tools (not part of Firebase API)
-   *****************************************************/
-
-  /**
-   * Invoke all the operations that have been queued thus far. If a numeric delay is specified, this
-   * occurs asynchronously. Otherwise, it is a synchronous event.
-   *
-   * This allows Firebase to be used in synchronous tests without waiting for async callbacks. It also
-   * provides a rudimentary mechanism for simulating locally cached data (events are triggered
-   * synchronously when you do on('value') or on('child_added') against locally cached data)
-   *
-   * If you call this multiple times with different delay values, you could invoke the events out
-   * of order; make sure that is your intention.
-   *
-   * This also affects all child and parent paths that were created using .child from the original
-   * MockFirebase instance; all events queued before a flush, regardless of the node level in hierarchy,
-   * are processed together. To make child and parent paths fire on a different timeline or out of order,
-   * check out splitFlushQueue() below.
-   *
-   * <code>
-   *   var fbRef = new MockFirebase();
-   *   var childRef = fbRef.child('a');
-   *   fbRef.update({a: 'foo'});
-   *   childRef.set('bar');
-   *   fbRef.flush(); // a === 'bar'
-   *
-   *   fbRef.update({a: 'foo'});
-   *   fbRef.flush(0); // async flush
-   *
-   *   childRef.set('bar');
-   *   childRef.flush(); // sync flush (could also do fbRef.flush()--same thing)
-   *   // after the async flush completes, a === 'foo'!
-   *   // the child_changed and value events also happen in reversed order
-   * </code>
-   *
-   * @param {boolean|int} [delay]
-   * @returns {MockFirebase}
-   */
   flush: function(delay) {
     this.flushQueue.flush(delay);
     return this;
   },
 
-  /**
-   * Automatically trigger a flush event after each operation. If a numeric delay is specified, this is an
-   * asynchronous event. If value is set to true, it is synchronous (flush is triggered immediately). Setting
-   * this to false disables autoFlush
-   *
-   * @param {int|boolean} [delay]
-   * @returns {MockFirebase}
-   */
   autoFlush: function(delay){
     if(_.isUndefined(delay)) { delay = true; }
     if( this.flushDelay !== delay ) {
@@ -9632,46 +9535,20 @@ MockFirebase.prototype = {
     return this;
   },
 
-  /**
-   * If we can't use fakeEvent() and we need to test events out of order, we can give a child its own flush queue
-   * so that calling flush() does not also trigger parent and siblings in the queue.
-   */
   splitFlushQueue: function() {
     this.flushQueue = new Queue();
   },
 
-  /**
-   * Restore the flush queue after using splitFlushQueue() so that child/sibling/parent queues are flushed in order.
-   */
   joinFlushQueue: function() {
     if( this.parent ) {
       this.flushQueue = this.parent.flushQueue;
     }
   },
 
-  /**
-   * Simulate a failure by specifying that the next invocation of methodName should
-   * fail with the provided error.
-   *
-   * @param {String} methodName currently only supports `set`, `update`, `push` (with data) and `transaction`
-   * @param {String|Error} error
-   */
   failNext: function(methodName, error) {
     this.errs[methodName] = error;
   },
 
-  /**
-   * Simulate a security error by cancelling any opened listeners on the given path
-   * and returning the error provided. If event/callback/context are provided, then
-   * only listeners exactly matching this signature (same rules as off()) will be cancelled.
-   *
-   * This also invokes off() on the events--they won't be notified of future changes.
-   *
-   * @param {String|Error} error
-   * @param {String} [event]
-   * @param {Function} [callback]
-   * @param {Object} [context]
-   */
   forceCancel: function(error, event, callback, context) {
     var self = this, events = self._events;
     _.each(event? [event] : _.keys(events), function(eventType) {
@@ -9685,35 +9562,14 @@ MockFirebase.prototype = {
     });
   },
 
-  /**
-   * Returns a copy of the current data
-   * @returns {*}
-   */
   getData: function() {
     return _.cloneDeep(this.data);
   },
 
-  /**
-   * Returns keys from the data in this path
-   * @returns {Array}
-   */
   getKeys: function() {
     return this.sortedDataKeys.slice();
   },
 
-  /**
-   * Generates a fake event that does not affect or derive from the actual data in this
-   * mock. Great for quick event handling tests that won't rely on longer-term consistency
-   * or for creating out-of-order networking conditions that are hard to produce
-   * using set/remove/setPriority
-   *
-   * @param {string} event
-   * @param {string} key
-   * @param [data]
-   * @param {string} [prevChild]
-   * @param [pri]
-   * @returns {MockFirebase}
-   */
   fakeEvent: function(event, key, data, prevChild, pri) {
     if( arguments.length < 5 ) { pri = null; }
     if( arguments.length < 4 ) { prevChild = null; }
@@ -9735,12 +9591,6 @@ MockFirebase.prototype = {
     return this;
   },
 
-  /**
-   * Modifies authentication state and changes the current user credentials. This will trigger
-   * any onAuth() listeners in the next flush() operation.
-   *
-   * @param {Object|null} userData if an object, it should contain all field specified here: https://www.firebase.com/docs/web/api/firebase/onauth.html
-   */
   changeAuthState: function (userData) {
     var self = this;
     this._defer(function() {
@@ -9751,16 +9601,9 @@ MockFirebase.prototype = {
     });
   },
 
-  /**
-   * Retrieve an email user that was added with createUser()
-   */
   getEmailUser: function(email) {
     return this._users.hasOwnProperty(email) ? _.extend({}, this._users[email]) : null;
   },
-
-  /*****************************************************
-   * Firebase API methods
-   *****************************************************/
 
   toString: function() {
     return this.currentPath;
@@ -9974,30 +9817,11 @@ MockFirebase.prototype = {
     return [valueFn, finishedFn, applyLocally];
   },
 
-  /**********************************************************
-   * AUTHENTICATION METHODS
-   **********************************************************/
-
-  /**
-   * If token is valid and parses, returns the contents of token as exected. If not, the error is returned.
-   * Does not change behavior in any way (since we don't really auth anywhere)
-   *
-   * @param {String} token
-   * @param {Function} [callback]
-   * @deprecated
-   */
   auth: function(token, callback) {
     console.warn('FIREBASE WARNING: FirebaseRef.auth() being deprecated. Please use FirebaseRef.authWithCustomToken() instead.');
     this._authEvent('auth', callback);
   },
 
-  /**
-   * If token is valid and parses, returns the contents of token as exected. If not, the error is returned.
-   * Does not change behavior in any way (since we don't really auth anywhere)
-   *
-   * @param {String} token
-   * @param {Function} [onComplete]
-   */
   authWithCustomToken: function(token, onComplete) {
     this._authEvent('authWithCustomToken', onComplete);
   },
