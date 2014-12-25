@@ -38,23 +38,23 @@ describe('FlushQueue', function () {
 
     it('fires the events synchoronously by default', function () {
       var spy = sinon.spy();
-      queue.push([spy, 1, 2]);
+      queue.push(spy);
       queue.flush();
-      expect(spy).to.have.been.calledWith(1, 2);
+      expect(spy).to.have.been.called;
     });
 
     it('empties the queue before invoking events', function () {
       function assertEmpty () {
         expect(queue.events).to.be.empty;
       }
-      queue.push([assertEmpty]);
+      queue.push(assertEmpty);
       queue.flush();
     });
 
     it('can invoke events after a delay', function () {
       var clock = sinon.useFakeTimers();
       var spy = sinon.spy();
-      queue.push([spy]);
+      queue.push(spy);
       queue.flush(100);
       expect(spy).to.not.have.been.called;
       clock.tick(100);

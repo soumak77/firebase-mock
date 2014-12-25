@@ -14,11 +14,11 @@ FlushQueue.prototype.flush = function (delay) {
   if (!this.events.length) {
     throw new Error('No deferred tasks to be flushed');
   }
-  var list = this.events;
+  var events = this.events;
   this.events = [];
   function process () {
-    list.forEach(function(parts) {
-      parts[0].apply(null, parts.slice(1));
+    events.forEach(function(event) {
+      event();
     });
   }
   if (_.isNumber(delay)) {
