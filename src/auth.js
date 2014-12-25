@@ -1,6 +1,7 @@
 'use strict';
 
-var _ = require('lodash');
+var _      = require('lodash');
+var format = require('util').format;
 
 function FirebaseAuth () {
   this._auth = {
@@ -117,7 +118,7 @@ function FirebaseAuth () {
     this._defer(_.bind(function() {
       var user = null;
       err = err ||
-        this._validateCreds('createUser', credentials, ['email', 'password']) ||
+        validateCredentials('createUser', credentials, ['email', 'password']) ||
         this._validateNewEmail(credentials);
       if( !err ) {
         var key = credentials.email;
@@ -132,7 +133,7 @@ function FirebaseAuth () {
     var err = this._nextErr('changePassword');
     this._defer(_.bind(function() {
       err = err ||
-        this._validateCreds('changePassword', credentials, ['email', 'oldPassword', 'newPassword']) ||
+        validateCredentials('changePassword', credentials, ['email', 'oldPassword', 'newPassword']) ||
         this._validateExistingEmail(credentials) ||
         this._validPass(credentials, 'oldPassword');
       if( !err ) {
@@ -148,7 +149,7 @@ function FirebaseAuth () {
     var err = this._nextErr('removeUser');
     this._defer(_.bind(function() {
       err = err ||
-        this._validateCreds('removeUser', credentials, ['email', 'password']) ||
+        validateCredentials('removeUser', credentials, ['email', 'password']) ||
         this._validateExistingEmail(credentials) ||
         this._validPass(credentials, 'password');
       if( !err ) {
@@ -162,7 +163,7 @@ function FirebaseAuth () {
     var err = this._nextErr('resetPassword');
     this._defer(_.bind(function() {
       err = err ||
-        this._validateCreds('resetPassword', credentials, ['email']) ||
+        validateCredentials('resetPassword', credentials, ['email']) ||
         this._validateExistingEmail(credentials);
       onComplete(err);
     }, this));
@@ -192,16 +193,6 @@ function FirebaseAuth () {
     return null;
   };
 
-  this._validateCreds = function (method, creds, fields) {
-    var err = this._validObj(creds, method, 'First');
-    var i = 0;
-    while (err === null && i < fields.length) {
-      err = this._validArg(method, creds, 'First', fields[i], 'string');
-      i++;
-    }
-    return err;
-  };
-
   this._validPass = function (obj, name) {
     var err = null;
     var key = obj.email;
@@ -212,20 +203,40 @@ function FirebaseAuth () {
     return err;
   };
 
-  this._validObj = function (obj, method, position) {
-    if( !_.isObject(obj) ) {
-      return new Error('Firebase.' + method + ' failed: ' + position + ' argument must be a valid object.');
-    }
-    return null;
-  };
+}
 
-  this._validArg = function (method, obj, position, name, type) {
-    if( !obj.hasOwnProperty(name) || typeof(obj[name]) !== type ) {
-      return new Error('Firebase.' + method + ' failed: ' + position +
-        ' argument must contain the key "' + name + '" with type "' + type + '"');
-    }
-    return null;
-  };
+function validateCredentials (method, credentials, fields) {
+  var err = validateObject(credentials, method, 'First');
+  var i = 0;
+  while (err === null && i < fields.length) {
+    err = validateArgument(method, credentials, 'First', fields[i], 'string');
+    i++;
+  }
+  return err;
+}
+
+function validateObject (object, method, position) {
+  if (!_.isObject(object)) {
+    return new Error(format(
+      'Firebase.%s failed: %s argument must be a valid object.',
+      method,
+      position
+    ));
+  }
+  return null;
+}
+
+function validateArgument (method, object, position, name, type) {
+  if (!object.hasOwnProperty(name) || typeof object[name] !== type) {
+    return new Error(format(
+      'Firebase.%s failed: %s argument must contain the key "%s" with type "%s"',
+      method,
+      position,
+      name,
+      type
+    ));
+  }
+  return null;
 }
 
 module.exports = FirebaseAuth;
