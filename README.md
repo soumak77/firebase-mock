@@ -49,22 +49,23 @@ fb.flush();
 assert(gotValue === true);
 ```
 
-# Proxying Firebase
+## Proxying Firebase
 
-When writing unit tests, you'll probably want to patch calls to `Firebase` in your source code with `MockFirebase`.
+When writing unit tests, you'll probably want to replace calls to `Firebase` in your source code with `MockFirebase`.
 
-## Browser
+### Browser
 
-If `Firebase` is attached to the `window`, you can just replace it using the override method:
+If `Firebase` is attached to the `window`, you can replace it using the `override` method:
 
 ```js
 MockFirebase.override();
 ```
 
-Make sure to include `MockFirebase` before overwriting Firebase and then add your tests after the patch.
+### Node/Browserify
 
-## Node/Browserify
 In Node/Browserify, you need to patch `require` itself. [proxyquire](https://github.com/thlorenz/proxyquire) and [proxyquireify](https://github.com/thlorenz/proxyquireify) make this easy.
+
+Example Source Code:
 
 ```js
 // ./mySrc.js
@@ -75,9 +76,7 @@ ref.on('value', function (snapshot) {
 });
 ```
 
-In order to test the above source code, we can use proxyquire.
-
-**Example**
+Example Test Code:
 
 ```js
 // ./test.js
@@ -92,9 +91,3 @@ var mySrc = proxyquire('./mySrc', {
 mock.flush();
 // data is logged
 ```
-
-Note that the key in the stubs object matches the module name (`'firebase'`) and not the capitalized variable name.
-
-# Support
-
-Use the [issues list](https://github.com/katowulf/mockfirebase/issues) for questions and troubleshooting help.
