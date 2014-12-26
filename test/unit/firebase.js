@@ -32,11 +32,11 @@ describe('MockFirebase', function () {
     });
 
     it('can use leading slashes (#23)', function () {
-      expect(ref.child('/children').currentPath).to.equal('Mock://data/children');
+      expect(ref.child('/children').path).to.equal('Mock://data/children');
     });
 
     it('can use trailing slashes (#23)', function () {
-      expect(ref.child('children/').currentPath).to.equal('Mock://data/children');
+      expect(ref.child('children/').path).to.equal('Mock://data/children');
     });
 
   });
@@ -381,7 +381,7 @@ describe('MockFirebase', function () {
   describe('#root', function () {
 
     it('traverses to the top of the reference', function () {
-      expect(ref.child('foo/bar').root().currentPath)
+      expect(ref.child('foo/bar').root().path)
         .to.equal('Mock://');
     });
 
