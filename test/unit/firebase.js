@@ -2,6 +2,7 @@
 
 var sinon    = require('sinon');
 var expect   = require('chai').use(require('sinon-chai')).expect;
+var _        = require('lodash');
 var Firebase = require('../../').MockFirebase;
 
 describe('MockFirebase', function () {
@@ -86,6 +87,63 @@ describe('MockFirebase', function () {
 
     it('must be called with an Error', function () {
       expect(ref.failNext.bind(ref)).to.throw('"Error"');
+    });
+
+  });
+
+  describe('#forceCancel', function () {
+
+    it('calls the cancel callback', function () {
+      ref.on('value', _.noop, spy);
+      var err = new Error();
+      ref.forceCancel(err);
+      expect(spy).to.have.been.calledWith(err);
+    });
+
+    it('calls the cancel callback on the context', function () {
+      var context = {};
+      ref.on('value', _.noop, spy, context);
+      ref.forceCancel(new Error(), 'value', _.noop, context);
+      expect(spy).to.have.been.calledOn(context);
+    });
+
+    it('turns off the listener', function () {
+      ref.on('value', spy);
+      ref.forceCancel(new Error());
+      ref.set({});
+      ref.flush();
+      expect(spy).to.not.have.been.called;
+    });
+
+    it('can match an event type', function () {
+      var spy2 = sinon.spy();
+      ref.on('value', _.noop, spy);
+      ref.on('child_added', _.noop, spy2);
+      ref.forceCancel(new Error(), 'value');
+      expect(spy).to.have.been.called;
+      expect(spy2).to.not.have.been.called;
+    });
+
+    it('can match a callback', function () {
+      var spy2 = sinon.spy();
+      ref.on('value', spy);
+      ref.on('value', spy2);
+      ref.forceCancel(new Error(), 'value', spy);
+      ref.set({});
+      ref.flush();
+      expect(spy2).to.have.been.called;
+    });
+
+    it('can match a context', function () {
+      var spy2 = sinon.spy();
+      var context = {};
+      ref.on('value', spy, spy, context);
+      ref.on('value', spy);
+      var err = new Error();
+      ref.forceCancel(err, 'value', spy, context);
+      expect(spy)
+        .to.have.been.calledOnce
+        .and.calledWith(err);
     });
 
   });
