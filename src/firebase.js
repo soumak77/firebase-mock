@@ -176,6 +176,7 @@ MockFirebase.prototype.key = function () {
   return this.myName;
 };
 
+/* istanbul ignore next */
 MockFirebase.prototype.name = function () {
   console.warn('ref.name() is deprecated. Use ref.key()');
   return this.key.apply(this, arguments);
