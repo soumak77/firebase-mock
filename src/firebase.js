@@ -80,7 +80,7 @@ MockFirebase.prototype.forceCancel = function (error, event, callback, context) 
           parts[2].call(parts[1], error);
           this.off(event, callback, context);
         }, this);
-    });
+    }, this);
 };
 
 MockFirebase.prototype.getData = function () {
