@@ -6,37 +6,37 @@ var Firebase = require('../../').MockFirebase;
 
 describe('MockFirebase', function () {
 
-  var fb, spy;
+  var ref, spy;
   beforeEach(function () {
-    fb = new Firebase().child('data');
-    fb.set(require('./data.json').data);
-    fb.flush();
+    ref = new Firebase().child('data');
+    ref.set(require('./data.json').data);
+    ref.flush();
     spy = sinon.spy();
   });
 
   describe('#child', function () {
 
     it('requires a path', function () {
-      expect(fb.child.bind(fb)).to.throw();
+      expect(ref.child.bind(ref)).to.throw();
     });
 
     it('caches children', function () {
-      expect(fb.child('foo')).to.equal(fb.child('foo'));
+      expect(ref.child('foo')).to.equal(ref.child('foo'));
     });
 
     it('calls child recursively for multi-segment paths', function () {
-      var child = fb.child('foo');
+      var child = ref.child('foo');
       sinon.spy(child, 'child');
-      fb.child('foo/bar');
+      ref.child('foo/bar');
       expect(child.child).to.have.been.calledWith('bar');
     });
 
     it('can use leading slashes (#23)', function () {
-      expect(fb.child('/children').currentPath).to.equal('Mock://data/children');
+      expect(ref.child('/children').currentPath).to.equal('Mock://data/children');
     });
 
     it('can use trailing slashes (#23)', function () {
-      expect(fb.child('children/').currentPath).to.equal('Mock://data/children');
+      expect(ref.child('children/').currentPath).to.equal('Mock://data/children');
     });
 
   });
@@ -44,19 +44,19 @@ describe('MockFirebase', function () {
   describe('#set', function () {
 
     beforeEach(function () {
-      fb.autoFlush();
+      ref.autoFlush();
     });
 
     it('should remove old keys from data', function () {
-      fb.set({
+      ref.set({
         alpha: true,
         bravo: false
       });
-      expect(fb.getData().a).to.be.undefined;
+      expect(ref.getData().a).to.be.undefined;
     });
 
     it('should set priorities on children if included in data', function () {
-      fb.set({
+      ref.set({
         a: {
           '.priority': 100,
           '.value': 'a'
@@ -66,18 +66,18 @@ describe('MockFirebase', function () {
           '.value': 'b'
         }
       });
-      expect(fb.getData()).to.contain({
+      expect(ref.getData()).to.contain({
         a: 'a',
         b: 'b'
       });
-      expect(fb.child('a')).to.have.property('priority', 100);
-      expect(fb.child('b')).to.have.property('priority', 200);
+      expect(ref.child('a')).to.have.property('priority', 100);
+      expect(ref.child('b')).to.have.property('priority', 200);
     });
 
     it('should have correct priority in snapshot if added with set', function () {
-      fb.on('child_added', spy);
+      ref.on('child_added', spy);
       var previousCallCount = spy.callCount;
-      fb.set({
+      ref.set({
         alphanew: {
           '.priority': 100,
           '.value': 'a'
@@ -89,8 +89,8 @@ describe('MockFirebase', function () {
     });
 
     it('should fire child_added events with correct prevChildName', function () {
-      fb = new Firebase('Empty://', null).autoFlush();
-      fb.set({
+      ref = new Firebase('Empty://', null).autoFlush();
+      ref.set({
         alpha: {
           '.priority': 200,
           foo: 'alpha'
@@ -104,7 +104,7 @@ describe('MockFirebase', function () {
           foo: 'charlie'
         }
       });
-      fb.on('child_added', spy);
+      ref.on('child_added', spy);
       expect(spy.callCount).to.equal(3);
       [null, 'charlie', 'alpha'].forEach(function (previous, index) {
         expect(spy.getCall(index).args[1]).to.equal(previous);
@@ -126,9 +126,9 @@ describe('MockFirebase', function () {
           foo: 'charlie'
         }
       };
-      fb = new Firebase('Empty://', null).autoFlush();
-      fb.set(data);
-      fb.on('child_added', spy);
+      ref = new Firebase('Empty://', null).autoFlush();
+      ref.set(data);
+      ref.on('child_added', spy);
       expect(spy.callCount).to.equal(3);
       for (var i = 0; i < 3; i++) {
         var snapshot = spy.getCall(i).args[0];
@@ -138,23 +138,23 @@ describe('MockFirebase', function () {
     });
 
     it('should trigger child_removed if child keys are missing', function () {
-      fb.on('child_removed', spy);
-      var data = fb.getData();
+      ref.on('child_removed', spy);
+      var data = ref.getData();
       var keys = Object.keys(data);
       // data must have more than one record to do this test
       expect(keys).to.have.length.above(1);
       // remove one key from data and call set()
       delete data[keys[0]];
-      fb.set(data);
+      ref.set(data);
       expect(spy).to.have.been.calledOnce;
     });
 
     it('should change parent from null to object when child is set', function () {
-      fb.set(null);
-      fb.child('newkey').set({
+      ref.set(null);
+      ref.child('newkey').set({
         foo: 'bar'
       });
-      expect(fb.getData()).to.deep.equal({
+      expect(ref.getData()).to.deep.equal({
         newkey: {
           foo: 'bar'
         }
@@ -166,20 +166,20 @@ describe('MockFirebase', function () {
   describe('#setPriority', function () {
 
     beforeEach(function () {
-      fb.autoFlush();
+      ref.autoFlush();
     });
 
     it('should trigger child_moved with correct prevChildName', function () {
-      var keys = Object.keys(fb.getData());
+      var keys = Object.keys(ref.getData());
       expect(keys).to.have.length.above(1);
-      fb.on('child_moved', spy);
-      fb.child(keys[0]).setPriority(250);
+      ref.on('child_moved', spy);
+      ref.child(keys[0]).setPriority(250);
       expect(spy).to.have.been.calledOnce;
       expect(spy.firstCall.args[1]).to.equal(keys[keys.length - 1]);
     });
 
     it('should trigger a callback', function () {
-      fb.setPriority(100, spy);
+      ref.setPriority(100, spy);
       expect(spy).to.have.been.called;
     });
 
@@ -188,19 +188,19 @@ describe('MockFirebase', function () {
   describe('#setWithPriority', function () {
 
     it('should pass the priority to #setPriority', function () {
-      fb.autoFlush();
-      sinon.spy(fb, 'setPriority');
-      fb.setWithPriority({}, 250);
-      expect(fb.setPriority).to.have.been.calledWith(250);
+      ref.autoFlush();
+      sinon.spy(ref, 'setPriority');
+      ref.setWithPriority({}, 250);
+      expect(ref.setPriority).to.have.been.calledWith(250);
     });
 
     it('should pass the data and callback to #set', function () {
       var data = {};
       var callback = sinon.spy();
-      fb.autoFlush();
-      sinon.spy(fb, 'set');
-      fb.setWithPriority(data, 250, callback);
-      expect(fb.set).to.have.been.calledWith(data, callback);
+      ref.autoFlush();
+      sinon.spy(ref, 'set');
+      ref.setWithPriority(data, 250, callback);
+      expect(ref.set).to.have.been.calledWith(data, callback);
     });
 
   });
@@ -208,36 +208,36 @@ describe('MockFirebase', function () {
   describe('#update', function () {
 
     it('must be called with an object', function () {
-      expect(fb.update).to.throw();
+      expect(ref.update).to.throw();
     });
 
     it('extends the data', function () {
-      fb.update({
+      ref.update({
         foo: 'bar'
       });
-      fb.flush();
-      expect(fb.getData()).to.have.property('foo', 'bar');
+      ref.flush();
+      expect(ref.getData()).to.have.property('foo', 'bar');
     });
 
     it('can be called on an empty reference', function () {
-      fb.set(null);
-      fb.flush();
-      fb.update({
+      ref.set(null);
+      ref.flush();
+      ref.update({
         foo: 'bar'
       });
-      fb.flush();
-      expect(fb.getData()).to.deep.equal({
+      ref.flush();
+      expect(ref.getData()).to.deep.equal({
         foo: 'bar'
       });
     });
 
     it('can simulate an error', function () {
       var err = new Error();
-      fb.failNext('update', err);
-      fb.update({
+      ref.failNext('update', err);
+      ref.update({
         foo: 'bar'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.calledWith(err);
     });
 
@@ -246,22 +246,22 @@ describe('MockFirebase', function () {
   describe('#remove', function () {
 
     beforeEach(function () {
-      fb.autoFlush();
+      ref.autoFlush();
     });
 
     it('should call child_removed for children', function () {
-      fb.on('child_removed', spy);
-      fb.child('a').remove();
+      ref.on('child_removed', spy);
+      ref.child('a').remove();
       expect(spy).to.have.been.called;
       var snapshot = spy.firstCall.args[0];
       expect(snapshot.key()).to.equal('a');
     });
 
     it('should change to null if all children are removed', function () {
-      for (var key in fb.getData()) {
-        fb.child(key).remove();
+      for (var key in ref.getData()) {
+        ref.child(key).remove();
       }
-      expect(fb.getData()).to.be.null;
+      expect(ref.getData()).to.be.null;
     });
 
   });
@@ -269,18 +269,18 @@ describe('MockFirebase', function () {
   describe('#on', function () {
 
     it('should work when initial value is null', function () {
-      fb.on('value', spy);
-      fb.flush();
+      ref.on('value', spy);
+      ref.flush();
       expect(spy).to.have.been.calledOnce;
-      fb.set('foo');
-      fb.flush();
+      ref.set('foo');
+      ref.flush();
       expect(spy).to.have.been.calledTwice;
     });
 
     it('can take the context as the 3rd argument', function () {
       var context = {};
-      fb.on('value', spy, context);
-      fb.flush();
+      ref.on('value', spy, context);
+      ref.flush();
       expect(spy).to.have.been.calledOn(context);
     });
 
@@ -289,9 +289,9 @@ describe('MockFirebase', function () {
       var err = new Error();
       var success = spy;
       var fail = sinon.spy();
-      fb.failNext('on', err);
-      fb.on('value', success, fail, context);
-      fb.flush();
+      ref.failNext('on', err);
+      ref.on('value', success, fail, context);
+      ref.flush();
       expect(fail)
         .to.have.been.calledWith(err)
         .and.calledOn(context);
@@ -303,9 +303,9 @@ describe('MockFirebase', function () {
       var err = new Error();
       var success = spy;
       var fail = sinon.spy();
-      fb.failNext('on', err);
-      fb.on('value', success, fail, context);
-      fb.flush();
+      ref.failNext('on', err);
+      ref.on('value', success, fail, context);
+      ref.flush();
       expect(fail)
         .to.have.been.calledWith(err)
         .and.calledOn(context);
@@ -313,11 +313,11 @@ describe('MockFirebase', function () {
     });
 
     it('is cancelled by an off call before flush', function () {
-      fb.on('value', spy);
-      fb.on('child_added', spy);
-      fb._events.value = [];
-      fb._events.child_added = [];
-      fb.flush();
+      ref.on('value', spy);
+      ref.on('child_added', spy);
+      ref._events.value = [];
+      ref._events.child_added = [];
+      ref.flush();
       expect(spy).to.not.have.been.called;
     });
 
@@ -326,13 +326,13 @@ describe('MockFirebase', function () {
   describe('#transaction', function () {
 
     it('should call the transaction function', function () {
-      fb.transaction(spy);
-      fb.flush();
+      ref.transaction(spy);
+      ref.flush();
       expect(spy).to.have.been.called;
     });
 
     it('should fire the callback with a "committed" boolean and error message', function () {
-      fb.transaction(function (currentValue) {
+      ref.transaction(function (currentValue) {
         currentValue.transacted = 'yes';
         return currentValue;
       }, function (error, committed, snapshot) {
@@ -340,7 +340,7 @@ describe('MockFirebase', function () {
         expect(committed).to.be.true;
         expect(snapshot.val().transacted).to.equal('yes');
       });
-      fb.flush();
+      ref.flush();
     });
 
   });
@@ -348,31 +348,31 @@ describe('MockFirebase', function () {
   describe('#push', function () {
 
     it('can add data by auto id', function () {
-      var id = fb._newAutoId();
-      sinon.stub(fb, '_newAutoId').returns(id);
-      fb.push({
+      var id = ref._newAutoId();
+      sinon.stub(ref, '_newAutoId').returns(id);
+      ref.push({
         foo: 'bar'
       });
-      fb.flush();
-      expect(fb.child(id).getData()).to.deep.equal({
+      ref.flush();
+      expect(ref.child(id).getData()).to.deep.equal({
         foo: 'bar'
       });
     });
 
     it('can simulate an error', function () {
       var err = new Error();
-      fb.failNext('push', err);
-      fb.push({}, spy);
-      fb.flush();
+      ref.failNext('push', err);
+      ref.push({}, spy);
+      ref.flush();
       expect(spy).to.have.been.calledWith(err);
     });
 
     it('avoids calling set when unnecessary', function () {
-      var id = fb._newAutoId();
-      sinon.stub(fb, '_newAutoId').returns(id);
-      var set = sinon.stub(fb.child(id), 'set');
-      fb.push();
-      fb.push(null);
+      var id = ref._newAutoId();
+      sinon.stub(ref, '_newAutoId').returns(id);
+      var set = sinon.stub(ref.child(id), 'set');
+      ref.push();
+      ref.push(null);
       expect(set).to.not.have.been.called;
     });
 
@@ -381,7 +381,7 @@ describe('MockFirebase', function () {
   describe('#root', function () {
 
     it('traverses to the top of the reference', function () {
-      expect(fb.child('foo/bar').root().currentPath)
+      expect(ref.child('foo/bar').root().currentPath)
         .to.equal('Mock://');
     });
 
@@ -390,11 +390,11 @@ describe('MockFirebase', function () {
   describe('#changeAuthState', function () {
 
     it('sets the auth data to null if a non-object is passed', function () {
-      fb.changeAuthState({});
-      fb.flush();
-      fb.changeAuthState('auth');
-      fb.flush();
-      expect(fb.getAuth()).to.be.null;
+      ref.changeAuthState({});
+      ref.flush();
+      ref.changeAuthState('auth');
+      ref.flush();
+      expect(ref.getAuth()).to.be.null;
     });
 
   });
@@ -406,9 +406,9 @@ describe('MockFirebase', function () {
         expect(error.message).to.equal('INVALID_TOKEN');
         expect(result).to.be.null;
       });
-      fb.failNext('auth', new Error('INVALID_TOKEN'));
-      fb.auth('invalidToken', spy);
-      fb.flush();
+      ref.failNext('auth', new Error('INVALID_TOKEN'));
+      ref.auth('invalidToken', spy);
+      ref.flush();
       expect(spy).to.have.been.called;
     });
 
@@ -420,9 +420,9 @@ describe('MockFirebase', function () {
         expect(error).to.be.null;
         expect(authData).to.deep.equal(userData);
       });
-      fb.auth('goodToken', spy);
-      fb.changeAuthState(userData);
-      fb.flush();
+      ref.auth('goodToken', spy);
+      ref.changeAuthState(userData);
+      ref.flush();
       expect(spy).to.have.been.called;
     });
 
@@ -435,9 +435,9 @@ describe('MockFirebase', function () {
         expect(error.message).to.equal('INVALID_TOKEN');
         expect(result).to.be.null;
       });
-      fb.failNext('authWithCustomToken', new Error('INVALID_TOKEN'));
-      fb.authWithCustomToken('invalidToken', spy);
-      fb.flush();
+      ref.failNext('authWithCustomToken', new Error('INVALID_TOKEN'));
+      ref.authWithCustomToken('invalidToken', spy);
+      ref.flush();
       expect(spy).to.have.been.called;
     });
 
@@ -449,14 +449,14 @@ describe('MockFirebase', function () {
         expect(error).to.be.null;
         expect(authData).to.deep.equal(userData);
       });
-      fb.authWithCustomToken('goodToken', spy);
-      fb.changeAuthState(userData);
-      fb.flush();
+      ref.authWithCustomToken('goodToken', spy);
+      ref.changeAuthState(userData);
+      ref.flush();
       expect(spy).to.have.been.called;
     });
 
     it('handles no callback', function () {
-      fb.authWithCustomToken('goodToken');
+      ref.authWithCustomToken('goodToken');
     });
 
   });
@@ -468,9 +468,9 @@ describe('MockFirebase', function () {
         expect(error.message).to.equal('INVALID_TOKEN');
         expect(result).to.be.null;
       });
-      fb.failNext('authAnonymously', new Error('INVALID_TOKEN'));
-      fb.authAnonymously(spy);
-      fb.flush();
+      ref.failNext('authAnonymously', new Error('INVALID_TOKEN'));
+      ref.authAnonymously(spy);
+      ref.flush();
       expect(spy).to.have.been.called;
     });
 
@@ -481,9 +481,9 @@ describe('MockFirebase', function () {
         expect(error).to.be.null;
         expect(authData).to.deep.equal(userData);
       });
-      fb.authAnonymously(spy);
-      fb.changeAuthState(userData);
-      fb.flush();
+      ref.authAnonymously(spy);
+      ref.changeAuthState(userData);
+      ref.flush();
       expect(spy).to.have.been.called;
     });
 
@@ -496,12 +496,12 @@ describe('MockFirebase', function () {
         expect(error.message).to.equal('INVALID_TOKEN');
         expect(result).to.be.null;
       });
-      fb.failNext('authWithPassword', new Error('INVALID_TOKEN'));
-      fb.authWithPassword({
+      ref.failNext('authWithPassword', new Error('INVALID_TOKEN'));
+      ref.authWithPassword({
         email: 'kato',
         password: 'kato'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
     });
 
@@ -513,12 +513,12 @@ describe('MockFirebase', function () {
         expect(error).to.be.null;
         expect(authData).to.deep.equal(userData);
       });
-      fb.authWithPassword({
+      ref.authWithPassword({
         email: 'kato',
         password: 'kato'
       }, spy);
-      fb.changeAuthState(userData);
-      fb.flush();
+      ref.changeAuthState(userData);
+      ref.flush();
       expect(spy).to.have.been.called;
     });
 
@@ -531,9 +531,9 @@ describe('MockFirebase', function () {
         expect(error.message).to.equal('INVALID_TOKEN');
         expect(result).to.be.null;
       });
-      fb.failNext('authWithOAuthPopup', new Error('INVALID_TOKEN'));
-      fb.authWithOAuthPopup('facebook', spy);
-      fb.flush();
+      ref.failNext('authWithOAuthPopup', new Error('INVALID_TOKEN'));
+      ref.authWithOAuthPopup('facebook', spy);
+      ref.flush();
       expect(spy).to.have.been.called;
     });
 
@@ -545,9 +545,9 @@ describe('MockFirebase', function () {
         expect(error).to.be.null;
         expect(authData).to.deep.equal(userData);
       });
-      fb.authWithOAuthPopup('facebook', spy);
-      fb.changeAuthState(userData);
-      fb.flush();
+      ref.authWithOAuthPopup('facebook', spy);
+      ref.changeAuthState(userData);
+      ref.flush();
       expect(spy).to.have.been.called;
     });
 
@@ -560,9 +560,9 @@ describe('MockFirebase', function () {
         expect(error.message).to.equal('INVALID_TOKEN');
         expect(result).to.be.null;
       });
-      fb.failNext('authWithOAuthRedirect', new Error('INVALID_TOKEN'));
-      fb.authWithOAuthRedirect('facebook', spy);
-      fb.flush();
+      ref.failNext('authWithOAuthRedirect', new Error('INVALID_TOKEN'));
+      ref.authWithOAuthRedirect('facebook', spy);
+      ref.flush();
       expect(spy).to.have.been.called;
     });
 
@@ -574,9 +574,9 @@ describe('MockFirebase', function () {
         expect(error).to.be.null;
         expect(authData).to.deep.equal(userData);
       });
-      fb.authWithOAuthRedirect('facebook', spy);
-      fb.changeAuthState(userData);
-      fb.flush();
+      ref.authWithOAuthRedirect('facebook', spy);
+      ref.changeAuthState(userData);
+      ref.flush();
       expect(spy).to.have.been.called;
     });
 
@@ -589,9 +589,9 @@ describe('MockFirebase', function () {
         expect(error.message).to.equal('INVALID_TOKEN');
         expect(result).to.be.null;
       });
-      fb.failNext('authWithOAuthToken', new Error('INVALID_TOKEN'));
-      fb.authWithOAuthToken('twitter', 'invalid_token', spy);
-      fb.flush();
+      ref.failNext('authWithOAuthToken', new Error('INVALID_TOKEN'));
+      ref.authWithOAuthToken('twitter', 'invalid_token', spy);
+      ref.flush();
       expect(spy).to.have.been.called;
     });
 
@@ -603,9 +603,9 @@ describe('MockFirebase', function () {
         expect(error).to.be.null;
         expect(authData).to.deep.equal(userData);
       });
-      fb.authWithOAuthToken('twitter', 'valid_token', spy);
-      fb.changeAuthState(userData);
-      fb.flush();
+      ref.authWithOAuthToken('twitter', 'valid_token', spy);
+      ref.changeAuthState(userData);
+      ref.flush();
       expect(spy).to.have.been.called;
     });
 
@@ -614,15 +614,15 @@ describe('MockFirebase', function () {
   describe('#getAuth', function () {
 
     it('should be null by default', function () {
-      expect(fb.getAuth()).to.be.null;
+      expect(ref.getAuth()).to.be.null;
     });
 
     it('should be set to whatever is passed into changeAuthState', function () {
-      fb.changeAuthState({
+      ref.changeAuthState({
         foo: 'bar'
       });
-      fb.flush();
-      expect(fb.getAuth()).to.deep.equal({
+      ref.flush();
+      expect(ref.getAuth()).to.deep.equal({
         foo: 'bar'
       });
     });
@@ -632,40 +632,40 @@ describe('MockFirebase', function () {
   describe('#onAuth', function () {
 
     it('should be triggered when changeAuthState() modifies data', function () {
-      fb.onAuth(spy);
-      fb.changeAuthState({uid: 'kato'
+      ref.onAuth(spy);
+      ref.changeAuthState({uid: 'kato'
     });
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
     });
 
     it('should return same value as getAuth()', function () {
-      fb.onAuth(spy);
-      fb.changeAuthState({
+      ref.onAuth(spy);
+      ref.changeAuthState({
         uid: 'kato'
       });
-      fb.flush();
-      expect(spy.args[0][0]).to.deep.equal(fb.getAuth());
+      ref.flush();
+      expect(spy.args[0][0]).to.deep.equal(ref.getAuth());
     });
 
     it('should not be triggered if auth state does not change', function () {
-      fb.onAuth(spy);
-      fb.changeAuthState({uid: 'kato'
+      ref.onAuth(spy);
+      ref.changeAuthState({uid: 'kato'
     });
-      fb.flush();
-      fb.changeAuthState({uid: 'kato'
+      ref.flush();
+      ref.changeAuthState({uid: 'kato'
     });
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.calledOnce;
     });
 
     it('should set context when callback triggered', function () {
       var context = {};
-      fb.onAuth(spy, context);
-      fb.changeAuthState({
+      ref.onAuth(spy, context);
+      ref.changeAuthState({
         uid: 'kato'
       });
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.calledOn(context);
     });
 
@@ -674,38 +674,38 @@ describe('MockFirebase', function () {
   describe('#offAuth', function () {
 
     it('should not trigger callback after being called', function () {
-      fb.onAuth(spy);
-      fb.changeAuthState({
+      ref.onAuth(spy);
+      ref.changeAuthState({
         uid: 'kato1'
       });
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.calledOnce;
-      fb.offAuth(spy);
-      fb.changeAuthState({
+      ref.offAuth(spy);
+      ref.changeAuthState({
         uid: 'kato1'
       });
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.calledOnce;
     });
 
     it('should only remove callback that matches context', function () {
       var context1 = {};
       var context2 = {};
-      fb.onAuth(spy);
-      fb.onAuth(spy, context1);
-      fb.onAuth(spy, context2);
-      fb.changeAuthState({
+      ref.onAuth(spy);
+      ref.onAuth(spy, context1);
+      ref.onAuth(spy, context2);
+      ref.changeAuthState({
         uid: 'kato1'
       });
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.calledThrice;
       // unmatched context
-      fb.offAuth(spy, {});
-      fb.offAuth(spy, context1);
-      fb.changeAuthState({
+      ref.offAuth(spy, {});
+      ref.offAuth(spy, context1);
+      ref.changeAuthState({
         uid: 'kato2'
       });
-      fb.flush();
+      ref.flush();
       expect(spy.callCount).to.equal(5);
     });
 
@@ -714,29 +714,29 @@ describe('MockFirebase', function () {
   describe('#unauth', function () {
 
     it('should set auth data to null', function () {
-      fb.changeAuthState({
+      ref.changeAuthState({
         uid: 'kato'
       });
-      fb.flush();
-      expect(fb.getAuth()).not.to.be.null;
-      fb.unauth();
-      expect(fb.getAuth()).to.be.null;
+      ref.flush();
+      expect(ref.getAuth()).not.to.be.null;
+      ref.unauth();
+      expect(ref.getAuth()).to.be.null;
     });
 
     it('should trigger onAuth callback if auth data is non-null', function () {
-      fb.changeAuthState({
+      ref.changeAuthState({
         uid: 'kato'
       });
-      fb.flush();
-      fb.onAuth(spy);
-      fb.unauth();
+      ref.flush();
+      ref.onAuth(spy);
+      ref.unauth();
       expect(spy).to.have.been.called;
     });
 
     it('should not trigger onAuth callback if auth data is null', function () {
-      fb.onAuth(spy);
-      expect(fb.getAuth()).to.be.null;
-      fb.unauth();
+      ref.onAuth(spy);
+      expect(ref.getAuth()).to.be.null;
+      ref.unauth();
       expect(spy).to.not.have.been.called;
     });
     
@@ -745,33 +745,33 @@ describe('MockFirebase', function () {
   describe('createUser', function () {
 
     it('should not generate error if credentials are valid', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'new1@new1.com',
         password: 'new1'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       expect(spy.firstCall.args[0]).to.be.null;
     });
 
     it('should assign each user a unique id', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'new1@new1.com',
         password: 'new1'
       }, spy);
-      fb.createUser({
+      ref.createUser({
         email: 'new2@new2.com',
         password: 'new2'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.calledTwice;
       expect(spy.firstCall.args[1].uid).to.equal('simplelogin:1');
       expect(spy.secondCall.args[1].uid).to.equal('simplelogin:2');
     });
 
     it('should fail if credentials is not an object', function () {
-      fb.createUser(29, spy);
-      fb.flush();
+      ref.createUser(29, spy);
+      ref.flush();
       expect(spy).to.have.been.called;
       var args = spy.firstCall.args;
       var err = args[0];
@@ -781,11 +781,11 @@ describe('MockFirebase', function () {
     });
 
     it('should fail if email is not a string', function () {
-      fb.createUser({
+      ref.createUser({
         email: true,
         password: 'foo'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       var user = spy.firstCall.args[1];
@@ -794,11 +794,11 @@ describe('MockFirebase', function () {
     });
 
     it('should fail if password is not a string', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'new1@new1.com',
         password: null
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       var user = spy.firstCall.args[1];
@@ -807,16 +807,16 @@ describe('MockFirebase', function () {
     });
 
     it('should fail if user already exists', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'duplicate@dup.com',
         password: 'foo'
       }, noop);
-      fb.flush();
-      fb.createUser({
+      ref.flush();
+      ref.createUser({
         email: 'duplicate@dup.com',
         password: 'bar'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       var user = spy.firstCall.args[1];
@@ -826,14 +826,14 @@ describe('MockFirebase', function () {
     });
 
     it('should fail if failNext is set', function () {
-      fb.failNext('createUser', {
+      ref.failNext('createUser', {
         foo: 'bar'
       });
-      fb.createUser({
+      ref.createUser({
         email: 'hello',
         password: 'world'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var args = spy.firstCall.args;
       expect(args[0]).to.deep.equal({
@@ -847,92 +847,92 @@ describe('MockFirebase', function () {
   describe('changePassword', function () {
 
     it('should change the password', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.changePassword({
+      ref.changePassword({
         email: 'kato@kato.com',
         oldPassword: 'kato',
         newPassword: 'kato!'
       }, noop);
-      fb.flush();
-      expect(fb.getEmailUser('kato@kato.com').password).to.equal('kato!');
+      ref.flush();
+      expect(ref.getEmailUser('kato@kato.com').password).to.equal('kato!');
     });
 
     it('should fail if credentials is not an object', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.changePassword(29, spy);
-      fb.flush();
+      ref.changePassword(29, spy);
+      ref.flush();
       expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.message).to.contain('must be a valid object.');
     });
 
     it('should fail if email is not a string', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.changePassword({
+      ref.changePassword({
         email: true,
         oldPassword: 'foo',
         newPassword: 'bar'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.message).to.contain('must contain the key "email"');
     });
 
     it('should fail if oldPassword is not a string', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.changePassword({
+      ref.changePassword({
         email: 'new1@new1.com',
         oldPassword: null,
         newPassword: 'bar'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.message).to.contain('must contain the key "oldPassword"');
     });
 
     it('should fail if newPassword is not a string', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.changePassword({
+      ref.changePassword({
         email: 'new1@new1.com',
         oldPassword: 'foo'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.message).to.contain('must contain the key "newPassword"');
     });
 
     it('should fail if failNext is set', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.failNext('changePassword', {
+      ref.failNext('changePassword', {
         foo: 'bar'
       });
-      fb.changePassword({
+      ref.changePassword({
         email: 'hello',
         oldPassword: 'foo',
         newPassword: 'bar'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var args = spy.firstCall.args;
       expect(args[0]).to.deep.equal({
@@ -941,12 +941,12 @@ describe('MockFirebase', function () {
     });
 
     it('should fail if user does not exist', function () {
-      fb.changePassword({
+      ref.changePassword({
         email: 'hello',
         oldPassword: 'foo',
         newPassword: 'bar'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.code).to.equal('INVALID_USER');
@@ -954,16 +954,16 @@ describe('MockFirebase', function () {
     });
 
     it('should fail if password is invalid', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.changePassword({
+      ref.changePassword({
         email: 'kato@kato.com',
         oldPassword: 'foo',
         newPassword: 'bar'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.code).to.equal('INVALID_PASSWORD');
@@ -974,77 +974,77 @@ describe('MockFirebase', function () {
   describe('removeUser', function () {
 
     it('should remove the account', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.flush();
-      expect(fb.getEmailUser('kato@kato.com')).to.deep.equal({uid: 'simplelogin:1', email: 'kato@kato.com',
+      ref.flush();
+      expect(ref.getEmailUser('kato@kato.com')).to.deep.equal({uid: 'simplelogin:1', email: 'kato@kato.com',
         password: 'kato'
       });
-      fb.removeUser({
+      ref.removeUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.flush();
-      expect(fb.getEmailUser('kato@kato.com')).to.be.null;
+      ref.flush();
+      expect(ref.getEmailUser('kato@kato.com')).to.be.null;
     });
 
     it('should fail if credentials is not an object', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.removeUser(29, spy);
-      fb.flush();
+      ref.removeUser(29, spy);
+      ref.flush();
       expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.message).to.contain('must be a valid object.');
     });
 
     it('should fail if email is not a string', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.removeUser({
+      ref.removeUser({
         email: true,
         password: 'foo'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.message).to.equal('Firebase.removeUser failed: First argument must contain the key "email" with type "string"');
     });
 
     it('should fail if password is not a string', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.removeUser({
+      ref.removeUser({
         email: 'new1@new1.com',
         password: null
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.message).to.equal('Firebase.removeUser failed: First argument must contain the key "password" with type "string"');
     });
 
     it('should fail if failNext is set', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.failNext('removeUser', {
+      ref.failNext('removeUser', {
         foo: 'bar'
       });
-      fb.removeUser({
+      ref.removeUser({
         email: 'hello',
         password: 'foo'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var args = spy.firstCall.args;
       expect(args[0]).to.deep.equal({
@@ -1053,11 +1053,11 @@ describe('MockFirebase', function () {
     });
 
     it('should fail if user does not exist', function () {
-      fb.removeUser({
+      ref.removeUser({
         email: 'hello',
         password: 'foo'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.code).to.equal('INVALID_USER');
@@ -1065,15 +1065,15 @@ describe('MockFirebase', function () {
     });
 
     it('should fail if password is invalid', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.removeUser({
+      ref.removeUser({
         email: 'kato@kato.com',
         password: 'foo'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.code).to.equal('INVALID_PASSWORD');
@@ -1084,56 +1084,56 @@ describe('MockFirebase', function () {
   describe('resetPassword', function () {
 
     it('should simulate reset if credentials are valid', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.resetPassword({
+      ref.resetPassword({
         email: 'kato@kato.com'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       expect(spy.firstCall.args[0]).to.be.null;
     });
 
     it('should fail if credentials is not an object', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.resetPassword(29, spy);
-      fb.flush();
+      ref.resetPassword(29, spy);
+      ref.flush();
       expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.message).to.equal('Firebase.resetPassword failed: First argument must be a valid object.');
     });
 
     it('should fail if email is not a string', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.resetPassword({
+      ref.resetPassword({
         email: true}, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.message).to.equal('Firebase.resetPassword failed: First argument must contain the key "email" with type "string"');
     });
 
     it('should fail if failNext is set', function () {
-      fb.createUser({
+      ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, noop);
-      fb.failNext('resetPassword', {
+      ref.failNext('resetPassword', {
         foo: 'bar'
       });
-      fb.resetPassword({
+      ref.resetPassword({
         email: 'kato@kato.com',
         password: 'foo'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var args = spy.firstCall.args;
       expect(args[0]).to.deep.equal({
@@ -1142,10 +1142,10 @@ describe('MockFirebase', function () {
     });
 
     it('should fail if user does not exist', function () {
-      fb.resetPassword({
+      ref.resetPassword({
         email: 'hello'
       }, spy);
-      fb.flush();
+      ref.flush();
       expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.code).to.equal('INVALID_USER');
