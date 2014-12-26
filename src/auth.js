@@ -27,33 +27,28 @@ FirebaseAuth.prototype.getEmailUser = function (email) {
   return users.hasOwnProperty(email) ? _.clone(users[email]) : null;
 };
 
+// number of arguments
+var authMethods = {
+  authWithCustomToken: 2,
+  authAnonymously: 1,
+  authWithPassword: 2,
+  authWithOAuthPopup: 2,
+  authWithOAuthRedirect: 2,
+  authWithOAuthToken: 3
+};
+
+Object.keys(authMethods)
+  .forEach(function (method) {
+    var length = authMethods[method];
+    var callbackIndex = length - 1;
+    FirebaseAuth.prototype[method] = function () {
+      this._authEvent(method, arguments[callbackIndex]);
+    };
+  });
+
 FirebaseAuth.prototype.auth = function (token, callback) {
   console.warn('FIREBASE WARNING: FirebaseRef.auth() being deprecated. Please use FirebaseRef.authWithCustomToken() instead.');
   this._authEvent('auth', callback);
-};
-
-FirebaseAuth.prototype.authWithCustomToken = function (token, onComplete) {
-  this._authEvent('authWithCustomToken', onComplete);
-};
-
-FirebaseAuth.prototype.authAnonymously = function (onComplete) {
-  this._authEvent('authAnonymously', onComplete);
-};
-
-FirebaseAuth.prototype.authWithPassword = function (credentials, onComplete) {
-  this._authEvent('authWithPassword', onComplete);
-};
-
-FirebaseAuth.prototype.authWithOAuthPopup = function (provider, onComplete) {
-  this._authEvent('authWithOAuthPopup', onComplete);
-};
-
-FirebaseAuth.prototype.authWithOAuthRedirect = function (provider, onComplete) {
-  this._authEvent('authWithOAuthRedirect', onComplete);
-};
-
-FirebaseAuth.prototype.authWithOAuthToken = function (provider, credentials, onComplete) {
-  this._authEvent('authWithOAuthToken', onComplete);
 };
 
 FirebaseAuth.prototype._authEvent = function (method, callback) {
