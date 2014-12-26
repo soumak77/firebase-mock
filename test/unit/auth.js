@@ -117,172 +117,22 @@ describe('Auth', function () {
       expect(spy).to.have.been.called;
     });
 
-    it('should invoke callback if no failNext is set and changeAuthState is triggered', function () {
-      var userData = {
+    it('invokes the callback when auth state is set', function () {
+      var user = {
         uid: 'kato'
       };
-      spy = sinon.spy(function(error, authData) {
+      spy = sinon.spy(function (error, authData) {
         expect(error).to.be.null;
-        expect(authData).to.deep.equal(userData);
+        expect(authData).to.deep.equal(user);
       });
       ref.authWithCustomToken('goodToken', spy);
-      ref.changeAuthState(userData);
+      ref.changeAuthState(user);
       ref.flush();
       expect(spy).to.have.been.called;
     });
 
     it('handles no callback', function () {
       ref.authWithCustomToken('goodToken');
-    });
-
-  });
-
-  describe('#authAnonymously', function () {
-
-    it('should fail auth if failNext is set', function () {
-      spy = sinon.spy(function (error, result) {
-        expect(error.message).to.equal('INVALID_TOKEN');
-        expect(result).to.be.null;
-      });
-      ref.failNext('authAnonymously', new Error('INVALID_TOKEN'));
-      ref.authAnonymously(spy);
-      ref.flush();
-      expect(spy).to.have.been.called;
-    });
-
-    it('should invoke callback if no failNext is set and changeAuthState is triggered', function () {
-      var userData = {uid: 'anon123'
-    };
-      spy = sinon.spy(function (error, authData) {
-        expect(error).to.be.null;
-        expect(authData).to.deep.equal(userData);
-      });
-      ref.authAnonymously(spy);
-      ref.changeAuthState(userData);
-      ref.flush();
-      expect(spy).to.have.been.called;
-    });
-
-  });
-
-  //todo tie this into user accounts?
-  describe('#authWithPassword', function () {
-    it('should fail auth if failNext is set', function () {
-      spy = sinon.spy(function (error, result) {
-        expect(error.message).to.equal('INVALID_TOKEN');
-        expect(result).to.be.null;
-      });
-      ref.failNext('authWithPassword', new Error('INVALID_TOKEN'));
-      ref.authWithPassword({
-        email: 'kato',
-        password: 'kato'
-      }, spy);
-      ref.flush();
-      expect(spy).to.have.been.called;
-    });
-
-    it('should invoke callback if no failNext is set and changeAuthState is triggered', function () {
-      var userData = {
-        uid: 'anon123'
-      };
-      spy = sinon.spy(function (error, authData) {
-        expect(error).to.be.null;
-        expect(authData).to.deep.equal(userData);
-      });
-      ref.authWithPassword({
-        email: 'kato',
-        password: 'kato'
-      }, spy);
-      ref.changeAuthState(userData);
-      ref.flush();
-      expect(spy).to.have.been.called;
-    });
-
-  });
-
-  describe('#authWithOAuthPopup', function () {
-
-    it('should fail auth if failNext is set', function () {
-      spy = sinon.spy(function (error, result) {
-        expect(error.message).to.equal('INVALID_TOKEN');
-        expect(result).to.be.null;
-      });
-      ref.failNext('authWithOAuthPopup', new Error('INVALID_TOKEN'));
-      ref.authWithOAuthPopup('facebook', spy);
-      ref.flush();
-      expect(spy).to.have.been.called;
-    });
-
-    it('should invoke callback if no failNext is set and changeAuthState is triggered', function () {
-      var userData = {
-        uid: 'anon123'
-      };
-      spy = sinon.spy(function (error, authData) {
-        expect(error).to.be.null;
-        expect(authData).to.deep.equal(userData);
-      });
-      ref.authWithOAuthPopup('facebook', spy);
-      ref.changeAuthState(userData);
-      ref.flush();
-      expect(spy).to.have.been.called;
-    });
-
-  });
-
-  describe('#authWithOAuthRedirect', function () {
-
-    it('should fail auth if failNext is set', function () {
-      spy = sinon.spy(function (error, result) {
-        expect(error.message).to.equal('INVALID_TOKEN');
-        expect(result).to.be.null;
-      });
-      ref.failNext('authWithOAuthRedirect', new Error('INVALID_TOKEN'));
-      ref.authWithOAuthRedirect('facebook', spy);
-      ref.flush();
-      expect(spy).to.have.been.called;
-    });
-
-    it('should invoke callback if no failNext is set and changeAuthState is triggered', function () {
-      var userData = {
-        uid: 'anon123'
-      };
-      spy = sinon.spy(function (error, authData) {
-        expect(error).to.be.null;
-        expect(authData).to.deep.equal(userData);
-      });
-      ref.authWithOAuthRedirect('facebook', spy);
-      ref.changeAuthState(userData);
-      ref.flush();
-      expect(spy).to.have.been.called;
-    });
-
-  });
-
-  describe('authWithOAuthToken', function () {
-
-    it('should fail auth if failNext is set', function () {
-      spy = sinon.spy(function (error, result) {
-        expect(error.message).to.equal('INVALID_TOKEN');
-        expect(result).to.be.null;
-      });
-      ref.failNext('authWithOAuthToken', new Error('INVALID_TOKEN'));
-      ref.authWithOAuthToken('twitter', 'invalid_token', spy);
-      ref.flush();
-      expect(spy).to.have.been.called;
-    });
-
-    it('should invoke callback if no failNext is set and changeAuthState is triggered', function () {
-      var userData = {
-        uid: 'anon123'
-      };
-      spy = sinon.spy(function (error, authData) {
-        expect(error).to.be.null;
-        expect(authData).to.deep.equal(userData);
-      });
-      ref.authWithOAuthToken('twitter', 'valid_token', spy);
-      ref.changeAuthState(userData);
-      ref.flush();
-      expect(spy).to.have.been.called;
     });
 
   });
