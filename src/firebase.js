@@ -235,8 +235,8 @@ MockFirebase.prototype.once = function (event, callback, cancel, context) {
 
 MockFirebase.prototype.remove = function (callback) {
   var err = this._nextErr('remove');
-  this._defer(function() {
-    if( err === null ) {
+  this._defer(function () {
+    if (err === null) {
       this._dataChanged(null);
     }
     if (callback) callback(err);

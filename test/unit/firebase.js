@@ -433,23 +433,28 @@ describe('MockFirebase', function () {
 
   describe('#remove', function () {
 
-    beforeEach(function () {
-      ref.autoFlush();
-    });
-
-    it('should call child_removed for children', function () {
+    it('fires child_removed for children', function () {
       ref.on('child_removed', spy);
       ref.child('a').remove();
+      ref.flush();
       expect(spy).to.have.been.called;
-      var snapshot = spy.firstCall.args[0];
-      expect(snapshot.key()).to.equal('a');
+      expect(spy.firstCall.args[0].key()).to.equal('a');
     });
 
-    it('should change to null if all children are removed', function () {
-      for (var key in ref.getData()) {
+    it('changes to null if all children are removed', function () {
+      ref.getKeys().forEach(function (key) {
         ref.child(key).remove();
-      }
+      });
+      ref.flush();
       expect(ref.getData()).to.be.null;
+    });
+
+    it('can simulate an error', function () {
+      var err = new Error();
+      ref.failNext('remove', err);
+      ref.remove(spy);
+      ref.flush();
+      expect(spy).to.have.been.calledWith(err);
     });
 
   });
