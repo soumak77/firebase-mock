@@ -63,8 +63,9 @@ MockFirebase.prototype.joinQueue = function () {
   }
 };
 
-MockFirebase.prototype.failNext = function (methodName, error) {
-  this.errs[methodName] = error;
+MockFirebase.prototype.failNext = function (methodName, err) {
+  assert(err instanceof Error, 'err must be an "Error" object');
+  this.errs[methodName] = err;
 };
 
 MockFirebase.prototype.forceCancel = function (error, event, callback, context) {

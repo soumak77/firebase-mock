@@ -82,6 +82,14 @@ describe('MockFirebase', function () {
 
   });
 
+  describe('#failNext', function () {
+
+    it('must be called with an Error', function () {
+      expect(ref.failNext.bind(ref)).to.throw('"Error"');
+    });
+
+  });
+
   describe('#child', function () {
 
     it('requires a path', function () {

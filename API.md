@@ -63,6 +63,8 @@ After calling `splitQueue`, `joinQueue` will restore the normal behavior and rec
 
 When `method` is next invoked, trigger the `onComplete` callback with the specified `err`. This is useful for simulating validation, authorization, or any other errors. The callback will be triggered with the next `flush`. 
 
+`err` must be a proper `Error` object and not a string or any other primitive. 
+
 Example:
 
 ```js
