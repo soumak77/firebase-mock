@@ -32,516 +32,514 @@ function MockFirebase (path, data, parent, name) {
   _.extend(this, Auth.prototype, new Auth());
 }
 
-MockFirebase.prototype = {
-  flush: function(delay) {
-    this.queue.flush(delay);
-    return this;
-  },
+MockFirebase.prototype.flush = function (delay) {
+  this.queue.flush(delay);
+  return this;
+};
 
-  autoFlush: function(delay){
-    if(_.isUndefined(delay)) { delay = true; }
-    if( this.flushDelay !== delay ) {
-      this.flushDelay = delay;
-      _.each(this.children, function(c) {
-        c.autoFlush(delay);
-      });
-      if( this.parentRef ) { this.parentRef.autoFlush(delay); }
-    }
-    return this;
-  },
+MockFirebase.prototype.autoFlush = function (delay){
+  if(_.isUndefined(delay)) { delay = true; }
+  if( this.flushDelay !== delay ) {
+    this.flushDelay = delay;
+    _.each(this.children, function(c) {
+      c.autoFlush(delay);
+    });
+    if( this.parentRef ) { this.parentRef.autoFlush(delay); }
+  }
+  return this;
+};
 
-  splitQueue: function() {
-    this.queue = new Queue();
-  },
+MockFirebase.prototype.splitQueue = function () {
+  this.queue = new Queue();
+};
 
-  joinQueue: function() {
-    if( this.parent ) {
-      this.queue = this.parent.queue;
-    }
-  },
+MockFirebase.prototype.joinQueue = function () {
+  if( this.parent ) {
+    this.queue = this.parent.queue;
+  }
+};
 
-  failNext: function(methodName, error) {
-    this.errs[methodName] = error;
-  },
+MockFirebase.prototype.failNext = function (methodName, error) {
+  this.errs[methodName] = error;
+};
 
-  forceCancel: function(error, event, callback, context) {
-    var events = this._events;
-    (event ? [event] : _.keys(events))
-      .forEach(function (eventName) {
-        events[eventName]
-          .filter(function (parts) {
-            return !event || !callback || (callback === parts[0] && context === parts[1]);
-          })
-          .forEach(function (parts) {
-            parts[2].call(parts[1], error);
-            this.off(event, callback, context);
-          }, this);
-      });
-  },
-
-  getData: function() {
-    return _.cloneDeep(this.data);
-  },
-
-  getKeys: function() {
-    return this.sortedDataKeys.slice();
-  },
-
-  fakeEvent: function(event, key, data, prevChild, pri) {
-    if( arguments.length < 5 ) { pri = null; }
-    if( arguments.length < 4 ) { prevChild = null; }
-    if( arguments.length < 3 ) { data = null; }
-    var ref = event==='value'? this : this.child(key);
-    var snapshot = new Snapshot(ref, data, pri);
-    this._defer(function() {
-      this._events[event]
-        .map(function (parts) {
-          return {
-            fn: parts[0],
-            args: [snapshot],
-            context: parts[1]
-          };
+MockFirebase.prototype.forceCancel = function (error, event, callback, context) {
+  var events = this._events;
+  (event ? [event] : _.keys(events))
+    .forEach(function (eventName) {
+      events[eventName]
+        .filter(function (parts) {
+          return !event || !callback || (callback === parts[0] && context === parts[1]);
         })
-        .forEach(function (data) {
-          if ('child_added' === event || 'child_moved' === event) {
-            data.args.push(prevChild);
-          }
-          data.fn.apply(data.context.concat(data.args));
-        });
+        .forEach(function (parts) {
+          parts[2].call(parts[1], error);
+          this.off(event, callback, context);
+        }, this);
     });
-    return this;
-  },
+};
 
-  toString: function() {
-    return this.path;
-  },
+MockFirebase.prototype.getData = function () {
+  return _.cloneDeep(this.data);
+};
 
-  child: function(childPath) {
-    assert(childPath, 'A child path is required');
-    var parts = _.compact(childPath.split('/'));
-    var childKey = parts.shift();
-    var child = this.children[childKey];
-    if (!child) {
-      child = new MockFirebase(utils.mergePaths(this.path, childKey), this._childData(childKey), this, childKey);
-      this.children[child.key()] = child;
-    }
-    if (parts.length) {
-      child = child.child(parts.join('/'));
-    }
-    return child;
-  },
+MockFirebase.prototype.getKeys = function () {
+  return this.sortedDataKeys.slice();
+};
 
-  set: function(data, callback) {
-    var err = this._nextErr('set');
-    data = _.cloneDeep(data);
-    this._defer(function() {
-      if( err === null ) {
-        this._dataChanged(data);
-      }
-      if (callback) callback(err);
-    });
-  },
-
-  update: function(changes, callback) {
-    assert.equal(typeof changes, 'object', 'First argument must be an object when calling $update');
-    var err = this._nextErr('update');
-    var base = this.getData();
-    var data = _.assign(_.isObject(base) ? base : {}, changes);
-    this._defer(function() {
-      if (!err) {
-        this._dataChanged(data);
-      }
-      if (callback) callback(err);
-    });
-  },
-
-  setPriority: function(newPriority, callback) {
-    var err = this._nextErr('setPriority');
-    this._defer(function() {
-      this._priChanged(newPriority);
-      if (callback) callback(err);
-    });
-  },
-
-  setWithPriority: function(data, pri, callback) {
-    this.setPriority(pri);
-    this.set(data, callback);
-  },
-
-  key: function() {
-    return this.myName;
-  },
-
-  name: function() {
-    console.warn('ref.name() is deprecated. Use ref.key()');
-    return this.key.apply(this, arguments);
-  },
-
-  ref: function() {
-    return this;
-  },
-
-  parent: function() {
-    return this.parentRef;
-  },
-
-  root: function() {
-    var next = this;
-    while (next.parentRef) {
-      next = next.parentRef;
-    }
-    return next;
-  },
-
-  push: function(data, callback) {
-    var child = this.child(this._newAutoId());
-    var err = this._nextErr('push');
-    if (err) child.failNext('set', err);
-    if (arguments.length && data !== null) {
-      // currently, callback only invoked if child exists
-      child.set(data, callback);
-    }
-    return child;
-  },
-
-  once: function(event, callback, cancel, context) {
-    if( arguments.length === 3 && !_.isFunction(cancel) ) {
-      context = cancel;
-      cancel = function() {};
-    }
-    else if( arguments.length < 3 ) {
-      cancel = function() {};
-      context = null;
-    }
-    var err = this._nextErr('once');
-    if( err ) {
-      this._defer(function() {
-        cancel.call(context, err);
+MockFirebase.prototype.fakeEvent = function (event, key, data, prevChild, pri) {
+  if( arguments.length < 5 ) { pri = null; }
+  if( arguments.length < 4 ) { prevChild = null; }
+  if( arguments.length < 3 ) { data = null; }
+  var ref = event==='value'? this : this.child(key);
+  var snapshot = new Snapshot(ref, data, pri);
+  this._defer(function() {
+    this._events[event]
+      .map(function (parts) {
+        return {
+          fn: parts[0],
+          args: [snapshot],
+          context: parts[1]
+        };
+      })
+      .forEach(function (data) {
+        if ('child_added' === event || 'child_moved' === event) {
+          data.args.push(prevChild);
+        }
+        data.fn.apply(data.context.concat(data.args));
       });
-    }
-    else {
-      var fn = function (snap) {
-        this.off(event, fn, context);
-        callback.call(context, snap);
-      }.bind(this);
+  });
+  return this;
+};
 
-      this.on(event, fn, cancel, context);
-    }
-  },
+MockFirebase.prototype.toString = function () {
+  return this.path;
+};
 
-  remove: function(callback) {
-    var err = this._nextErr('remove');
+MockFirebase.prototype.child = function (childPath) {
+  assert(childPath, 'A child path is required');
+  var parts = _.compact(childPath.split('/'));
+  var childKey = parts.shift();
+  var child = this.children[childKey];
+  if (!child) {
+    child = new MockFirebase(utils.mergePaths(this.path, childKey), this._childData(childKey), this, childKey);
+    this.children[child.key()] = child;
+  }
+  if (parts.length) {
+    child = child.child(parts.join('/'));
+  }
+  return child;
+};
+
+MockFirebase.prototype.set = function (data, callback) {
+  var err = this._nextErr('set');
+  data = _.cloneDeep(data);
+  this._defer(function() {
+    if( err === null ) {
+      this._dataChanged(data);
+    }
+    if (callback) callback(err);
+  });
+};
+
+MockFirebase.prototype.update = function (changes, callback) {
+  assert.equal(typeof changes, 'object', 'First argument must be an object when calling $update');
+  var err = this._nextErr('update');
+  var base = this.getData();
+  var data = _.assign(_.isObject(base) ? base : {}, changes);
+  this._defer(function() {
+    if (!err) {
+      this._dataChanged(data);
+    }
+    if (callback) callback(err);
+  });
+};
+
+MockFirebase.prototype.setPriority = function (newPriority, callback) {
+  var err = this._nextErr('setPriority');
+  this._defer(function() {
+    this._priChanged(newPriority);
+    if (callback) callback(err);
+  });
+};
+
+MockFirebase.prototype.setWithPriority = function (data, pri, callback) {
+  this.setPriority(pri);
+  this.set(data, callback);
+};
+
+MockFirebase.prototype.key = function () {
+  return this.myName;
+};
+
+MockFirebase.prototype.name = function () {
+  console.warn('ref.name() is deprecated. Use ref.key()');
+  return this.key.apply(this, arguments);
+};
+
+MockFirebase.prototype.ref = function () {
+  return this;
+};
+
+MockFirebase.prototype.parent = function () {
+  return this.parentRef;
+};
+
+MockFirebase.prototype.root = function () {
+  var next = this;
+  while (next.parentRef) {
+    next = next.parentRef;
+  }
+  return next;
+};
+
+MockFirebase.prototype.push = function (data, callback) {
+  var child = this.child(this._newAutoId());
+  var err = this._nextErr('push');
+  if (err) child.failNext('set', err);
+  if (arguments.length && data !== null) {
+    // currently, callback only invoked if child exists
+    child.set(data, callback);
+  }
+  return child;
+};
+
+MockFirebase.prototype.once = function (event, callback, cancel, context) {
+  if( arguments.length === 3 && !_.isFunction(cancel) ) {
+    context = cancel;
+    cancel = function() {};
+  }
+  else if( arguments.length < 3 ) {
+    cancel = function() {};
+    context = null;
+  }
+  var err = this._nextErr('once');
+  if( err ) {
     this._defer(function() {
-      if( err === null ) {
-        this._dataChanged(null);
-      }
-      if (callback) callback(err);
+      cancel.call(context, err);
     });
-    return this;
-  },
+  }
+  else {
+    var fn = function (snap) {
+      this.off(event, fn, context);
+      callback.call(context, snap);
+    }.bind(this);
 
-  on: function(event, callback, cancel, context) {
-    if (arguments.length === 3 && typeof cancel !== 'function') {
-      context = cancel;
-      cancel = noop;
-    }
-    else if (arguments.length < 3) {
-      cancel = noop;
-    }
+    this.on(event, fn, cancel, context);
+  }
+};
 
-    var err = this._nextErr('on');
-    if (err) {
+MockFirebase.prototype.remove = function (callback) {
+  var err = this._nextErr('remove');
+  this._defer(function() {
+    if( err === null ) {
+      this._dataChanged(null);
+    }
+    if (callback) callback(err);
+  });
+  return this;
+};
+
+MockFirebase.prototype.on = function (event, callback, cancel, context) {
+  if (arguments.length === 3 && typeof cancel !== 'function') {
+    context = cancel;
+    cancel = noop;
+  }
+  else if (arguments.length < 3) {
+    cancel = noop;
+  }
+
+  var err = this._nextErr('on');
+  if (err) {
+    this._defer(function() {
+      cancel.call(context, err);
+    });
+  }
+  else {
+    var handlers = [callback, context, cancel];
+    this._events[event].push(handlers);
+    if (event === 'value') {
       this._defer(function() {
-        cancel.call(context, err);
-      });
-    }
-    else {
-      var handlers = [callback, context, cancel];
-      this._events[event].push(handlers);
-      if (event === 'value') {
-        this._defer(function() {
-          // make sure off() wasn't called in the interim
-          if (this._events[event].indexOf(handlers) > -1) {
-            callback.call(context, new Snapshot(this, this.getData(), this.priority));
-          }
-        });
-      }
-      else if (event === 'child_added') {
-        this._defer(function() {
-          if (this._events[event].indexOf(handlers) > -1) {
-            var previous = null;
-            this.sortedDataKeys
-              .forEach(function (key) {
-                var child = this.child(key);
-                callback.call(context, new Snapshot(child, child.getData(), child.priority), previous);
-                previous = key;
-              }, this);
-          }
-        });
-      }
-    }
-  },
-
-  off: function(event, callback, context) {
-    if( !event ) {
-      for (var key in this._events)
-        if( this._events.hasOwnProperty(key) )
-          this.off(key);
-    }
-    else if( callback ) {
-      var list = this._events[event];
-      var newList = this._events[event] = [];
-      _.each(list, function(parts) {
-        if( parts[0] !== callback || parts[1] !== context ) {
-          newList.push(parts);
+        // make sure off() wasn't called in the interim
+        if (this._events[event].indexOf(handlers) > -1) {
+          callback.call(context, new Snapshot(this, this.getData(), this.priority));
         }
       });
     }
-    else {
-      this._events[event] = [];
+    else if (event === 'child_added') {
+      this._defer(function() {
+        if (this._events[event].indexOf(handlers) > -1) {
+          var previous = null;
+          this.sortedDataKeys
+            .forEach(function (key) {
+              var child = this.child(key);
+              callback.call(context, new Snapshot(child, child.getData(), child.priority), previous);
+              previous = key;
+            }, this);
+        }
+      });
     }
-  },
+  }
+};
 
-  transaction: function(valueFn, finishedFn, applyLocally) {
-    this._defer(function() {
-      var err = this._nextErr('transaction');
-      var res = valueFn(this.getData());
-      var newData = _.isUndefined(res) || err? this.getData() : res;
-      this._dataChanged(newData);
-      if (typeof finishedFn === 'function') {
-        finishedFn(err, err === null && !_.isUndefined(res), new Snapshot(this, newData, this.priority));
+MockFirebase.prototype.off = function (event, callback, context) {
+  if( !event ) {
+    for (var key in this._events)
+      if( this._events.hasOwnProperty(key) )
+        this.off(key);
+  }
+  else if( callback ) {
+    var list = this._events[event];
+    var newList = this._events[event] = [];
+    _.each(list, function(parts) {
+      if( parts[0] !== callback || parts[1] !== context ) {
+        newList.push(parts);
       }
     });
-    return [valueFn, finishedFn, applyLocally];
-  },
+  }
+  else {
+    this._events[event] = [];
+  }
+};
 
-  /**
-   * Just a stub at this point.
-   * @param {int} limit
-   */
-  limit: function(limit) {
-    return new Query(this).limit(limit);
-  },
+MockFirebase.prototype.transaction = function (valueFn, finishedFn, applyLocally) {
+  this._defer(function() {
+    var err = this._nextErr('transaction');
+    var res = valueFn(this.getData());
+    var newData = _.isUndefined(res) || err? this.getData() : res;
+    this._dataChanged(newData);
+    if (typeof finishedFn === 'function') {
+      finishedFn(err, err === null && !_.isUndefined(res), new Snapshot(this, newData, this.priority));
+    }
+  });
+  return [valueFn, finishedFn, applyLocally];
+};
 
-  startAt: function(priority, key) {
-    return new Query(this).startAt(priority, key);
-  },
+MockFirebase.prototype./**
+ * Just a stub at this point.
+ * @param {int} limit
+ */
+limit = function (limit) {
+  return new Query(this).limit(limit);
+};
 
-  endAt: function(priority, key) {
-    return new Query(this).endAt(priority, key);
-  },
+MockFirebase.prototype.startAt = function (priority, key) {
+  return new Query(this).startAt(priority, key);
+};
 
-  _childChanged: function(ref) {
+MockFirebase.prototype.endAt = function (priority, key) {
+  return new Query(this).endAt(priority, key);
+};
+
+MockFirebase.prototype._childChanged = function (ref) {
+  var events = [];
+  var childKey = ref.key();
+  var data = ref.getData();
+  if( data === null ) {
+    this._removeChild(childKey, events);
+  }
+  else {
+    this._updateOrAdd(childKey, data, events);
+  }
+  this._triggerAll(events);
+};
+
+MockFirebase.prototype._dataChanged = function (unparsedData) {
+  var pri = utils.getMeta(unparsedData, 'priority', this.priority);
+  var data = utils.cleanData(unparsedData);
+  if( pri !== this.priority ) {
+    this._priChanged(pri);
+  }
+  if( !_.isEqual(data, this.data) ) {
+    var oldKeys = _.keys(this.data).sort();
+    var newKeys = _.keys(data).sort();
+    var keysToRemove = _.difference(oldKeys, newKeys);
+    var keysToChange = _.difference(newKeys, keysToRemove);
     var events = [];
-    var childKey = ref.key();
-    var data = ref.getData();
-    if( data === null ) {
-      this._removeChild(childKey, events);
+
+    keysToRemove.forEach(function(key) {
+      this._removeChild(key, events);
+    }, this);
+
+    if(!_.isObject(data)) {
+      events.push(false);
+      this.data = data;
     }
     else {
-      this._updateOrAdd(childKey, data, events);
-    }
-    this._triggerAll(events);
-  },
-
-  _dataChanged: function(unparsedData) {
-    var pri = utils.getMeta(unparsedData, 'priority', this.priority);
-    var data = utils.cleanData(unparsedData);
-    if( pri !== this.priority ) {
-      this._priChanged(pri);
-    }
-    if( !_.isEqual(data, this.data) ) {
-      var oldKeys = _.keys(this.data).sort();
-      var newKeys = _.keys(data).sort();
-      var keysToRemove = _.difference(oldKeys, newKeys);
-      var keysToChange = _.difference(newKeys, keysToRemove);
-      var events = [];
-
-      keysToRemove.forEach(function(key) {
-        this._removeChild(key, events);
+      keysToChange.forEach(function(key) {
+        this._updateOrAdd(key, unparsedData[key], events);
       }, this);
-
-      if(!_.isObject(data)) {
-        events.push(false);
-        this.data = data;
-      }
-      else {
-        keysToChange.forEach(function(key) {
-          this._updateOrAdd(key, unparsedData[key], events);
-        }, this);
-      }
-
-      // update order of my child keys
-      this._resort();
-
-      // trigger parent notifications after all children have
-      // been processed
-      this._triggerAll(events);
     }
-  },
 
-  _priChanged: function(newPriority) {
-    this.priority = newPriority;
-    if( this.parentRef ) {
-      this.parentRef._resort(this.key());
-    }
-  },
+    // update order of my child keys
+    this._resort();
 
-  _getPri: function(key) {
-    return _.has(this.children, key)? this.children[key].priority : null;
-  },
+    // trigger parent notifications after all children have
+    // been processed
+    this._triggerAll(events);
+  }
+};
 
-  _resort: function(childKeyMoved) {
-    this.sortedDataKeys.sort(_.bind(this.childComparator, this));
-    // resort the data object to match our keys so value events return ordered content
-    var oldData = _.assign({}, this.data);
-    _.each(oldData, function(v,k) { delete this.data[k]; }, this);
-    _.each(this.sortedDataKeys, function(k) {
-      this.data[k] = oldData[k];
-    }, this);
-    if( !_.isUndefined(childKeyMoved) && _.has(this.data, childKeyMoved) ) {
-      this._trigger('child_moved', this.data[childKeyMoved], this._getPri(childKeyMoved), childKeyMoved);
-    }
-  },
+MockFirebase.prototype._priChanged = function (newPriority) {
+  this.priority = newPriority;
+  if( this.parentRef ) {
+    this.parentRef._resort(this.key());
+  }
+};
 
-  _addKey: function(newKey) {
-    if(_.indexOf(this.sortedDataKeys, newKey) === -1) {
-      this.sortedDataKeys.push(newKey);
-      this._resort();
-    }
-  },
+MockFirebase.prototype._getPri = function (key) {
+  return _.has(this.children, key)? this.children[key].priority : null;
+};
 
-  _dropKey: function(key) {
-    var i = _.indexOf(this.sortedDataKeys, key);
-    if( i > -1 ) {
-      this.sortedDataKeys.splice(i, 1);
-    }
-  },
+MockFirebase.prototype._resort = function (childKeyMoved) {
+  this.sortedDataKeys.sort(_.bind(this.childComparator, this));
+  // resort the data object to match our keys so value events return ordered content
+  var oldData = _.assign({}, this.data);
+  _.each(oldData, function(v,k) { delete this.data[k]; }, this);
+  _.each(this.sortedDataKeys, function(k) {
+    this.data[k] = oldData[k];
+  }, this);
+  if( !_.isUndefined(childKeyMoved) && _.has(this.data, childKeyMoved) ) {
+    this._trigger('child_moved', this.data[childKeyMoved], this._getPri(childKeyMoved), childKeyMoved);
+  }
+};
 
-  _defer: function (callback) {
-    this.queue.push(_.bind(callback, this));
-    if (this.flushDelay !== false) {
-      this.flush(this.flushDelay);
-    }
-  },
+MockFirebase.prototype._addKey = function (newKey) {
+  if(_.indexOf(this.sortedDataKeys, newKey) === -1) {
+    this.sortedDataKeys.push(newKey);
+    this._resort();
+  }
+};
 
-  _trigger: function(event, data, pri, key) {
-    var ref = event==='value'? this : this.child(key);
-    var snap = new Snapshot(ref, data, pri);
-    _.each(this._events[event], function(parts) {
-      var fn = parts[0], context = parts[1];
-      if(_.contains(['child_added', 'child_moved'], event)) {
-        fn.call(context, snap, this._getPrevChild(key));
-      }
-      else {
-        fn.call(context, snap);
-      }
-    }, this);
-  },
+MockFirebase.prototype._dropKey = function (key) {
+  var i = _.indexOf(this.sortedDataKeys, key);
+  if( i > -1 ) {
+    this.sortedDataKeys.splice(i, 1);
+  }
+};
 
-  _triggerAll: function(events) {
-    if (!events.length) return;
-    events.forEach(function(event) {
-      if (event !== false) this._trigger.apply(this, event);
-    }, this);
-    this._trigger('value', this.data, this.priority);
-    if (this.parentRef) {
-      this.parentRef._childChanged(this);
-    }
-  },
+MockFirebase.prototype._defer = function (callback) {
+  this.queue.push(_.bind(callback, this));
+  if (this.flushDelay !== false) {
+    this.flush(this.flushDelay);
+  }
+};
 
-  _updateOrAdd: function(key, data, events) {
-    var exists = _.isObject(this.data) && this.data.hasOwnProperty(key);
-    if( !exists ) {
-      return this._addChild(key, data, events);
+MockFirebase.prototype._trigger = function (event, data, pri, key) {
+  var ref = event==='value'? this : this.child(key);
+  var snap = new Snapshot(ref, data, pri);
+  _.each(this._events[event], function(parts) {
+    var fn = parts[0], context = parts[1];
+    if(_.contains(['child_added', 'child_moved'], event)) {
+      fn.call(context, snap, this._getPrevChild(key));
     }
     else {
-      return this._updateChild(key, data, events);
+      fn.call(context, snap);
     }
-  },
+  }, this);
+};
 
-  _addChild: function(key, data, events) {
-    if(this._hasChild(key)) {
-      throw new Error('Tried to add existing object', key);
+MockFirebase.prototype._triggerAll = function (events) {
+  if (!events.length) return;
+  events.forEach(function(event) {
+    if (event !== false) this._trigger.apply(this, event);
+  }, this);
+  this._trigger('value', this.data, this.priority);
+  if (this.parentRef) {
+    this.parentRef._childChanged(this);
+  }
+};
+
+MockFirebase.prototype._updateOrAdd = function (key, data, events) {
+  var exists = _.isObject(this.data) && this.data.hasOwnProperty(key);
+  if( !exists ) {
+    return this._addChild(key, data, events);
+  }
+  else {
+    return this._updateChild(key, data, events);
+  }
+};
+
+MockFirebase.prototype._addChild = function (key, data, events) {
+  if(this._hasChild(key)) {
+    throw new Error('Tried to add existing object', key);
+  }
+  if( !_.isObject(this.data) ) {
+    this.data = {};
+  }
+  this._addKey(key);
+  this.data[key] = utils.cleanData(data);
+  var c = this.child(key);
+  c._dataChanged(data);
+  if (events) events.push(['child_added', c.getData(), c.priority, key]);
+};
+
+MockFirebase.prototype._removeChild = function (key, events) {
+  if(this._hasChild(key)) {
+    this._dropKey(key);
+    var data = this.data[key];
+    delete this.data[key];
+    if(_.isEmpty(this.data)) {
+      this.data = null;
     }
-    if( !_.isObject(this.data) ) {
-      this.data = {};
+    if(_.has(this.children, key)) {
+      this.children[key]._dataChanged(null);
     }
-    this._addKey(key);
-    this.data[key] = utils.cleanData(data);
+    if (events) events.push(['child_removed', data, null, key]);
+  }
+};
+
+MockFirebase.prototype._updateChild = function (key, data, events) {
+  var cdata = utils.cleanData(data);
+  if(_.isObject(this.data) && _.has(this.data,key) && !_.isEqual(this.data[key], cdata)) {
+    this.data[key] = cdata;
     var c = this.child(key);
     c._dataChanged(data);
-    if (events) events.push(['child_added', c.getData(), c.priority, key]);
-  },
-
-  _removeChild: function(key, events) {
-    if(this._hasChild(key)) {
-      this._dropKey(key);
-      var data = this.data[key];
-      delete this.data[key];
-      if(_.isEmpty(this.data)) {
-        this.data = null;
-      }
-      if(_.has(this.children, key)) {
-        this.children[key]._dataChanged(null);
-      }
-      if (events) events.push(['child_removed', data, null, key]);
-    }
-  },
-
-  _updateChild: function(key, data, events) {
-    var cdata = utils.cleanData(data);
-    if(_.isObject(this.data) && _.has(this.data,key) && !_.isEqual(this.data[key], cdata)) {
-      this.data[key] = cdata;
-      var c = this.child(key);
-      c._dataChanged(data);
-      if (events) events.push(['child_changed', c.getData(), c.priority, key]);
-    }
-  },
-
-  _newAutoId: function() {
-    this._lastAutoId = 'mock-'+Date.now()+'-'+Math.floor(Math.random()*10000);
-    return this._lastAutoId;
-  },
-
-  _nextErr: function(type) {
-    var err = this.errs[type];
-    delete this.errs[type];
-    return err||null;
-  },
-
-  _hasChild: function(key) {
-    return _.isObject(this.data) && _.has(this.data, key);
-  },
-
-  _childData: function(key) {
-    return this._hasChild(key)? this.data[key] : null;
-  },
-
-  _getPrevChild: function(key) {
-//      this._resort();
-    var keys = this.sortedDataKeys;
-    var i = _.indexOf(keys, key);
-    if( i === -1 ) {
-      keys = keys.slice();
-      keys.push(key);
-      keys.sort(_.bind(this.childComparator, this));
-      i = _.indexOf(keys, key);
-    }
-    return i === 0? null : keys[i-1];
-  },
-
-  childComparator: function(a, b) {
-    var aPri = this._getPri(a);
-    var bPri = this._getPri(b);
-    var x = utils.priorityComparator(aPri, bPri);
-    if( x === 0 ) {
-      if( a !== b ) {
-        x = a < b? -1 : 1;
-      }
-    }
-    return x;
+    if (events) events.push(['child_changed', c.getData(), c.priority, key]);
   }
+};
+
+MockFirebase.prototype._newAutoId = function () {
+  this._lastAutoId = 'mock-'+Date.now()+'-'+Math.floor(Math.random()*10000);
+  return this._lastAutoId;
+};
+
+MockFirebase.prototype._nextErr = function (type) {
+  var err = this.errs[type];
+  delete this.errs[type];
+  return err||null;
+};
+
+MockFirebase.prototype._hasChild = function (key) {
+  return _.isObject(this.data) && _.has(this.data, key);
+};
+
+MockFirebase.prototype._childData = function (key) {
+  return this._hasChild(key)? this.data[key] : null;
+};
+
+MockFirebase.prototype._getPrevChild = function (key) {
+//      this._resort();
+  var keys = this.sortedDataKeys;
+  var i = _.indexOf(keys, key);
+  if( i === -1 ) {
+    keys = keys.slice();
+    keys.push(key);
+    keys.sort(_.bind(this.childComparator, this));
+    i = _.indexOf(keys, key);
+  }
+  return i === 0? null : keys[i-1];
+};
+
+MockFirebase.prototype.childComparator = function (a, b) {
+  var aPri = this._getPri(a);
+  var bPri = this._getPri(b);
+  var x = utils.priorityComparator(aPri, bPri);
+  if( x === 0 ) {
+    if( a !== b ) {
+      x = a < b? -1 : 1;
+    }
+  }
+  return x;
 };
 
 function extractName(path) {
