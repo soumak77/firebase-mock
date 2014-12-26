@@ -14,6 +14,45 @@ describe('MockFirebase', function () {
     spy = sinon.spy();
   });
 
+  describe('#flush', function () {
+
+    it('flushes the queue and returns itself', function () {
+      sinon.stub(ref.queue, 'flush');
+      expect(ref.flush(10)).to.equal(ref);
+      expect(ref.queue.flush).to.have.been.calledWith(10);
+    });
+
+  });
+
+  describe('#autoFlush', function () {
+
+    it('enables autoflush with no args', function () {
+      ref.autoFlush();
+      expect(ref.flushDelay).to.be.true;
+    });
+
+    it('can specify a flush delay', function () {
+      ref.autoFlush(10);
+      expect(ref.flushDelay).to.equal(10);
+    });
+
+    it('sets the delay on all children', function () {
+      ref.child('key');
+      ref.autoFlush(10);
+      expect(ref.child('key').flushDelay).to.equal(10);
+    });
+
+    it('sets the delay on a parent', function () {
+      ref.child('key').autoFlush(10);
+      expect(ref.flushDelay).to.equal(10);
+    });
+
+    it('returns itself', function () {
+      expect(ref.autoFlush()).to.equal(ref);
+    });
+
+  });
+
   describe('#child', function () {
 
     it('requires a path', function () {

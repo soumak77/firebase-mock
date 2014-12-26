@@ -37,14 +37,18 @@ MockFirebase.prototype.flush = function (delay) {
   return this;
 };
 
-MockFirebase.prototype.autoFlush = function (delay){
-  if(_.isUndefined(delay)) { delay = true; }
-  if( this.flushDelay !== delay ) {
+MockFirebase.prototype.autoFlush = function (delay) {
+  if( _.isUndefined(delay)) {
+    delay = true;
+  }
+  if (this.flushDelay !== delay) {
     this.flushDelay = delay;
-    _.each(this.children, function(c) {
-      c.autoFlush(delay);
+    _.each(this.children, function (child) {
+      child.autoFlush(delay);
     });
-    if( this.parentRef ) { this.parentRef.autoFlush(delay); }
+    if (this.parentRef) {
+      this.parentRef.autoFlush(delay);
+    }
   }
   return this;
 };
