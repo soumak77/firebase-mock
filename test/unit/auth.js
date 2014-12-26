@@ -15,12 +15,46 @@ describe('Auth', function () {
 
   describe('#changeAuthState', function () {
 
-    it('sets the auth data to null if a non-object is passed', function () {
+    it('sets the auth data', function () {
+      var user = {};
+      ref.changeAuthState(user);
+      ref.flush();
+      expect(ref.getAuth()).to.equal(user);
+    });
+
+    it('is a noop if deeply equal', function () {
+      var user = {};
+      ref.changeAuthState(user);
+      ref.flush();
+      ref.changeAuthState({});
+      expect(ref.getAuth()).to.equal(user);
+    });
+
+    it('is a noop if deeply equal', function () {
+      var user = {};
+      ref.changeAuthState(user);
+      ref.flush();
+      ref.changeAuthState({});
+      expect(ref.getAuth()).to.equal(user);
+    });
+
+    it('sets null for a non object', function () {
       ref.changeAuthState({});
       ref.flush();
       ref.changeAuthState('auth');
       ref.flush();
       expect(ref.getAuth()).to.be.null;
+    });
+
+    it('triggers an auth event', function () {
+      var user = {
+        uid: 'ben'
+      };
+      ref.changeAuthState(user);
+      ref.onAuth(spy);
+      ref.flush();
+      expect(spy.firstCall.args[0]).to.not.equal(user);
+      expect(spy.firstCall.args[0]).to.deep.equal(user);
     });
 
   });
