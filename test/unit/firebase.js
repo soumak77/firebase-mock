@@ -353,22 +353,24 @@ describe('MockFirebase', function () {
 
   describe('#setPriority', function () {
 
-    beforeEach(function () {
-      ref.autoFlush();
-    });
-
     it('should trigger child_moved with correct prevChildName', function () {
-      var keys = Object.keys(ref.getData());
-      expect(keys).to.have.length.above(1);
+      var keys = ref.getKeys();
       ref.on('child_moved', spy);
       ref.child(keys[0]).setPriority(250);
+      ref.flush();
       expect(spy).to.have.been.calledOnce;
       expect(spy.firstCall.args[1]).to.equal(keys[keys.length - 1]);
     });
 
     it('should trigger a callback', function () {
       ref.setPriority(100, spy);
+      ref.flush();
       expect(spy).to.have.been.called;
+    });
+
+    it('can be called on the root', function () {
+      ref.root().setPriority(1);
+      ref.flush();
     });
 
   });
