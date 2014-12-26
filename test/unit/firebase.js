@@ -53,6 +53,35 @@ describe('MockFirebase', function () {
 
   });
 
+  describe('#splitQueue', function () {
+
+    it('detaches the flush queue from the parent', function () {
+      var child = ref.child('key');
+      expect(child.queue).to.equal(ref.queue);
+      child.splitQueue();
+      expect(child.queue).to.not.equal(ref.queue);
+    });
+
+  });
+
+  describe('#joinQueue', function () {
+
+    it('resets to the parent queue', function () {
+      var child = ref.child('key');
+      child.splitQueue();
+      child.joinQueue();
+      expect(child.queue).to.equal(ref.queue);
+    });
+
+    it('is a noop with no parent', function () {
+      ref = ref.root();
+      var queue = ref.queue;
+      ref.joinQueue();
+      expect(ref.queue).to.equal(queue);
+    });
+
+  });
+
   describe('#child', function () {
 
     it('requires a path', function () {

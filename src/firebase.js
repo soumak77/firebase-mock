@@ -58,8 +58,8 @@ MockFirebase.prototype.splitQueue = function () {
 };
 
 MockFirebase.prototype.joinQueue = function () {
-  if( this.parent ) {
-    this.queue = this.parent.queue;
+  if (this.parent()) {
+    this.queue = this.parent().queue;
   }
 };
 
