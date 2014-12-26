@@ -222,6 +222,14 @@ describe('MockFirebase', function () {
 
   });
 
+  describe('#ref', function () {
+
+    it('returns itself', function () {
+      expect(ref.ref()).to.equal(ref);
+    });
+
+  });
+
   describe('#set', function () {
 
     beforeEach(function () {
