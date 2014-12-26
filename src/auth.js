@@ -69,17 +69,14 @@ FirebaseAuth.prototype._authEvent = function (method, callback) {
 };
 
 FirebaseAuth.prototype._triggerAuthEvent = function () {
-  var list = this._auth.completionListeners;
-  // clear the completion list before triggering callbacks
+  var completionListeners = this._auth.completionListeners;
   this._auth.completionListeners = [];
   var user = this._auth.userData;
-  // trigger completion listeners first
-  _.forEach(list, function(parts) {
-    parts.fn.call(parts.ctx, null, _.cloneDeep(user));
+  completionListeners.forEach(function (parts) {
+    parts.fn.call(parts.context, null, _.cloneDeep(user));
   });
-  // then trigger onAuth listeners
-  _.forEach(this._auth.listeners, function(parts) {
-    parts.fn.call(parts.ctx, _.cloneDeep(user));
+  this._auth.listeners.forEach(function (parts) {
+    parts.fn.call(parts.context, _.cloneDeep(user));
   });
 };
 
@@ -88,12 +85,15 @@ FirebaseAuth.prototype.getAuth = function () {
 };
 
 FirebaseAuth.prototype.onAuth = function (onComplete, context) {
-  this._auth.listeners.push({fn: onComplete, ctx: context});
+  this._auth.listeners.push({
+    fn: onComplete,
+    context: context
+  });
 };
 
 FirebaseAuth.prototype.offAuth = function (onComplete, context) {
   var index = _.findIndex(this._auth.listeners, function (listener) {
-    return listener.fn === onComplete && listener.ctx === context;
+    return listener.fn === onComplete && listener.context === context;
   });
   if (index > -1) {
     this._auth.listeners.splice(index, 1);

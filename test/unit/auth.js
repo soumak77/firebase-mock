@@ -77,18 +77,7 @@ describe('Auth', function () {
 
   describe('#auth', function () {
 
-    it('should fail auth if failNext is set', function () {
-      spy = sinon.spy(function (error, result) {
-        expect(error.message).to.equal('INVALID_TOKEN');
-        expect(result).to.be.null;
-      });
-      ref.failNext('auth', new Error('INVALID_TOKEN'));
-      ref.auth('invalidToken', spy);
-      ref.flush();
-      expect(spy).to.have.been.called;
-    });
-
-    it('should invoke callback if no failNext is set and changeAuthState is triggered', function () {
+    it('calls callback on auth state change', function () {
       var userData = {
         uid: 'kato'
       };
@@ -106,7 +95,7 @@ describe('Auth', function () {
 
   describe('#authWithCustomToken', function () {
 
-    it('should return error if failNext is set', function () {
+    it('calls the callback with a nextErr', function () {
       spy = sinon.spy(function (error, result) {
         expect(error.message).to.equal('INVALID_TOKEN');
         expect(result).to.be.null;
@@ -139,11 +128,11 @@ describe('Auth', function () {
 
   describe('#getAuth', function () {
 
-    it('should be null by default', function () {
+    it('is null by default', function () {
       expect(ref.getAuth()).to.be.null;
     });
 
-    it('should be set to whatever is passed into changeAuthState', function () {
+    it('returns the value from changeAuthState', function () {
       ref.changeAuthState({
         foo: 'bar'
       });
@@ -157,40 +146,35 @@ describe('Auth', function () {
 
   describe('#onAuth', function () {
 
-    it('should be triggered when changeAuthState() modifies data', function () {
-      ref.onAuth(spy);
-      ref.changeAuthState({uid: 'kato'
-    });
-      ref.flush();
-      expect(spy).to.have.been.called;
-    });
-
-    it('should return same value as getAuth()', function () {
+    it('is triggered when changeAuthState modifies data', function () {
       ref.onAuth(spy);
       ref.changeAuthState({
         uid: 'kato'
       });
       ref.flush();
-      expect(spy.args[0][0]).to.deep.equal(ref.getAuth());
+      expect(spy).to.have.been.calledWithMatch({
+        uid: 'kato'
+      });
     });
 
-    it('should not be triggered if auth state does not change', function () {
+    it('is not be triggered if auth state does not change', function () {
       ref.onAuth(spy);
-      ref.changeAuthState({uid: 'kato'
-    });
+      ref.changeAuthState({
+        uid: 'kato'
+      });
       ref.flush();
-      ref.changeAuthState({uid: 'kato'
-    });
+      spy.reset();
+      ref.changeAuthState({
+        uid: 'kato'
+      });
       ref.flush();
-      expect(spy).to.have.been.calledOnce;
+      expect(spy).to.not.have.been.called;
     });
 
-    it('should set context when callback triggered', function () {
+    it('can set a context', function () {
       var context = {};
       ref.onAuth(spy, context);
-      ref.changeAuthState({
-        uid: 'kato'
-      });
+      ref.changeAuthState();
       ref.flush();
       expect(spy).to.have.been.calledOn(context);
     });
@@ -199,57 +183,56 @@ describe('Auth', function () {
 
   describe('#offAuth', function () {
 
-    it('should not trigger callback after being called', function () {
+    it('removes a callback', function () {
       ref.onAuth(spy);
       ref.changeAuthState({
         uid: 'kato1'
       });
       ref.flush();
-      expect(spy).to.have.been.calledOnce;
+      spy.reset();
       ref.offAuth(spy);
       ref.changeAuthState({
         uid: 'kato1'
       });
       ref.flush();
-      expect(spy).to.have.been.calledOnce;
+      expect(spy).to.not.have.been.called;
     });
 
-    it('should only remove callback that matches context', function () {
-      var context1 = {};
-      var context2 = {};
+    it('only removes callback that matches the context', function () {
+      var context = {};
       ref.onAuth(spy);
-      ref.onAuth(spy, context1);
-      ref.onAuth(spy, context2);
+      ref.onAuth(spy, context);
       ref.changeAuthState({
         uid: 'kato1'
       });
       ref.flush();
-      expect(spy).to.have.been.calledThrice;
-      // unmatched context
+      expect(spy).to.have.been.calledTwice;
+      spy.reset();
+      // will not match any context
       ref.offAuth(spy, {});
-      ref.offAuth(spy, context1);
+      ref.offAuth(spy, context);
       ref.changeAuthState({
         uid: 'kato2'
       });
       ref.flush();
-      expect(spy.callCount).to.equal(5);
+      expect(spy).to.have.been.calledOnce;
     });
 
   });
 
   describe('#unauth', function () {
 
-    it('should set auth data to null', function () {
+    it('sets auth data to null', function () {
       ref.changeAuthState({
         uid: 'kato'
       });
       ref.flush();
-      expect(ref.getAuth()).not.to.be.null;
+      expect(ref.getAuth()).to.not.be.null;
       ref.unauth();
       expect(ref.getAuth()).to.be.null;
     });
 
-    it('should trigger onAuth callback if auth data is non-null', function () {
+    it('triggers onAuth callback if not null', function () {
       ref.changeAuthState({
         uid: 'kato'
       });
@@ -259,9 +242,8 @@ describe('Auth', function () {
       expect(spy).to.have.been.called;
     });
 
-    it('should not trigger onAuth callback if auth data is null', function () {
+    it('does not trigger onAuth callback if auth data is null', function () {
       ref.onAuth(spy);
-      expect(ref.getAuth()).to.be.null;
       ref.unauth();
       expect(spy).to.not.have.been.called;
     });
