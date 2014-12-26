@@ -135,7 +135,6 @@ describe('MockFirebase', function () {
     });
 
     it('can match a context', function () {
-      var spy2 = sinon.spy();
       var context = {};
       ref.on('value', spy, spy, context);
       ref.on('value', spy);
@@ -508,6 +507,38 @@ describe('MockFirebase', function () {
       ref._events.child_added = [];
       ref.flush();
       expect(spy).to.not.have.been.called;
+    });
+
+  });
+
+  describe('#once', function () {
+
+    it('only fires the listener once', function () {
+      ref.once('value', spy);
+      ref.flush();
+      expect(spy).to.have.been.calledOnce;
+      ref.set({});
+      ref.flush();
+      expect(spy).to.have.been.calledOnce;
+    });
+
+    it('can catch a simulated error', function () {
+      var cancel = sinon.spy();
+      var err = new Error();
+      ref.failNext('once', err);
+      ref.once('value', spy, cancel);
+      ref.flush();
+      ref.set({});
+      ref.flush();
+      expect(cancel).to.have.been.calledWith(err);
+      expect(spy).to.not.have.been.called;
+    });
+
+    it('can provide a context in place of cancel', function () {
+      var context = {};
+      ref.once('value', spy, context);
+      ref.flush();
+      expect(spy).to.have.been.calledOn(context);
     });
 
   });

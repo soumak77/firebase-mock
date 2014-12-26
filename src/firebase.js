@@ -210,26 +210,25 @@ MockFirebase.prototype.push = function (data, callback) {
 };
 
 MockFirebase.prototype.once = function (event, callback, cancel, context) {
-  if( arguments.length === 3 && !_.isFunction(cancel) ) {
+  if (arguments.length === 3 && !_.isFunction(cancel)) {
     context = cancel;
-    cancel = function() {};
+    cancel = _.noop;
   }
-  else if( arguments.length < 3 ) {
-    cancel = function() {};
+  else if (arguments.length < 3) {
+    cancel = _.noop;
     context = null;
   }
   var err = this._nextErr('once');
-  if( err ) {
-    this._defer(function() {
+  if (err) {
+    this._defer(function () {
       cancel.call(context, err);
     });
   }
   else {
-    var fn = function (snap) {
+    var fn = function (snapshot) {
       this.off(event, fn, context);
-      callback.call(context, snap);
+      callback.call(context, snapshot);
     }.bind(this);
-
     this.on(event, fn, cancel, context);
   }
 };
