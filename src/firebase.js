@@ -247,10 +247,10 @@ MockFirebase.prototype.remove = function (callback) {
 MockFirebase.prototype.on = function (event, callback, cancel, context) {
   if (arguments.length === 3 && typeof cancel !== 'function') {
     context = cancel;
-    cancel = noop;
+    cancel = _.noop;
   }
   else if (arguments.length < 3) {
-    cancel = noop;
+    cancel = _.noop;
   }
 
   var err = this._nextErr('on');
@@ -553,7 +553,5 @@ MockFirebase.prototype.childComparator = function (a, b) {
 function extractName(path) {
   return ((path || '').match(/\/([^.$\[\]#\/]+)$/)||[null, null])[1];
 }
-
-function noop () {}
 
 module.exports = MockFirebase;
