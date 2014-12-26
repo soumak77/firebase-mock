@@ -548,6 +548,29 @@ describe('MockFirebase', function () {
 
   });
 
+  describe('#off', function () {
+
+    it('can disable all events', function () {
+      sinon.spy(ref, 'off');
+      ref.off();
+      expect(ref.off).to.have.been.calledWith('value');
+    });
+
+    it('can disable a specific event', function () {
+      ref.on('value', spy);
+      ref.on('child_added', spy);
+      ref.flush();
+      spy.reset();
+      ref.off('value');
+      ref.push({
+        foo: 'bar'
+      });
+      ref.flush();
+      expect(spy).to.have.been.calledOnce;
+    });
+
+  });
+
   describe('#transaction', function () {
 
     it('should call the transaction function', function () {

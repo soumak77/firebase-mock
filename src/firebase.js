@@ -287,17 +287,20 @@ MockFirebase.prototype.on = function (event, callback, cancel, context) {
 };
 
 MockFirebase.prototype.off = function (event, callback, context) {
-  if( !event ) {
-    for (var key in this._events)
-      if( this._events.hasOwnProperty(key) )
+  if (!event) {
+    for (var key in this._events) {
+      /* istanbul ignore else */
+      if (this._events.hasOwnProperty(key)) {
         this.off(key);
+      }
+    }
   }
-  else if( callback ) {
-    var list = this._events[event];
-    var newList = this._events[event] = [];
-    _.each(list, function(parts) {
-      if( parts[0] !== callback || parts[1] !== context ) {
-        newList.push(parts);
+  else if (callback) {
+    var events = this._events[event];
+    var newEvents = this._events[event] = [];
+    _.each(events, function (parts) {
+      if (parts[0] !== callback || parts[1] !== context) {
+        newEvents.push(parts);
       }
     });
   }
