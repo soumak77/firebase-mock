@@ -59,6 +59,22 @@ describe('Auth', function () {
 
   });
 
+  describe('#getEmailUser', function () {
+
+    it('gets a copy of the user by email', function () {
+      var user = {
+        uid: 'bd'
+      };
+      ref._auth.users['ben@example.com'] = user;
+      expect(ref.getEmailUser('ben@example.com')).to.deep.equal(user);
+    });
+
+    it('only searches own properties', function () {
+      expect(ref.getEmailUser('toString')).to.be.null;
+    });
+
+  });
+
   describe('#auth', function () {
 
     it('should fail auth if failNext is set', function () {
