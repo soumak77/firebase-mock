@@ -92,10 +92,10 @@ MockFirebase.prototype.getKeys = function () {
 };
 
 MockFirebase.prototype.fakeEvent = function (event, key, data, prevChild, pri) {
-  if( arguments.length < 5 ) { pri = null; }
-  if( arguments.length < 4 ) { prevChild = null; }
-  if( arguments.length < 3 ) { data = null; }
-  var ref = event==='value'? this : this.child(key);
+  if( arguments.length < 5) pri = null;
+  if( arguments.length < 4 ) prevChild = null;
+  if( arguments.length < 3 ) data = null;
+  var ref = event === 'value' ? this : this.child(key);
   var snapshot = new Snapshot(ref, data, pri);
   this._defer(function() {
     this._events[event]
@@ -110,7 +110,7 @@ MockFirebase.prototype.fakeEvent = function (event, key, data, prevChild, pri) {
         if ('child_added' === event || 'child_moved' === event) {
           data.args.push(prevChild);
         }
-        data.fn.apply(data.context.concat(data.args));
+        data.fn.apply(data.context, data.args);
       });
   });
   return this;
