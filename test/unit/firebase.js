@@ -148,6 +148,53 @@ describe('MockFirebase', function () {
 
   });
 
+  describe('#fakeEvent', function () {
+
+    it('can trigger a fake value event', function () {
+      ref.on('value', spy);
+      ref.flush();
+      spy.reset();
+      var data = {
+        foo: 'bar'
+      };
+      ref.fakeEvent('value', undefined, data);
+      expect(spy).to.not.have.been.called;
+      ref.flush();
+      expect(spy).to.have.been.calledOnce;
+      var snapshot = spy.firstCall.args[0];
+      expect(snapshot.ref()).to.equal(ref);
+      expect(snapshot.val()).to.deep.equal(data);
+      expect(snapshot.getPriority()).to.be.null;
+    });
+
+    it('can trigger a fake child_added event', function () {
+      ref.on('child_added', spy);
+      ref.flush();
+      spy.reset();
+      var data = {
+        foo: 'bar'
+      };
+      ref.fakeEvent('child_added', 'theKey', data, 'prevChild', 1);
+      ref.flush();
+      expect(spy).to.have.been.calledOnce;
+      var snapshot = spy.firstCall.args[0];
+      expect(snapshot.ref()).to.equal(ref.child('theKey'));
+      expect(spy.firstCall.args[1]).to.equal('prevChild');
+      expect(snapshot.getPriority()).to.equal(1);
+    });
+
+    it('uses null as the default data', function () {
+      ref.on('value', spy);
+      ref.flush();
+      spy.reset();
+      ref.fakeEvent('value');
+      ref.flush();
+      var snapshot = spy.firstCall.args[0];
+      expect(snapshot.val()).to.be.null;
+    });
+
+  });
+
   describe('#child', function () {
 
     it('requires a path', function () {

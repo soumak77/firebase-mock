@@ -91,12 +91,12 @@ MockFirebase.prototype.getKeys = function () {
   return this.sortedDataKeys.slice();
 };
 
-MockFirebase.prototype.fakeEvent = function (event, key, data, prevChild, pri) {
-  if( arguments.length < 5) pri = null;
+MockFirebase.prototype.fakeEvent = function (event, key, data, prevChild, priority) {
+  if( arguments.length < 5) priority = null;
   if( arguments.length < 4 ) prevChild = null;
   if( arguments.length < 3 ) data = null;
   var ref = event === 'value' ? this : this.child(key);
-  var snapshot = new Snapshot(ref, data, pri);
+  var snapshot = new Snapshot(ref, data, priority);
   this._defer(function() {
     this._events[event]
       .map(function (parts) {
