@@ -110,67 +110,84 @@ FirebaseAuth.prototype.unauth = function () {
 FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
   var err = this._nextErr('createUser');
   var users = this._auth.users;
-  this._defer(_.bind(function() {
+  this._defer(function () {
     var user = null;
     err = err ||
-      validateCredentials('createUser', credentials, ['email', 'password']) ||
+      validateCredentials('createUser', credentials, [
+        'email',
+        'password'
+      ]) ||
       this._validateNewEmail(credentials);
-    if( !err ) {
+    if (!err) {
       var key = credentials.email;
-      users[key] = {uid: this._nextUid(), email: key, password: credentials.password};
-      user = {uid: users[key].uid};
+      users[key] = {
+        uid: this._nextUid(),
+        email: key,
+        password: credentials.password
+      };
+      user = {
+        uid: users[key].uid
+      };
     }
     onComplete(err, user);
-  }, this));
+  });
 };
 
 FirebaseAuth.prototype.changePassword = function (credentials, onComplete) {
   var err = this._nextErr('changePassword');
-  this._defer(_.bind(function() {
+  this._defer(function () {
     err = err ||
-      validateCredentials('changePassword', credentials, ['email', 'oldPassword', 'newPassword']) ||
+      validateCredentials('changePassword', credentials, [
+        'email',
+        'oldPassword',
+        'newPassword'
+      ]) ||
       this._validateExistingEmail(credentials) ||
       this._validPass(credentials, 'oldPassword');
-    if( !err ) {
+    if (!err) {
       var key = credentials.email;
       var user = this._auth.users[key];
       user.password = credentials.newPassword;
     }
     onComplete(err);
-  }, this));
+  });
 };
 
 FirebaseAuth.prototype.removeUser = function (credentials, onComplete) {
   var err = this._nextErr('removeUser');
-  this._defer(_.bind(function() {
+  this._defer(function () {
     err = err ||
-      validateCredentials('removeUser', credentials, ['email', 'password']) ||
+      validateCredentials('removeUser', credentials, [
+        'email',
+        'password'
+      ]) ||
       this._validateExistingEmail(credentials) ||
       this._validPass(credentials, 'password');
-    if( !err ) {
+    if (!err) {
       delete this._auth.users[credentials.email];
     }
     onComplete(err);
-  }, this));
+  });
 };
 
 FirebaseAuth.prototype.resetPassword = function (credentials, onComplete) {
   var err = this._nextErr('resetPassword');
-  this._defer(_.bind(function() {
+  this._defer(function() {
     err = err ||
-      validateCredentials('resetPassword', credentials, ['email']) ||
+      validateCredentials('resetPassword', credentials, [
+        'email'
+      ]) ||
       this._validateExistingEmail(credentials);
     onComplete(err);
-  }, this));
+  });
 };
 
 FirebaseAuth.prototype._nextUid = function () {
-  return 'simplelogin:'+(this._auth.uidCounter++);
+  return 'simplelogin:' + (this._auth.uidCounter++);
 };
 
-FirebaseAuth.prototype._validateNewEmail = function (creds) {
-  creds = _.assign({}, creds);
-  if( this._auth.users.hasOwnProperty(creds.email) ) {
+FirebaseAuth.prototype._validateNewEmail = function (credentials) {
+  if (this._auth.users.hasOwnProperty(credentials.email)) {
     var err = new Error('The specified email address is already in use.');
     err.code = 'EMAIL_TAKEN';
     return err;
@@ -178,9 +195,8 @@ FirebaseAuth.prototype._validateNewEmail = function (creds) {
   return null;
 };
 
-FirebaseAuth.prototype._validateExistingEmail = function (creds) {
-  creds = _.assign({}, creds);
-  if( !this._auth.users.hasOwnProperty(creds.email) ) {
+FirebaseAuth.prototype._validateExistingEmail = function (credentials) {
+  if (!this._auth.users.hasOwnProperty(credentials.email)) {
     var err = new Error('The specified user does not exist.');
     err.code = 'INVALID_USER';
     return err;
@@ -188,10 +204,10 @@ FirebaseAuth.prototype._validateExistingEmail = function (creds) {
   return null;
 };
 
-FirebaseAuth.prototype._validPass = function (obj, name) {
+FirebaseAuth.prototype._validPass = function (object, name) {
   var err = null;
-  var key = obj.email;
-  if( obj[name] !== this._auth.users[key].password ) {
+  var key = object.email;
+  if (object[name] !== this._auth.users[key].password) {
     err = new Error('The specified password is incorrect.');
     err.code = 'INVALID_PASSWORD';
   }

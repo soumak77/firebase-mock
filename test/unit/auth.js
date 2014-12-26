@@ -250,19 +250,20 @@ describe('Auth', function () {
     
   });
 
-  describe('createUser', function () {
+  describe('#createUser', function () {
 
-    it('should not generate error if credentials are valid', function () {
+    it('creates a new user', function () {
       ref.createUser({
         email: 'new1@new1.com',
         password: 'new1'
       }, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
-      expect(spy.firstCall.args[0]).to.be.null;
+      expect(spy).to.have.been.calledWithMatch(null, {
+        uid: 'simplelogin:1'
+      });
     });
 
-    it('should assign each user a unique id', function () {
+    it('increments the id for each user', function () {
       ref.createUser({
         email: 'new1@new1.com',
         password: 'new1'
@@ -272,49 +273,35 @@ describe('Auth', function () {
         password: 'new2'
       }, spy);
       ref.flush();
-      expect(spy).to.have.been.calledTwice;
       expect(spy.firstCall.args[1].uid).to.equal('simplelogin:1');
       expect(spy.secondCall.args[1].uid).to.equal('simplelogin:2');
     });
 
-    it('should fail if credentials is not an object', function () {
+    it('fails if credentials is not an object', function () {
       ref.createUser(29, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
-      var args = spy.firstCall.args;
-      var err = args[0];
-      var user = args[1];
-      expect(err.message).to.contain('must be a valid object.');
-      expect(user).to.be.null;
+      expect(spy.firstCall.args[0].message).to.contain('must be a valid object.');
     });
 
-    it('should fail if email is not a string', function () {
+    it('fails if email is not a string', function () {
       ref.createUser({
         email: true,
         password: 'foo'
       }, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
-      var err = spy.firstCall.args[0];
-      var user = spy.firstCall.args[1];
-      expect(err.message).to.contain('must contain the key "email"');
-      expect(user).to.be.null;
+      expect(spy.firstCall.args[0].message).to.contain('must contain the key "email"');
     });
 
-    it('should fail if password is not a string', function () {
+    it('fails if password is not a string', function () {
       ref.createUser({
         email: 'new1@new1.com',
         password: null
       }, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
-      var err = spy.firstCall.args[0];
-      var user = spy.firstCall.args[1];
-      expect(err.message).to.contain('must contain the key "password"');
-      expect(user).to.be.null;
+      expect(spy.firstCall.args[0].message).to.contain('must contain the key "password"');
     });
 
-    it('should fail if user already exists', function () {
+    it('fails if user already exists', function () {
       ref.createUser({
         email: 'duplicate@dup.com',
         password: 'foo'
@@ -325,36 +312,27 @@ describe('Auth', function () {
         password: 'bar'
       }, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
-      var user = spy.firstCall.args[1];
       expect(err.message).to.contain('email address is already in use');
       expect(err.code).to.equal('EMAIL_TAKEN');
-      expect(user).to.be.null;
     });
 
-    it('should fail if failNext is set', function () {
-      ref.failNext('createUser', {
-        foo: 'bar'
-      });
+    it('fails if failNext is set', function () {
+      var err = new Error();
+      ref.failNext('createUser', err);
       ref.createUser({
         email: 'hello',
         password: 'world'
       }, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
-      var args = spy.firstCall.args;
-      expect(args[0]).to.deep.equal({
-        foo: 'bar'
-      });
-      expect(args[1]).to.be.null;
+      expect(spy.firstCall.args[0]).to.equal(err);
     });
 
   });
 
-  describe('changePassword', function () {
+  describe('#changePassword', function () {
 
-    it('should change the password', function () {
+    it('changes the password', function () {
       ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
@@ -365,10 +343,11 @@ describe('Auth', function () {
         newPassword: 'kato!'
       }, _.noop);
       ref.flush();
-      expect(ref.getEmailUser('kato@kato.com').password).to.equal('kato!');
+      expect(ref.getEmailUser('kato@kato.com'))
+        .to.have.property('password', 'kato!');
     });
 
-    it('should fail if credentials is not an object', function () {
+    it('fails if credentials is not an object', function () {
       ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
@@ -376,11 +355,10 @@ describe('Auth', function () {
       ref.changePassword(29, spy);
       ref.flush();
       expect(spy).to.have.been.called;
-      var err = spy.firstCall.args[0];
-      expect(err.message).to.contain('must be a valid object.');
+      expect(spy.firstCall.args[0].message).to.contain('must be a valid object');
     });
 
-    it('should fail if email is not a string', function () {
+    it('fails if email is not a string', function () {
       ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
@@ -391,9 +369,7 @@ describe('Auth', function () {
         newPassword: 'bar'
       }, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
-      var err = spy.firstCall.args[0];
-      expect(err.message).to.contain('must contain the key "email"');
+      expect(spy.firstCall.args[0].message).to.contain('must contain the key "email"');
     });
 
     it('should fail if oldPassword is not a string', function () {
@@ -407,12 +383,10 @@ describe('Auth', function () {
         newPassword: 'bar'
       }, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
-      var err = spy.firstCall.args[0];
-      expect(err.message).to.contain('must contain the key "oldPassword"');
+      expect(spy.firstCall.args[0].message).to.contain('must contain the key "oldPassword"');
     });
 
-    it('should fail if newPassword is not a string', function () {
+    it('fails if newPassword is not a string', function () {
       ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
@@ -422,46 +396,22 @@ describe('Auth', function () {
         oldPassword: 'foo'
       }, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
-      var err = spy.firstCall.args[0];
-      expect(err.message).to.contain('must contain the key "newPassword"');
+      expect(spy.firstCall.args[0].message).to.contain('must contain the key "newPassword"');
     });
 
-    it('should fail if failNext is set', function () {
-      ref.createUser({
-        email: 'kato@kato.com',
-        password: 'kato'
-      }, _.noop);
-      ref.failNext('changePassword', {
-        foo: 'bar'
-      });
+    it('fails if user does not exist', function () {
       ref.changePassword({
         email: 'hello',
         oldPassword: 'foo',
         newPassword: 'bar'
       }, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
-      var args = spy.firstCall.args;
-      expect(args[0]).to.deep.equal({
-        foo: 'bar'
-      });
-    });
-
-    it('should fail if user does not exist', function () {
-      ref.changePassword({
-        email: 'hello',
-        oldPassword: 'foo',
-        newPassword: 'bar'
-      }, spy);
-      ref.flush();
-      expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.code).to.equal('INVALID_USER');
-      expect(err.message).to.equal('The specified user does not exist.');
+      expect(err.message).to.contain('user does not exist');
     });
 
-    it('should fail if password is invalid', function () {
+    it('fails if oldPassword is incorrect', function () {
       ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
@@ -472,22 +422,36 @@ describe('Auth', function () {
         newPassword: 'bar'
       }, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.code).to.equal('INVALID_PASSWORD');
-      expect(err.message).to.equal('The specified password is incorrect.');
+      expect(err.message).to.contain('password is incorrect');
     });
+
+    it('fails if failNext is set', function () {
+      ref.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, _.noop);
+      var err = new Error();
+      ref.failNext('changePassword', err);
+      ref.changePassword(null, spy);
+      ref.flush();
+      expect(spy).to.have.been.calledWith(err);
+    });
+
   });
 
-  describe('removeUser', function () {
+  describe('#removeUser', function () {
 
-    it('should remove the account', function () {
+    it('removes the account', function () {
       ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, _.noop);
       ref.flush();
-      expect(ref.getEmailUser('kato@kato.com')).to.deep.equal({uid: 'simplelogin:1', email: 'kato@kato.com',
+      expect(ref.getEmailUser('kato@kato.com')).to.deep.equal({
+        uid: 'simplelogin:1',
+        email: 'kato@kato.com',
         password: 'kato'
       });
       ref.removeUser({
@@ -498,19 +462,17 @@ describe('Auth', function () {
       expect(ref.getEmailUser('kato@kato.com')).to.be.null;
     });
 
-    it('should fail if credentials is not an object', function () {
+    it('fails if credentials is not an object', function () {
       ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, _.noop);
       ref.removeUser(29, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
-      var err = spy.firstCall.args[0];
-      expect(err.message).to.contain('must be a valid object.');
+      expect(spy.firstCall.args[0].message).to.contain('must be a valid object');
     });
 
-    it('should fail if email is not a string', function () {
+    it('fails if email is not a string', function () {
       ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
@@ -520,12 +482,10 @@ describe('Auth', function () {
         password: 'foo'
       }, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
-      var err = spy.firstCall.args[0];
-      expect(err.message).to.equal('Firebase.removeUser failed: First argument must contain the key "email" with type "string"');
+      expect(spy.firstCall.args[0].message).to.contain('must contain the key "email" with type "string"');
     });
 
-    it('should fail if password is not a string', function () {
+    it('fails if password is not a string', function () {
       ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
@@ -535,44 +495,21 @@ describe('Auth', function () {
         password: null
       }, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
-      var err = spy.firstCall.args[0];
-      expect(err.message).to.equal('Firebase.removeUser failed: First argument must contain the key "password" with type "string"');
+      expect(spy.firstCall.args[0].message).to.contain('must contain the key "password" with type "string"');
     });
 
-    it('should fail if failNext is set', function () {
-      ref.createUser({
-        email: 'kato@kato.com',
-        password: 'kato'
-      }, _.noop);
-      ref.failNext('removeUser', {
-        foo: 'bar'
-      });
+    it('fails if user does not exist', function () {
       ref.removeUser({
         email: 'hello',
         password: 'foo'
       }, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
-      var args = spy.firstCall.args;
-      expect(args[0]).to.deep.equal({
-        foo: 'bar'
-      });
-    });
-
-    it('should fail if user does not exist', function () {
-      ref.removeUser({
-        email: 'hello',
-        password: 'foo'
-      }, spy);
-      ref.flush();
-      expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.code).to.equal('INVALID_USER');
-      expect(err.message).to.equal('The specified user does not exist.');
+      expect(err.message).to.contain('user does not exist');
     });
 
-    it('should fail if password is invalid', function () {
+    it('fails if password is incorrect', function () {
       ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
@@ -582,16 +519,31 @@ describe('Auth', function () {
         password: 'foo'
       }, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
       var err = spy.firstCall.args[0];
       expect(err.code).to.equal('INVALID_PASSWORD');
-      expect(err.message).to.equal('The specified password is incorrect.');
+      expect(err.message).to.contain('password is incorrect');
     });
+
+    it('fails if failNext is set', function () {
+      ref.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }, _.noop);
+      var err = new Error();
+      ref.failNext('removeUser', err);
+      ref.removeUser({
+        email: 'hello',
+        password: 'foo'
+      }, spy);
+      ref.flush();
+      expect(spy).to.have.been.calledWith(err);
+    });
+
   });
 
-  describe('resetPassword', function () {
+  describe('#resetPassword', function () {
 
-    it('should simulate reset if credentials are valid', function () {
+    it('simulates reset if credentials are valid', function () {
       ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
@@ -600,64 +552,54 @@ describe('Auth', function () {
         email: 'kato@kato.com'
       }, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
-      expect(spy.firstCall.args[0]).to.be.null;
+      expect(spy).to.have.been.calledWith(null);
     });
 
-    it('should fail if credentials is not an object', function () {
+    it('fails if credentials is not an object', function () {
       ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, _.noop);
       ref.resetPassword(29, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
-      var err = spy.firstCall.args[0];
-      expect(err.message).to.equal('Firebase.resetPassword failed: First argument must be a valid object.');
+      expect(spy.firstCall.args[0].message).to.contain('must be a valid object');
     });
 
-    it('should fail if email is not a string', function () {
+    it('fails if email is not a string', function () {
       ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, _.noop);
       ref.resetPassword({
-        email: true}, spy);
+        email: true
+      }, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
-      var err = spy.firstCall.args[0];
-      expect(err.message).to.equal('Firebase.resetPassword failed: First argument must contain the key "email" with type "string"');
+      expect(spy.firstCall.args[0].message).to.contain('must contain the key "email" with type "string"');
     });
 
-    it('should fail if failNext is set', function () {
+    it('fails if user does not exist', function () {
+      ref.resetPassword({
+        email: 'hello'
+      }, spy);
+      ref.flush();
+      var err = spy.firstCall.args[0];
+      expect(err.code).to.equal('INVALID_USER');
+      expect(err.message).to.contain('user does not exist');
+    });
+
+    it('fails if failNext is set', function () {
       ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, _.noop);
-      ref.failNext('resetPassword', {
-        foo: 'bar'
-      });
+      var err = new Error();
+      ref.failNext('resetPassword', err);
       ref.resetPassword({
         email: 'kato@kato.com',
         password: 'foo'
       }, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
-      var args = spy.firstCall.args;
-      expect(args[0]).to.deep.equal({
-        foo: 'bar'
-      });
-    });
-
-    it('should fail if user does not exist', function () {
-      ref.resetPassword({
-        email: 'hello'
-      }, spy);
-      ref.flush();
-      expect(spy).to.have.been.called;
-      var err = spy.firstCall.args[0];
-      expect(err.code).to.equal('INVALID_USER');
-      expect(err.message).to.equal('The specified user does not exist.');
+      expect(spy).to.have.been.calledWith(err);
     });
 
   });
