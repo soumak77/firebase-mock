@@ -468,17 +468,14 @@ MockFirebase.prototype._updateOrAdd = function (key, data, events) {
 };
 
 MockFirebase.prototype._addChild = function (key, data, events) {
-  if(this._hasChild(key)) {
-    throw new Error('Tried to add existing object', key);
-  }
-  if( !_.isObject(this.data) ) {
+  if (!_.isObject(this.data)) {
     this.data = {};
   }
   this._addKey(key);
   this.data[key] = utils.cleanData(data);
-  var c = this.child(key);
-  c._dataChanged(data);
-  if (events) events.push(['child_added', c.getData(), c.priority, key]);
+  var child = this.child(key);
+  child._dataChanged(data);
+  if (events) events.push(['child_added', child.getData(), child.priority, key]);
 };
 
 MockFirebase.prototype._removeChild = function (key, events) {
