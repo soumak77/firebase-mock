@@ -4,7 +4,7 @@ var _        = require('lodash');
 var assert   = require('assert');
 var Query    = require('./query');
 var Snapshot = require('./snapshot');
-var Queue    = require('./queue');
+var Queue    = require('./queue').Queue;
 var utils    = require('./utils');
 var Auth     = require('./auth');
 
@@ -397,7 +397,15 @@ MockFirebase.prototype._dropKey = function (key) {
 };
 
 MockFirebase.prototype._defer = function (sourceMethod, sourceArgs, callback) {
-  this.queue.push(callback, this, {ref: this, method: sourceMethod, args: sourceArgs});
+  this.queue.push({
+    fn: callback,
+    context: this,
+    sourceData: {
+      ref: this,
+      method: sourceMethod,
+      args: sourceArgs
+    }
+  });
   if (this.flushDelay !== false) {
     this.flush(this.flushDelay);
   }

@@ -6,22 +6,31 @@ function FlushQueue () {
   this.events = [];
 }
 
-FlushQueue.prototype.push = function(fn, context, sourceData) {
-  this.events.push(new FlushEvent(fn, context, sourceData));
+FlushQueue.prototype.push = function () {
+  this.events.push.apply(this.events, [].slice.call(arguments).map(function (event) {
+    if (typeof event === 'function') {
+      event = {
+        fn: event
+      };
+    }
+    return new FlushEvent(event.fn, event.context, event.sourceData);
+  }));
 };
 
 FlushQueue.prototype.flush = function (delay) {
   if (!this.events.length) {
     throw new Error('No deferred tasks to be flushed');
   }
-  var list = this.events;
+  var events = this.events;
   this.events = [];
   function process () {
-    list.forEach(function(flushEvent) {
-      if( !flushEvent.alreadyRun ) {
-        flushEvent.run();
-      }
-    });
+    events
+      .filter(function (event) {
+        return !event.hasRun;
+      })
+      .forEach(function (event) {
+        event.run();
+      });
   }
   if (_.isNumber(delay)) {
     setTimeout(process, delay);
@@ -31,29 +40,34 @@ FlushQueue.prototype.flush = function (delay) {
   }
 };
 
-FlushQueue.prototype.getEvents = function() {
+FlushQueue.prototype.getEvents = function () {
   return this.events.slice();
 };
 
-function FlushEvent(fn, context, sourceData) {
+function FlushEvent (fn, context, sourceData) {
   this.canceled = false;
-  this.alreadyRun = false;
+  this.hasRun = false;
   this.fn = fn;
-  this.ctx = context;
+  this.context = context;
   // stores data about the event so that we can filter items in the queue
   this.sourceData = sourceData;
 }
 
-FlushEvent.prototype.run = function() {
-  if( this.alreadyRun ) { throw new Error('This FlushEvent was already run and cannot be invoked again'); }
-  if( this.canceled ) { return; }
-  this.alreadyRun = true;
-  this.fn.call(this.ctx);
+FlushEvent.prototype.run = function () {
+  if (this.hasRun) {
+    throw new Error('cannot call event.run() multiple times');
+  }
+  if (this.canceled) return;
+  this.hasRun = true;
+  this.fn.call(this.context);
 };
 
-FlushEvent.prototype.cancel = function() {
-  if( this.alreadyRun ) { throw new Error('This FlushEvent was already run and cannot be canceled'); }
+FlushEvent.prototype.cancel = function () {
+  if (this.hasRun) {
+    throw new Error('cannot call event.cancel() after event.run()');
+  }
   this.canceled = true;
 };
 
-module.exports = FlushQueue;
+exports.Queue = FlushQueue;
+exports.Event = FlushEvent;

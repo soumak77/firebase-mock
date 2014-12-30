@@ -1,8 +1,10 @@
 'use strict';
 
-var expect = require('chai').use(require('sinon-chai')).expect;
-var sinon  = require('sinon');
-var Queue  = require('../../src/queue');
+var expect     = require('chai').use(require('sinon-chai')).expect;
+var sinon      = require('sinon');
+var _          = require('lodash');
+var Queue      = require('../../src/queue').Queue;
+var FlushEvent = require('../../src/queue').Event;
 
 describe('FlushQueue', function () {
 
@@ -19,18 +21,26 @@ describe('FlushQueue', function () {
   });
 
   describe('#push', function () {
-    it('pushes events onto the queue', function () {
-      var e = {};
-      queue.push(e);
-      expect(queue.getEvents())
-        .to.have.length(1);
+
+    it('pushes simple events onto the queue like [].push', function () {
+      queue.push(_.noop, _.noop);
+      expect(queue.getEvents()).to.have.length(2);
     });
 
-    it('stores sourceData', function() {
-      var srcDat = {foo: 'bar'};
-      queue.push(function() {}, null, srcDat);
-      expect(queue.getEvents()[0].sourceData).to.eql(srcDat);
+    it('pushes complex events', function () {
+      var sourceData = {
+        foo: 'bar'
+      };
+      queue.push({
+        fn: _.noop,
+        context: null,
+        sourceData: sourceData
+      });
+      var event = queue.getEvents()[0];
+      expect(event.sourceData).to.equal(sourceData);
+      expect(event).to.be.an.instanceOf(FlushEvent);
     });
+
   });
 
   describe('#flush', function () {
@@ -47,7 +57,7 @@ describe('FlushQueue', function () {
     });
 
     it('empties the queue before invoking events', function () {
-      var spy = sinon.spy(function() {
+      var spy = sinon.spy(function () {
         expect(queue.events).to.be.empty;
       });
       queue.push(spy);
@@ -65,53 +75,66 @@ describe('FlushQueue', function () {
       expect(spy).to.have.been.called;
     });
 
-    it('runs events in the correct context', function() {
-      var ctx = {};
-      var spy = sinon.spy(function assertEmpty () {
-        expect(this).to.equal(ctx);
-      });
-      queue.push(spy, ctx);
-      queue.flush();
-      expect(spy).to.have.been.called;
-    });
-
-    it('does not not run any canceled events', function() {
-      var spy1 = sinon.spy();
-      var spy2 = sinon.spy();
-      queue.push(spy1);
-      queue.push(spy2);
-      queue.getEvents()[0].cancel();
-      queue.flush();
-      expect(spy1).not.to.have.been.called;
-      expect(spy2).to.have.been.called;
-    });
-
-    it('does not run any events twice', function() {
-      var spy1 = sinon.spy();
-      var spy2 = sinon.spy();
-      queue.push(spy1);
-      queue.push(spy2);
+    it('does not invoke events that have run', function () {
+      var spy = sinon.spy();
+      queue.push(spy);
       queue.getEvents()[0].run();
+      spy.reset();
       queue.flush();
-      expect(spy1).to.have.been.calledOnce;
-      expect(spy2).to.have.been.calledOnce;
+      expect(spy).to.not.have.been.called;
     });
+
   });
 
   describe('#getEvents', function() {
-    it('should return an array equal to number of events in queue', function() {
-      queue.push(function() {});
-      queue.push(function() {});
-      var events = queue.getEvents();
-      expect(events.length).to.equal(2);
+
+    it('returns a copy of the events', function () {
+      queue.push(_.noop);
+      expect(queue.getEvents()).to.deep.equal(queue.events);
+      expect(queue.getEvents()).to.not.equal(queue.events);
     });
 
-    it('should return a copy and not the original list', function() {
-      queue.push(function() {});
-      var list = queue.getEvents();
-      expect(list).to.eql(queue.events);
-      expect(list).not.to.equal(queue.events);
+  });
+
+});
+
+describe('FlushEvent', function () {
+
+  var spy, context, event;
+  beforeEach(function () {
+    spy = sinon.spy();
+    context = {};
+    event = new FlushEvent(spy, context);
+  });
+
+  describe('#run', function () {
+
+    it('throws if called twice', function () {
+      event.run();
+      expect(function runEvent () {
+        event.run();
+      })
+      .to.throw('multiple times');
     });
+
+    it('is a noop if cancelled', function () {
+      event.cancel();
+      event.run();
+      expect(event.hasRun).to.be.false;
+    });
+
+  });
+
+  describe('#cancel', function () {
+
+    it('throws if called after run', function () {
+      event.run();
+      expect(function cancelEvent () {
+        event.cancel();
+      })
+      .to.throw('after event.run');
+    });
+
   });
 
 });
