@@ -12,7 +12,7 @@ Only `MockFirebase` methods are included here. For details on normal Firebase AP
   - [`getData()`](#getdata---any)
   - [`getKeys()`](#getkeys---array)
   - [`fakeEvent(event [, key] [, data] [, previousChild] [, priority])`](#fakeeventevent--key--data--previouschild--priority---ref)
-  - [`getFlushQueue()`](#getflushqueue)
+  - [`getFlushQueue()`](#getflushqueue---array)
 - [Auth](#auth)
   - [`changeAuthState(user)`](#changeauthstateauthdata---undefined)
   - [`getEmailUser(email)`](#getemailuseremail---objectnull)
@@ -140,13 +140,14 @@ console.assert(ref.getData() === null, 'data is null');
 
 ##### `getFlushQueue()` -> `Array`
 
-Returns a list of all the items queued to be run the next time flush() is invoked.
-These items can be manipulated manually by calling run() or cancel(). Each contains
-a sourceMethod and sourceArguments attribute that can be used to identify specific
-calls to a mockfirebase method.
+Returns a list of all the `event` objects queued to be run the next time `ref.flush` is invoked.
+These items can be manipulated manually by calling `event.run` or `event.cancel`. Each contains
+a `sourceMethod` and `sourceArguments` attribute that can be used to identify specific
+calls to a MockFirebase method.
 
-The list will not change if more events are added after calling getFlushQueue(). It
-is a copy of the list and not a pointer to the internal array.
+This is a copy of the internal array and represents the state of the flush queue at the time `getFlushQueue` is called.
+
+Example:
 
 ```js
   // create some child_added events
@@ -155,28 +156,23 @@ is a copy of the list and not a pointer to the internal array.
   var child1 = ref.push('foo');
   var child2 = ref.push('bar');
   var child3 = ref.push('baz');
+  var events = ref.getFlushQueue();
 
-  var flushQueue = ref.getFlushQueue();
-
-  // let's see what is in there
   var flushData1 = flushQueue1.sourceData;
-  console.log(flushData1.ref === child2);  // true!
-  console.log(flushData1.method);          // "push"
-  console.log(flushData1.args[0]);         // "bar"
+  console.assert(flushData1.ref === child2, 'first event is for child1');
+  console.assert(flushData1.method, 'first event is a push');
+  console.assert(flushData1.args[0], 'push was called with "bar"');
 
-  // let's establish an event listener and have some fun
   ref.on('child_added', function(snap, prevChild) {
      console.log('added ' + snap.val() + ' after ' + prevChild);
   });
 
   // cancel the second push so it never triggers a event
   flushQueue[1].cancel();
-
   // trigger the third push before the first
-  flushQueue[2].run();     // "added baz after bar"
-
-  // now flush the remainder of the queue (just the first push)
-  ref.flush();             // "added foo after null"
+  flushQueue[2].run(); // added baz after bar
+  // now flush the remainder of the queue normally
+  ref.flush(); // added foo after null
 ```
 
 ## Auth
