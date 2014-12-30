@@ -14,7 +14,7 @@ function FirebaseAuth () {
 }
 
 FirebaseAuth.prototype.changeAuthState = function (userData) {
-  this._defer(function() {
+  this._defer('changeAuthState', _.toArray(arguments), function() {
     if (!_.isEqual(this._auth.userData, userData)) {
       this._auth.userData = _.isObject(userData) ? userData : null;
       this._triggerAuthEvent();
@@ -57,7 +57,7 @@ FirebaseAuth.prototype._authEvent = function (method, callback) {
   if (err) {
     // if an error occurs, we defer the error report until the next flush()
     // event is triggered
-    this._defer(function() {
+    this._defer('_authEvent', _.toArray(arguments), function() {
       callback(err, null);
     });
   }
@@ -110,7 +110,7 @@ FirebaseAuth.prototype.unauth = function () {
 FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
   var err = this._nextErr('createUser');
   var users = this._auth.users;
-  this._defer(function () {
+  this._defer('createUser', _.toArray(arguments), function () {
     var user = null;
     err = err ||
       validateCredentials('createUser', credentials, [
@@ -135,7 +135,7 @@ FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
 
 FirebaseAuth.prototype.changePassword = function (credentials, onComplete) {
   var err = this._nextErr('changePassword');
-  this._defer(function () {
+  this._defer('changePassword', _.toArray(arguments), function () {
     err = err ||
       validateCredentials('changePassword', credentials, [
         'email',
@@ -155,7 +155,7 @@ FirebaseAuth.prototype.changePassword = function (credentials, onComplete) {
 
 FirebaseAuth.prototype.removeUser = function (credentials, onComplete) {
   var err = this._nextErr('removeUser');
-  this._defer(function () {
+  this._defer('removeUser', _.toArray(arguments), function () {
     err = err ||
       validateCredentials('removeUser', credentials, [
         'email',
@@ -172,7 +172,7 @@ FirebaseAuth.prototype.removeUser = function (credentials, onComplete) {
 
 FirebaseAuth.prototype.resetPassword = function (credentials, onComplete) {
   var err = this._nextErr('resetPassword');
-  this._defer(function() {
+  this._defer('resetPassword', _.toArray(arguments), function() {
     err = err ||
       validateCredentials('resetPassword', credentials, [
         'email'

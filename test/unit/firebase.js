@@ -54,35 +54,6 @@ describe('MockFirebase', function () {
 
   });
 
-  describe('#splitQueue', function () {
-
-    it('detaches the flush queue from the parent', function () {
-      var child = ref.child('key');
-      expect(child.queue).to.equal(ref.queue);
-      child.splitQueue();
-      expect(child.queue).to.not.equal(ref.queue);
-    });
-
-  });
-
-  describe('#joinQueue', function () {
-
-    it('resets to the parent queue', function () {
-      var child = ref.child('key');
-      child.splitQueue();
-      child.joinQueue();
-      expect(child.queue).to.equal(ref.queue);
-    });
-
-    it('is a noop with no parent', function () {
-      ref = ref.root();
-      var queue = ref.queue;
-      ref.joinQueue();
-      expect(ref.queue).to.equal(queue);
-    });
-
-  });
-
   describe('#failNext', function () {
 
     it('must be called with an Error', function () {
@@ -636,5 +607,44 @@ describe('MockFirebase', function () {
     });
 
   });
-  
+
+  describe('#getFlushQueue', function() {
+    it('returns an array equal to number of flush events queued', function() {
+      ref.set(true);
+      ref.set(false);
+      var list = ref.getFlushQueue();
+      expect(list).to.be.an('array');
+      expect(list.length).to.equal(2);
+    });
+
+    it('does not change length if more items are added to the queue', function() {
+      ref.set(true);
+      ref.set(false);
+      var list = ref.getFlushQueue();
+      expect(list.length).to.equal(2);
+      ref.set('foo');
+      ref.set('bar');
+      expect(list.length).to.equal(2);
+    });
+
+    it('sets the ref attribute correctly', function() {
+      ref.set(true);
+      var data = ref.getFlushQueue()[0].sourceData;
+      expect(data.ref).to.equal(ref);
+    });
+
+    it('sets the `method` attribute correctly', function() {
+      ref.set(true);
+      var data = ref.getFlushQueue()[0].sourceData;
+      expect(data.method).to.equal('set');
+    });
+
+    it('sets the `args` attribute correctly', function() {
+      ref.set(true);
+      var data = ref.getFlushQueue()[0].sourceData;
+      expect(data.args).to.be.an('array');
+    });
+  });
+
+
 });
