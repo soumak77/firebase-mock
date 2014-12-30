@@ -86,12 +86,12 @@ MockFirebase.prototype.getKeys = function () {
 };
 
 MockFirebase.prototype.fakeEvent = function (event, key, data, prevChild, priority) {
-  if( arguments.length < 5) priority = null;
-  if( arguments.length < 4 ) prevChild = null;
-  if( arguments.length < 3 ) data = null;
+  if (arguments.length < 5) priority = null;
+  if (arguments.length < 4) prevChild = null;
+  if (arguments.length < 3) data = null;
   var ref = event === 'value' ? this : this.child(key);
   var snapshot = new Snapshot(ref, data, priority);
-  this._defer('fakeEvent', _.toArray(arguments), function() {
+  this._defer('fakeEvent', _.toArray(arguments), function () {
     this._events[event]
       .map(function (parts) {
         return {
