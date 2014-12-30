@@ -225,10 +225,10 @@ MockFirebase.prototype.once = function (event, callback, cancel, context) {
     });
   }
   else {
-    var fn = function (snapshot) {
+    var fn = _.bind(function (snapshot) {
       this.off(event, fn, context);
       callback.call(context, snapshot);
-    }.bind(this);
+    }, this);
     this.on(event, fn, cancel, context);
   }
 };
