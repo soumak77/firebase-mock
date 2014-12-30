@@ -133,7 +133,7 @@ MockFirebase.prototype.set = function (data, callback) {
   var err = this._nextErr('set');
   data = _.cloneDeep(data);
   this._defer('set', _.toArray(arguments), function() {
-    if( err === null ) {
+    if (err === null) {
       this._dataChanged(data);
     }
     if (callback) callback(err);
@@ -145,7 +145,7 @@ MockFirebase.prototype.update = function (changes, callback) {
   var err = this._nextErr('update');
   var base = this.getData();
   var data = _.assign(_.isObject(base) ? base : {}, changes);
-  this._defer('update', _.toArray(arguments), function() {
+  this._defer('update', _.toArray(arguments), function () {
     if (!err) {
       this._dataChanged(data);
     }
@@ -155,7 +155,7 @@ MockFirebase.prototype.update = function (changes, callback) {
 
 MockFirebase.prototype.setPriority = function (newPriority, callback) {
   var err = this._nextErr('setPriority');
-  this._defer('setPriority', _.toArray(arguments), function() {
+  this._defer('setPriority', _.toArray(arguments), function () {
     this._priChanged(newPriority);
     if (callback) callback(err);
   });
@@ -281,7 +281,7 @@ MockFirebase.prototype.off = function (event, callback, context) {
 };
 
 MockFirebase.prototype.transaction = function (valueFn, finishedFn, applyLocally) {
-  this._defer('transaction', _.toArray(arguments), function() {
+  this._defer('transaction', _.toArray(arguments), function () {
     var err = this._nextErr('transaction');
     var res = valueFn(this.getData());
     var newData = _.isUndefined(res) || err? this.getData() : res;
@@ -514,27 +514,28 @@ MockFirebase.prototype._getPrevChild = function (key) {
   return i === 0? null : keys[i-1];
 };
 
-MockFirebase.prototype._on = function(deferName, event, callback, cancel, context) {
+MockFirebase.prototype._on = function (deferName, event, callback, cancel, context) {
   var handlers = [callback, context, cancel];
   this._events[event].push(handlers);
-  var self = this;
-
   // value and child_added both trigger initial events when called so
-  // we'll defer those here
-  if( event === 'value' || event === 'child_added' ) {
-    this._defer(deferName, _.toArray(arguments).slice(1), function() {
+  // defer those here
+  if ('value' === event || 'child_added' === event) {
+    this._defer(deferName, _.toArray(arguments).slice(1), function () {
       // make sure off() wasn't called before we triggered this
-      if (self._events[event].indexOf(handlers) > -1) {
-        if (event === 'value') {
-          callback.call(context, new Snapshot(self, self.getData(), self.priority));
-        }
-        else if (event === 'child_added') {
-          var prev = null;
-          _.each(self.sortedDataKeys, function (k) {
-            var child = self.child(k);
-            callback.call(context, new Snapshot(child, child.getData(), child.priority), prev);
-            prev = k;
-          });
+      if (this._events[event].indexOf(handlers) > -1) {
+        switch (event) {
+          case 'value':
+            callback.call(context, new Snapshot(this, this.getData(), this.priority));
+            break;
+          case 'child_added':
+            var previousChild = null;
+            this.sortedDataKeys
+              .forEach(function (key) {
+                var child = this.child(key);
+                callback.call(context, new Snapshot(child, child.getData(), child.priority), previousChild);
+                previousChild = key;
+              }, this);
+            break;
         }
       }
     });
