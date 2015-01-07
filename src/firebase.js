@@ -141,7 +141,7 @@ MockFirebase.prototype.set = function (data, callback) {
 };
 
 MockFirebase.prototype.update = function (changes, callback) {
-  assert.equal(typeof changes, 'object', 'First argument must be an object when calling $update');
+  assert.equal(typeof changes, 'object', 'First argument must be an object when calling "update"');
   var err = this._nextErr('update');
   var base = this.getData();
   var data = _.assign(_.isObject(base) ? base : {}, changes);
