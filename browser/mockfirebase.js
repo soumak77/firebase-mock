@@ -1,4 +1,4 @@
-/** mockfirebase - v0.8.3
+/** mockfirebase - v0.9.0
 https://github.com/katowulf/mockfirebase
 * Copyright (c) 2014 Kato
 * License: MIT */
@@ -1020,7 +1020,7 @@ function base64Write (buf, string, offset, length) {
 }
 
 function utf16leWrite (buf, string, offset, length) {
-  var charsWritten = blitBuffer(utf16leToBytes(string), buf, offset, length)
+  var charsWritten = blitBuffer(utf16leToBytes(string), buf, offset, length, 2)
   return charsWritten
 }
 
@@ -1704,7 +1704,8 @@ function base64ToBytes (str) {
   return base64.toByteArray(str)
 }
 
-function blitBuffer (src, dst, offset, length) {
+function blitBuffer (src, dst, offset, length, unitSize) {
+  if (unitSize) length -= length % unitSize;
   for (var i = 0; i < length; i++) {
     if ((i + offset >= dst.length) || (i >= src.length))
       break
@@ -9480,7 +9481,7 @@ function FirebaseAuth () {
 }
 
 FirebaseAuth.prototype.changeAuthState = function (userData) {
-  this._defer(function() {
+  this._defer('changeAuthState', _.toArray(arguments), function() {
     if (!_.isEqual(this._auth.userData, userData)) {
       this._auth.userData = _.isObject(userData) ? userData : null;
       this._triggerAuthEvent();
@@ -9523,7 +9524,7 @@ FirebaseAuth.prototype._authEvent = function (method, callback) {
   if (err) {
     // if an error occurs, we defer the error report until the next flush()
     // event is triggered
-    this._defer(function() {
+    this._defer('_authEvent', _.toArray(arguments), function() {
       callback(err, null);
     });
   }
@@ -9576,7 +9577,7 @@ FirebaseAuth.prototype.unauth = function () {
 FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
   var err = this._nextErr('createUser');
   var users = this._auth.users;
-  this._defer(function () {
+  this._defer('createUser', _.toArray(arguments), function () {
     var user = null;
     err = err ||
       validateCredentials('createUser', credentials, [
@@ -9601,7 +9602,7 @@ FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
 
 FirebaseAuth.prototype.changePassword = function (credentials, onComplete) {
   var err = this._nextErr('changePassword');
-  this._defer(function () {
+  this._defer('changePassword', _.toArray(arguments), function () {
     err = err ||
       validateCredentials('changePassword', credentials, [
         'email',
@@ -9621,7 +9622,7 @@ FirebaseAuth.prototype.changePassword = function (credentials, onComplete) {
 
 FirebaseAuth.prototype.removeUser = function (credentials, onComplete) {
   var err = this._nextErr('removeUser');
-  this._defer(function () {
+  this._defer('removeUser', _.toArray(arguments), function () {
     err = err ||
       validateCredentials('removeUser', credentials, [
         'email',
@@ -9638,7 +9639,7 @@ FirebaseAuth.prototype.removeUser = function (credentials, onComplete) {
 
 FirebaseAuth.prototype.resetPassword = function (credentials, onComplete) {
   var err = this._nextErr('resetPassword');
-  this._defer(function() {
+  this._defer('resetPassword', _.toArray(arguments), function() {
     err = err ||
       validateCredentials('resetPassword', credentials, [
         'email'
@@ -9722,7 +9723,7 @@ var _        = require('lodash');
 var assert   = require('assert');
 var Query    = require('./query');
 var Snapshot = require('./snapshot');
-var Queue    = require('./queue');
+var Queue    = require('./queue').Queue;
 var utils    = require('./utils');
 var Auth     = require('./auth');
 
@@ -9771,14 +9772,8 @@ MockFirebase.prototype.autoFlush = function (delay) {
   return this;
 };
 
-MockFirebase.prototype.splitQueue = function () {
-  this.queue = new Queue();
-};
-
-MockFirebase.prototype.joinQueue = function () {
-  if (this.parent()) {
-    this.queue = this.parent().queue;
-  }
+MockFirebase.prototype.getFlushQueue = function() {
+  return this.queue.getEvents();
 };
 
 MockFirebase.prototype.failNext = function (methodName, err) {
@@ -9810,12 +9805,12 @@ MockFirebase.prototype.getKeys = function () {
 };
 
 MockFirebase.prototype.fakeEvent = function (event, key, data, prevChild, priority) {
-  if( arguments.length < 5) priority = null;
-  if( arguments.length < 4 ) prevChild = null;
-  if( arguments.length < 3 ) data = null;
+  if (arguments.length < 5) priority = null;
+  if (arguments.length < 4) prevChild = null;
+  if (arguments.length < 3) data = null;
   var ref = event === 'value' ? this : this.child(key);
   var snapshot = new Snapshot(ref, data, priority);
-  this._defer(function() {
+  this._defer('fakeEvent', _.toArray(arguments), function () {
     this._events[event]
       .map(function (parts) {
         return {
@@ -9856,8 +9851,8 @@ MockFirebase.prototype.child = function (childPath) {
 MockFirebase.prototype.set = function (data, callback) {
   var err = this._nextErr('set');
   data = _.cloneDeep(data);
-  this._defer(function() {
-    if( err === null ) {
+  this._defer('set', _.toArray(arguments), function() {
+    if (err === null) {
       this._dataChanged(data);
     }
     if (callback) callback(err);
@@ -9865,11 +9860,11 @@ MockFirebase.prototype.set = function (data, callback) {
 };
 
 MockFirebase.prototype.update = function (changes, callback) {
-  assert.equal(typeof changes, 'object', 'First argument must be an object when calling $update');
+  assert.equal(typeof changes, 'object', 'First argument must be an object when calling "update"');
   var err = this._nextErr('update');
   var base = this.getData();
   var data = _.assign(_.isObject(base) ? base : {}, changes);
-  this._defer(function() {
+  this._defer('update', _.toArray(arguments), function () {
     if (!err) {
       this._dataChanged(data);
     }
@@ -9879,7 +9874,7 @@ MockFirebase.prototype.update = function (changes, callback) {
 
 MockFirebase.prototype.setPriority = function (newPriority, callback) {
   var err = this._nextErr('setPriority');
-  this._defer(function() {
+  this._defer('setPriority', _.toArray(arguments), function () {
     this._priChanged(newPriority);
     if (callback) callback(err);
   });
@@ -9934,26 +9929,25 @@ MockFirebase.prototype.once = function (event, callback, cancel, context) {
   }
   else if (arguments.length < 3) {
     cancel = _.noop;
-    context = null;
   }
   var err = this._nextErr('once');
   if (err) {
-    this._defer(function () {
+    this._defer('once', _.toArray(arguments), function () {
       cancel.call(context, err);
     });
   }
   else {
-    var fn = function (snapshot) {
+    var fn = _.bind(function (snapshot) {
       this.off(event, fn, context);
       callback.call(context, snapshot);
-    }.bind(this);
-    this.on(event, fn, cancel, context);
+    }, this);
+    this._on('once', event, fn, cancel, context);
   }
 };
 
 MockFirebase.prototype.remove = function (callback) {
   var err = this._nextErr('remove');
-  this._defer(function () {
+  this._defer('remove', _.toArray(arguments), function () {
     if (err === null) {
       this._dataChanged(null);
     }
@@ -9973,34 +9967,12 @@ MockFirebase.prototype.on = function (event, callback, cancel, context) {
 
   var err = this._nextErr('on');
   if (err) {
-    this._defer(function() {
+    this._defer('on', _.toArray(arguments), function() {
       cancel.call(context, err);
     });
   }
   else {
-    var handlers = [callback, context, cancel];
-    this._events[event].push(handlers);
-    if (event === 'value') {
-      this._defer(function() {
-        // make sure off() wasn't called in the interim
-        if (this._events[event].indexOf(handlers) > -1) {
-          callback.call(context, new Snapshot(this, this.getData(), this.priority));
-        }
-      });
-    }
-    else if (event === 'child_added') {
-      this._defer(function() {
-        if (this._events[event].indexOf(handlers) > -1) {
-          var previous = null;
-          this.sortedDataKeys
-            .forEach(function (key) {
-              var child = this.child(key);
-              callback.call(context, new Snapshot(child, child.getData(), child.priority), previous);
-              previous = key;
-            }, this);
-        }
-      });
-    }
+    this._on('on', event, callback, cancel, context);
   }
 };
 
@@ -10028,7 +10000,7 @@ MockFirebase.prototype.off = function (event, callback, context) {
 };
 
 MockFirebase.prototype.transaction = function (valueFn, finishedFn, applyLocally) {
-  this._defer(function() {
+  this._defer('transaction', _.toArray(arguments), function () {
     var err = this._nextErr('transaction');
     var res = valueFn(this.getData());
     var newData = _.isUndefined(res) || err? this.getData() : res;
@@ -10143,8 +10115,16 @@ MockFirebase.prototype._dropKey = function (key) {
   }
 };
 
-MockFirebase.prototype._defer = function (callback) {
-  this.queue.push(_.bind(callback, this));
+MockFirebase.prototype._defer = function (sourceMethod, sourceArgs, callback) {
+  this.queue.push({
+    fn: callback,
+    context: this,
+    sourceData: {
+      ref: this,
+      method: sourceMethod,
+      args: sourceArgs
+    }
+  });
   if (this.flushDelay !== false) {
     this.flush(this.flushDelay);
   }
@@ -10251,6 +10231,34 @@ MockFirebase.prototype._getPrevChild = function (key) {
     i = _.indexOf(keys, key);
   }
   return i === 0? null : keys[i-1];
+};
+
+MockFirebase.prototype._on = function (deferName, event, callback, cancel, context) {
+  var handlers = [callback, context, cancel];
+  this._events[event].push(handlers);
+  // value and child_added both trigger initial events when called so
+  // defer those here
+  if ('value' === event || 'child_added' === event) {
+    this._defer(deferName, _.toArray(arguments).slice(1), function () {
+      // make sure off() wasn't called before we triggered this
+      if (this._events[event].indexOf(handlers) > -1) {
+        switch (event) {
+          case 'value':
+            callback.call(context, new Snapshot(this, this.getData(), this.priority));
+            break;
+          case 'child_added':
+            var previousChild = null;
+            this.sortedDataKeys
+              .forEach(function (key) {
+                var child = this.child(key);
+                callback.call(context, new Snapshot(child, child.getData(), child.priority), previousChild);
+                previousChild = key;
+              }, this);
+            break;
+        }
+      }
+    });
+  }
 };
 
 MockFirebase.prototype.childComparator = function (a, b) {
@@ -10747,8 +10755,15 @@ function FlushQueue () {
   this.events = [];
 }
 
-FlushQueue.prototype.push = function(args) {
-  this.events.push(args);
+FlushQueue.prototype.push = function () {
+  this.events.push.apply(this.events, [].slice.call(arguments).map(function (event) {
+    if (typeof event === 'function') {
+      event = {
+        fn: event
+      };
+    }
+    return new FlushEvent(event.fn, event.context, event.sourceData);
+  }));
 };
 
 FlushQueue.prototype.flush = function (delay) {
@@ -10758,9 +10773,13 @@ FlushQueue.prototype.flush = function (delay) {
   var events = this.events;
   this.events = [];
   function process () {
-    events.forEach(function(event) {
-      event();
-    });
+    events
+      .filter(function (event) {
+        return !event.hasRun;
+      })
+      .forEach(function (event) {
+        event.run();
+      });
   }
   if (_.isNumber(delay)) {
     setTimeout(process, delay);
@@ -10770,8 +10789,37 @@ FlushQueue.prototype.flush = function (delay) {
   }
 };
 
-module.exports = FlushQueue;
+FlushQueue.prototype.getEvents = function () {
+  return this.events.slice();
+};
 
+function FlushEvent (fn, context, sourceData) {
+  this.canceled = false;
+  this.hasRun = false;
+  this.fn = fn;
+  this.context = context;
+  // stores data about the event so that we can filter items in the queue
+  this.sourceData = sourceData;
+}
+
+FlushEvent.prototype.run = function () {
+  if (this.hasRun) {
+    throw new Error('cannot call event.run() multiple times');
+  }
+  if (this.canceled) return;
+  this.hasRun = true;
+  this.fn.call(this.context);
+};
+
+FlushEvent.prototype.cancel = function () {
+  if (this.hasRun) {
+    throw new Error('cannot call event.cancel() after event.run()');
+  }
+  this.canceled = true;
+};
+
+exports.Queue = FlushQueue;
+exports.Event = FlushEvent;
 },{"lodash":14}],20:[function(require,module,exports){
 'use strict';
 
