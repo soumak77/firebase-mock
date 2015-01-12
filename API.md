@@ -5,8 +5,6 @@ Only `MockFirebase` methods are included here. For details on normal Firebase AP
 - [Core](#core)
   - [`flush([delay])`](#flushdelay---ref)
   - [`autoFlush([delay])`](#autoflushdelaysetting---ref)
-  - [`splitQueue()`](#splitqueue---undefined)
-  - [`joinQueue()`](#joinqueue---undefined)
   - [`failNext(method, err)`](#failnextmethod-err---undefined)
   - [`forceCancel(err [, event] [, callback] [, context]`)](#forcecancelerr--event--callback--context---undefined)
   - [`getData()`](#getdata---any)
@@ -45,18 +43,6 @@ console.assert(ref.getData().foo === 'bar', 'ref has data');
 ##### `autoFlush([delay|setting])` -> `ref`
 
 Configures the Firebase reference to automatically flush data and authentication operations when run. If no arguments or `true` are passed, the operations will be flushed immediately (synchronously). If a `delay` is provided, the operations will be flushed after the specified number of milliseconds. If `false` is provided, `autoFlush` will be disabled.
-
-<hr>
-
-##### `splitQueue()` -> `undefined`
-
-Normally all child paths inherit the event queue from their parent reference. Calling `ref.flush` on a reference with listeners at child paths would normally fire all listeners and persist pending data changes. You can override this behavior by calling `splitQueue` on a path to detach the queue from the parent. You should call this before adding listeners or changing data.
-
-<hr>
-
-##### `joinQueue()` -> `undefined`
-
-After calling `splitQueue`, `joinQueue` will restore the normal behavior and reconnect the child flush queue to the parent. Any existing queued events on the child will be lost.
 
 <hr>
 
