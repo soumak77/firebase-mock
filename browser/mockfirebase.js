@@ -1,4 +1,4 @@
-/** mockfirebase - v0.9.0
+/** mockfirebase - v0.9.1
 https://github.com/katowulf/mockfirebase
 * Copyright (c) 2014 Kato
 * License: MIT */
@@ -9,7 +9,7 @@ exports.MockFirebase = require('./firebase');
 /** @deprecated */
 exports.MockFirebaseSimpleLogin = require('./login');
 
-},{"./firebase":16,"./login":17}],2:[function(require,module,exports){
+},{"./firebase":17,"./login":18}],2:[function(require,module,exports){
 (function (Buffer){
 (function(){
   var crypt = require('crypt'),
@@ -668,7 +668,7 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-},{"util/":13}],6:[function(require,module,exports){
+},{"util/":14}],6:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -1966,6 +1966,309 @@ module.exports = isArray || function (val) {
 };
 
 },{}],10:[function(require,module,exports){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+function EventEmitter() {
+  this._events = this._events || {};
+  this._maxListeners = this._maxListeners || undefined;
+}
+module.exports = EventEmitter;
+
+// Backwards-compat with node 0.10.x
+EventEmitter.EventEmitter = EventEmitter;
+
+EventEmitter.prototype._events = undefined;
+EventEmitter.prototype._maxListeners = undefined;
+
+// By default EventEmitters will print a warning if more than 10 listeners are
+// added to it. This is a useful default which helps finding memory leaks.
+EventEmitter.defaultMaxListeners = 10;
+
+// Obviously not all Emitters should be limited to 10. This function allows
+// that to be increased. Set to zero for unlimited.
+EventEmitter.prototype.setMaxListeners = function(n) {
+  if (!isNumber(n) || n < 0 || isNaN(n))
+    throw TypeError('n must be a positive number');
+  this._maxListeners = n;
+  return this;
+};
+
+EventEmitter.prototype.emit = function(type) {
+  var er, handler, len, args, i, listeners;
+
+  if (!this._events)
+    this._events = {};
+
+  // If there is no 'error' event listener then throw.
+  if (type === 'error') {
+    if (!this._events.error ||
+        (isObject(this._events.error) && !this._events.error.length)) {
+      er = arguments[1];
+      if (er instanceof Error) {
+        throw er; // Unhandled 'error' event
+      }
+      throw TypeError('Uncaught, unspecified "error" event.');
+    }
+  }
+
+  handler = this._events[type];
+
+  if (isUndefined(handler))
+    return false;
+
+  if (isFunction(handler)) {
+    switch (arguments.length) {
+      // fast cases
+      case 1:
+        handler.call(this);
+        break;
+      case 2:
+        handler.call(this, arguments[1]);
+        break;
+      case 3:
+        handler.call(this, arguments[1], arguments[2]);
+        break;
+      // slower
+      default:
+        len = arguments.length;
+        args = new Array(len - 1);
+        for (i = 1; i < len; i++)
+          args[i - 1] = arguments[i];
+        handler.apply(this, args);
+    }
+  } else if (isObject(handler)) {
+    len = arguments.length;
+    args = new Array(len - 1);
+    for (i = 1; i < len; i++)
+      args[i - 1] = arguments[i];
+
+    listeners = handler.slice();
+    len = listeners.length;
+    for (i = 0; i < len; i++)
+      listeners[i].apply(this, args);
+  }
+
+  return true;
+};
+
+EventEmitter.prototype.addListener = function(type, listener) {
+  var m;
+
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
+
+  if (!this._events)
+    this._events = {};
+
+  // To avoid recursion in the case that type === "newListener"! Before
+  // adding it to the listeners, first emit "newListener".
+  if (this._events.newListener)
+    this.emit('newListener', type,
+              isFunction(listener.listener) ?
+              listener.listener : listener);
+
+  if (!this._events[type])
+    // Optimize the case of one listener. Don't need the extra array object.
+    this._events[type] = listener;
+  else if (isObject(this._events[type]))
+    // If we've already got an array, just append.
+    this._events[type].push(listener);
+  else
+    // Adding the second element, need to change to array.
+    this._events[type] = [this._events[type], listener];
+
+  // Check for listener leak
+  if (isObject(this._events[type]) && !this._events[type].warned) {
+    var m;
+    if (!isUndefined(this._maxListeners)) {
+      m = this._maxListeners;
+    } else {
+      m = EventEmitter.defaultMaxListeners;
+    }
+
+    if (m && m > 0 && this._events[type].length > m) {
+      this._events[type].warned = true;
+      console.error('(node) warning: possible EventEmitter memory ' +
+                    'leak detected. %d listeners added. ' +
+                    'Use emitter.setMaxListeners() to increase limit.',
+                    this._events[type].length);
+      if (typeof console.trace === 'function') {
+        // not supported in IE 10
+        console.trace();
+      }
+    }
+  }
+
+  return this;
+};
+
+EventEmitter.prototype.on = EventEmitter.prototype.addListener;
+
+EventEmitter.prototype.once = function(type, listener) {
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
+
+  var fired = false;
+
+  function g() {
+    this.removeListener(type, g);
+
+    if (!fired) {
+      fired = true;
+      listener.apply(this, arguments);
+    }
+  }
+
+  g.listener = listener;
+  this.on(type, g);
+
+  return this;
+};
+
+// emits a 'removeListener' event iff the listener was removed
+EventEmitter.prototype.removeListener = function(type, listener) {
+  var list, position, length, i;
+
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
+
+  if (!this._events || !this._events[type])
+    return this;
+
+  list = this._events[type];
+  length = list.length;
+  position = -1;
+
+  if (list === listener ||
+      (isFunction(list.listener) && list.listener === listener)) {
+    delete this._events[type];
+    if (this._events.removeListener)
+      this.emit('removeListener', type, listener);
+
+  } else if (isObject(list)) {
+    for (i = length; i-- > 0;) {
+      if (list[i] === listener ||
+          (list[i].listener && list[i].listener === listener)) {
+        position = i;
+        break;
+      }
+    }
+
+    if (position < 0)
+      return this;
+
+    if (list.length === 1) {
+      list.length = 0;
+      delete this._events[type];
+    } else {
+      list.splice(position, 1);
+    }
+
+    if (this._events.removeListener)
+      this.emit('removeListener', type, listener);
+  }
+
+  return this;
+};
+
+EventEmitter.prototype.removeAllListeners = function(type) {
+  var key, listeners;
+
+  if (!this._events)
+    return this;
+
+  // not listening for removeListener, no need to emit
+  if (!this._events.removeListener) {
+    if (arguments.length === 0)
+      this._events = {};
+    else if (this._events[type])
+      delete this._events[type];
+    return this;
+  }
+
+  // emit removeListener for all listeners on all events
+  if (arguments.length === 0) {
+    for (key in this._events) {
+      if (key === 'removeListener') continue;
+      this.removeAllListeners(key);
+    }
+    this.removeAllListeners('removeListener');
+    this._events = {};
+    return this;
+  }
+
+  listeners = this._events[type];
+
+  if (isFunction(listeners)) {
+    this.removeListener(type, listeners);
+  } else {
+    // LIFO order
+    while (listeners.length)
+      this.removeListener(type, listeners[listeners.length - 1]);
+  }
+  delete this._events[type];
+
+  return this;
+};
+
+EventEmitter.prototype.listeners = function(type) {
+  var ret;
+  if (!this._events || !this._events[type])
+    ret = [];
+  else if (isFunction(this._events[type]))
+    ret = [this._events[type]];
+  else
+    ret = this._events[type].slice();
+  return ret;
+};
+
+EventEmitter.listenerCount = function(emitter, type) {
+  var ret;
+  if (!emitter._events || !emitter._events[type])
+    ret = 0;
+  else if (isFunction(emitter._events[type]))
+    ret = 1;
+  else
+    ret = emitter._events[type].length;
+  return ret;
+};
+
+function isFunction(arg) {
+  return typeof arg === 'function';
+}
+
+function isNumber(arg) {
+  return typeof arg === 'number';
+}
+
+function isObject(arg) {
+  return typeof arg === 'object' && arg !== null;
+}
+
+function isUndefined(arg) {
+  return arg === void 0;
+}
+
+},{}],11:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -1990,7 +2293,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -2078,14 +2381,14 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -2675,7 +2978,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":12,"_process":11,"inherits":10}],14:[function(require,module,exports){
+},{"./support/isBuffer":13,"_process":12,"inherits":11}],15:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -9464,7 +9767,7 @@ function hasOwnProperty(obj, prop) {
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 var _      = require('lodash');
@@ -9716,7 +10019,7 @@ function validateArgument (method, object, position, name, type) {
 }
 
 module.exports = FirebaseAuth;
-},{"lodash":14,"util":13}],16:[function(require,module,exports){
+},{"lodash":15,"util":14}],17:[function(require,module,exports){
 'use strict';
 
 var _        = require('lodash');
@@ -10279,7 +10582,7 @@ function extractName(path) {
 
 module.exports = MockFirebase;
 
-},{"./auth":15,"./query":18,"./queue":19,"./snapshot":21,"./utils":22,"assert":5,"lodash":14}],17:[function(require,module,exports){
+},{"./auth":16,"./query":19,"./queue":20,"./snapshot":22,"./utils":23,"assert":5,"lodash":15}],18:[function(require,module,exports){
 'use strict';
 
 var _   = require('lodash');
@@ -10587,7 +10890,7 @@ function createDefaultUser (provider) {
 
 module.exports = MockFirebaseSimpleLogin;
 
-},{"MD5":2,"lodash":14}],18:[function(require,module,exports){
+},{"MD5":2,"lodash":15}],19:[function(require,module,exports){
 'use strict';
 
 var _        = require('lodash');
@@ -10746,23 +11049,29 @@ function assertQuery (method, pri, key) {
 
 module.exports = MockQuery;
 
-},{"./slice":20,"./utils":22,"lodash":14}],19:[function(require,module,exports){
+},{"./slice":21,"./utils":23,"lodash":15}],20:[function(require,module,exports){
 'use strict';
 
-var _ = require('lodash');
+var _            = require('lodash');
+var util         = require('util');
+var EventEmitter = require('events').EventEmitter;
 
 function FlushQueue () {
   this.events = [];
 }
 
 FlushQueue.prototype.push = function () {
-  this.events.push.apply(this.events, [].slice.call(arguments).map(function (event) {
+  var self = this;
+  this.events.push.apply(this.events, _.toArray(arguments).map(function (event) {
     if (typeof event === 'function') {
       event = {
         fn: event
       };
     }
-    return new FlushEvent(event.fn, event.context, event.sourceData);
+    return new FlushEvent(event.fn, event.context, event.sourceData)
+      .once('cancel', function (event) {
+        self.events.splice(self.events.indexOf(event), 1);
+      });
   }));
 };
 
@@ -10771,12 +11080,12 @@ FlushQueue.prototype.flush = function (delay) {
     throw new Error('No deferred tasks to be flushed');
   }
   var events = this.events;
+  events.forEach(function (event) {
+    event.removeAllListeners();
+  });
   this.events = [];
   function process () {
     events
-      .filter(function (event) {
-        return !event.hasRun;
-      })
       .forEach(function (event) {
         event.run();
       });
@@ -10794,33 +11103,29 @@ FlushQueue.prototype.getEvents = function () {
 };
 
 function FlushEvent (fn, context, sourceData) {
-  this.canceled = false;
-  this.hasRun = false;
   this.fn = fn;
   this.context = context;
   // stores data about the event so that we can filter items in the queue
   this.sourceData = sourceData;
+
+  EventEmitter.call(this);
 }
 
+util.inherits(FlushEvent, EventEmitter);
+
 FlushEvent.prototype.run = function () {
-  if (this.hasRun) {
-    throw new Error('cannot call event.run() multiple times');
-  }
-  if (this.canceled) return;
-  this.hasRun = true;
+  this.cancel();
   this.fn.call(this.context);
 };
 
 FlushEvent.prototype.cancel = function () {
-  if (this.hasRun) {
-    throw new Error('cannot call event.cancel() after event.run()');
-  }
-  this.canceled = true;
+  this.emit('cancel', this);
 };
 
 exports.Queue = FlushQueue;
 exports.Event = FlushEvent;
-},{"lodash":14}],20:[function(require,module,exports){
+
+},{"events":10,"lodash":15,"util":14}],21:[function(require,module,exports){
 'use strict';
 
 var _        = require('lodash');
@@ -11007,7 +11312,7 @@ Slice.prototype._build = function(ref, rawData) {
 
 module.exports = Slice;
 
-},{"./snapshot":21,"./utils":22,"lodash":14}],21:[function(require,module,exports){
+},{"./snapshot":22,"./utils":23,"lodash":15}],22:[function(require,module,exports){
 'use strict';
 
 var _ = require('lodash');
@@ -11091,7 +11396,7 @@ function isValue (value) {
 }
 
 module.exports = MockDataSnapshot;
-},{"lodash":14}],22:[function(require,module,exports){
+},{"lodash":15}],23:[function(require,module,exports){
 'use strict';
 
 var Snapshot = require('./snapshot');
@@ -11164,7 +11469,7 @@ exports.priorityComparator = function priorityComparator (a, b) {
   return 0;
 };
 
-},{"./snapshot":21,"lodash":14}]},{},[1])(1)
+},{"./snapshot":22,"lodash":15}]},{},[1])(1)
 });;(function (window) {
   'use strict';
   if (typeof window !== 'undefined' && window.mockfirebase) {
