@@ -1,19 +1,25 @@
 'use strict';
 
-var _ = require('lodash');
+var _            = require('lodash');
+var util         = require('util');
+var EventEmitter = require('events').EventEmitter;
 
 function FlushQueue () {
   this.events = [];
 }
 
 FlushQueue.prototype.push = function () {
-  this.events.push.apply(this.events, [].slice.call(arguments).map(function (event) {
+  var self = this;
+  this.events.push.apply(this.events, _.toArray(arguments).map(function (event) {
     if (typeof event === 'function') {
       event = {
         fn: event
       };
     }
-    return new FlushEvent(event.fn, event.context, event.sourceData);
+    return new FlushEvent(event.fn, event.context, event.sourceData)
+      .once('cancel', function (event) {
+        self.events.splice(self.events.indexOf(event), 1);
+      });
   }));
 };
 
@@ -22,12 +28,12 @@ FlushQueue.prototype.flush = function (delay) {
     throw new Error('No deferred tasks to be flushed');
   }
   var events = this.events;
+  events.forEach(function (event) {
+    event.removeAllListeners();
+  });
   this.events = [];
   function process () {
     events
-      .filter(function (event) {
-        return !event.hasRun;
-      })
       .forEach(function (event) {
         event.run();
       });
@@ -45,28 +51,23 @@ FlushQueue.prototype.getEvents = function () {
 };
 
 function FlushEvent (fn, context, sourceData) {
-  this.canceled = false;
-  this.hasRun = false;
   this.fn = fn;
   this.context = context;
   // stores data about the event so that we can filter items in the queue
   this.sourceData = sourceData;
+
+  EventEmitter.call(this);
 }
 
+util.inherits(FlushEvent, EventEmitter);
+
 FlushEvent.prototype.run = function () {
-  if (this.hasRun) {
-    throw new Error('cannot call event.run() multiple times');
-  }
-  if (this.canceled) return;
-  this.hasRun = true;
+  this.cancel();
   this.fn.call(this.context);
 };
 
 FlushEvent.prototype.cancel = function () {
-  if (this.hasRun) {
-    throw new Error('cannot call event.cancel() after event.run()');
-  }
-  this.canceled = true;
+  this.emit('cancel', this);
 };
 
 exports.Queue = FlushQueue;

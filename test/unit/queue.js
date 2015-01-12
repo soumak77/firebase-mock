@@ -1,10 +1,11 @@
 'use strict';
 
-var expect     = require('chai').use(require('sinon-chai')).expect;
-var sinon      = require('sinon');
-var _          = require('lodash');
-var Queue      = require('../../src/queue').Queue;
-var FlushEvent = require('../../src/queue').Event;
+var expect       = require('chai').use(require('sinon-chai')).expect;
+var sinon        = require('sinon');
+var _            = require('lodash');
+var Queue        = require('../../src/queue').Queue;
+var FlushEvent   = require('../../src/queue').Event;
+var EventEmitter = require('events').EventEmitter;
 
 describe('FlushQueue', function () {
 
@@ -18,6 +19,12 @@ describe('FlushQueue', function () {
       .to.have.property('events')
       .that.is.an('array')
       .that.is.empty;
+  });
+
+  it('removes events when they are cancelled', function () {
+    queue.push(_.noop);
+    queue.getEvents()[0].cancel();
+    expect(queue.getEvents()).to.have.length(0);
   });
 
   describe('#push', function () {
@@ -75,13 +82,11 @@ describe('FlushQueue', function () {
       expect(spy).to.have.been.called;
     });
 
-    it('does not invoke events that have run', function () {
-      var spy = sinon.spy();
-      queue.push(spy);
-      queue.getEvents()[0].run();
-      spy.reset();
+    it('removes internal event listeners immediately', function () {
+      queue.push(_.noop);
+      var event = queue.getEvents()[0];
       queue.flush();
-      expect(spy).to.not.have.been.called;
+      expect(EventEmitter.listenerCount(event, 'cancel')).to.equal(0);
     });
 
   });
@@ -109,30 +114,26 @@ describe('FlushEvent', function () {
 
   describe('#run', function () {
 
-    it('throws if called twice', function () {
+    it('runs the event handler on the context', function () {
       event.run();
-      expect(function runEvent () {
-        event.run();
-      })
-      .to.throw('multiple times');
+      expect(spy).to.have.been.calledOn(context);
     });
 
-    it('is a noop if cancelled', function () {
-      event.cancel();
+    it('cancels itself', function () {
+      sinon.spy(event, 'cancel');
       event.run();
-      expect(event.hasRun).to.be.false;
+      expect(event.cancel).to.have.been.called;
     });
 
   });
 
   describe('#cancel', function () {
 
-    it('throws if called after run', function () {
-      event.run();
-      expect(function cancelEvent () {
-        event.cancel();
-      })
-      .to.throw('after event.run');
+    it('emits a cancellation event', function () {
+      spy = sinon.spy();
+      event.on('cancel', spy);
+      event.cancel();
+      expect(spy).to.have.been.called;
     });
 
   });
