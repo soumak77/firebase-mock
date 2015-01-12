@@ -136,29 +136,29 @@ This is a copy of the internal array and represents the state of the flush queue
 Example:
 
 ```js
-  // create some child_added events
-  var ref = new MockFirebase('OutOfOrderFlushEvents://');
+// create some child_added events
+var ref = new MockFirebase('OutOfOrderFlushEvents://');
 
-  var child1 = ref.push('foo');
-  var child2 = ref.push('bar');
-  var child3 = ref.push('baz');
-  var events = ref.getFlushQueue();
+var child1 = ref.push('foo');
+var child2 = ref.push('bar');
+var child3 = ref.push('baz');
+var events = ref.getFlushQueue();
 
-  var flushData1 = flushQueue1.sourceData;
-  console.assert(flushData1.ref === child2, 'first event is for child1');
-  console.assert(flushData1.method, 'first event is a push');
-  console.assert(flushData1.args[0], 'push was called with "bar"');
+var sourceData = events[0].sourceData;
+console.assert(sourceData.ref === child2, 'first event is for child1');
+console.assert(sourceData.method, 'first event is a push');
+console.assert(sourceData.args[0], 'push was called with "bar"');
 
-  ref.on('child_added', function(snap, prevChild) {
-     console.log('added ' + snap.val() + ' after ' + prevChild);
-  });
+ref.on('child_added', function (snap, prevChild) {
+   console.log('added ' + snap.val() + ' after ' + prevChild);
+});
 
-  // cancel the second push so it never triggers a event
-  flushQueue[1].cancel();
-  // trigger the third push before the first
-  flushQueue[2].run(); // added baz after bar
-  // now flush the remainder of the queue normally
-  ref.flush(); // added foo after null
+// cancel the second push so it never triggers a event
+events[1].cancel();
+// trigger the third push before the first
+events[2].run(); // added baz after bar
+// now flush the remainder of the queue normally
+ref.flush(); // added foo after null
 ```
 
 ## Auth
