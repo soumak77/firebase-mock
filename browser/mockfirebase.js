@@ -1,4 +1,4 @@
-/** mockfirebase - v0.9.1
+/** mockfirebase - v0.9.2
 https://github.com/katowulf/mockfirebase
 * Copyright (c) 2014 Kato
 * License: MIT */
@@ -11340,6 +11340,10 @@ MockDataSnapshot.prototype.child = function (key) {
   return new MockDataSnapshot(ref, data, priority);
 };
 
+MockDataSnapshot.prototype.exists = function () {
+  return this.val() !== null;
+};
+
 MockDataSnapshot.prototype.forEach = function (callback, context) {
   _.each(this.val(), function (value, key) {
     callback.call(context, this.child(key));
@@ -11366,6 +11370,7 @@ MockDataSnapshot.prototype.name = function () {
 MockDataSnapshot.prototype.numChildren = function () {
   return _.size(this.val());
 };
+
 
 MockDataSnapshot.prototype.exportVal = function () {
   var exportData = {};
@@ -11396,6 +11401,7 @@ function isValue (value) {
 }
 
 module.exports = MockDataSnapshot;
+
 },{"lodash":15}],23:[function(require,module,exports){
 'use strict';
 
