@@ -25,6 +25,10 @@ MockDataSnapshot.prototype.child = function (key) {
   return new MockDataSnapshot(ref, data, priority);
 };
 
+MockDataSnapshot.prototype.exists = function () {
+  return this.val() !== null;
+};
+
 MockDataSnapshot.prototype.forEach = function (callback, context) {
   _.each(this.val(), function (value, key) {
     callback.call(context, this.child(key));
@@ -51,6 +55,7 @@ MockDataSnapshot.prototype.name = function () {
 MockDataSnapshot.prototype.numChildren = function () {
   return _.size(this.val());
 };
+
 
 MockDataSnapshot.prototype.exportVal = function () {
   var exportData = {};

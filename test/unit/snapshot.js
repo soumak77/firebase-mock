@@ -78,6 +78,15 @@ describe('DataSnapshot', function () {
 
   });
 
+  describe('#exists', function () {
+
+    it('checks for a null value', function () {
+      expect(new Snapshot(ref, null).exists()).to.be.false;
+      expect(new Snapshot(ref, {foo: 'bar'}).exists()).to.be.true;
+    });
+
+  });
+
   describe('#forEach', function () {
 
     it('calls the callback with each child', function () {
