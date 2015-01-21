@@ -14,6 +14,9 @@ Only `MockFirebase` methods are included here. For details on normal Firebase AP
 - [Auth](#auth)
   - [`changeAuthState(user)`](#changeauthstateauthdata---undefined)
   - [`getEmailUser(email)`](#getemailuseremail---objectnull)
+- [Server Timestamps](#server-timestamps)
+  - [`setClock(fn)`](#firebasesetclockfn---undefined)
+  - [`restoreClock()`](#firebasesetclockfn---undefined)
 
 ## Core
 
@@ -192,3 +195,17 @@ console.assert(ref.getAuth().auth.myAuthProperty, 'authData has custom property'
 ##### `getEmailUser(email)` -> `Object|null`
 
 Finds a user previously created with [`createUser`](https://www.firebase.com/docs/web/api/firebase/createuser.html). If no user was created with the specified `email`, `null` is returned instead.
+
+## Server Timestamps
+
+MockFirebase allow you to simulate the behavior of [server timestamps](https://www.firebase.com/docs/web/api/servervalue/timestamp.html) when using a real Firebase instance. Unless you use `Firebase.setClock`, `Firebase.ServerValue.TIMESTAMP` will be transformed to the current date (`Date.now()`) when your data change is flushed. 
+
+##### `Firebase.setClock(fn)` -> `undefined`
+
+Instead of using `Date.now()`, MockFirebase will call the `fn` you provide to generate a timestamp. `fn` should return a number.
+
+<hr>
+
+##### `Firebase.restoreClock()` -> `undefined`
+
+After calling `Firebase.setClock`, calling `Firebase.restoreClock` will restore the default timestamp behavior.

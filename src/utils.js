@@ -69,3 +69,7 @@ exports.priorityComparator = function priorityComparator (a, b) {
   }
   return 0;
 };
+
+exports.isServerTimestamp = function isServerTimestamp (data) {
+  return _.isObject(data) && data['.sv'] === 'timestamp';
+};

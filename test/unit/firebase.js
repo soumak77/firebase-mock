@@ -15,6 +15,62 @@ describe('MockFirebase', function () {
     spy = sinon.spy();
   });
 
+  describe('Server Timestamps', function () {
+
+    var clock;
+    beforeEach(function () {
+      clock = sinon.useFakeTimers();
+    });
+
+    afterEach(function () {
+      clock.restore();
+    });
+
+    it('parses server timestamps', function () {
+      ref.set(Firebase.ServerValue.TIMESTAMP);
+      ref.flush();
+      expect(ref.getData()).to.equal(Date.now());
+    });
+
+    it('parses server timestamps in child data', function () {
+      var child = ref.child('foo');
+      ref.set({
+        foo: Firebase.ServerValue.TIMESTAMP
+      });
+      ref.flush();
+      expect(child.getData()).to.equal(Date.now());
+    });
+
+    describe('Firebase#setClock', function () {
+
+      afterEach(Firebase.restoreClock);
+
+      it('sets a timestamp factory function', function () {
+        var customClock = sinon.stub().returns(10);
+        Firebase.setClock(customClock);
+        ref.set(Firebase.ServerValue.TIMESTAMP);
+        ref.flush();
+        expect(customClock).to.have.been.calledOnce;
+        expect(ref.getData()).to.equal(10);
+      });
+
+    });
+
+    describe('#restoreClock', function () {
+
+      it('restores the normal clock', function () {
+        Firebase.setClock(spy);
+        Firebase.restoreClock();
+        ref.set(Firebase.ServerValue.TIMESTAMP);
+        ref.flush();
+        expect(spy).to.not.have.been.called;
+        expect(ref.getData()).to.equal(Date.now());
+      });
+
+    });
+
+  });
+
   describe('#flush', function () {
 
     it('flushes the queue and returns itself', function () {
