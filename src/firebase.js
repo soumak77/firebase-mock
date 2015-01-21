@@ -40,7 +40,7 @@ MockFirebase.ServerValue = {
 
 var getServerTime, defaultClock;
 getServerTime = defaultClock = function () {
-  return Date.now();
+  return new Date().getTime();
 };
 
 MockFirebase.setClock = function (fn) {

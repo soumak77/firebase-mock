@@ -29,7 +29,7 @@ describe('MockFirebase', function () {
     it('parses server timestamps', function () {
       ref.set(Firebase.ServerValue.TIMESTAMP);
       ref.flush();
-      expect(ref.getData()).to.equal(Date.now());
+      expect(ref.getData()).to.equal(new Date().getTime());
     });
 
     it('parses server timestamps in child data', function () {
@@ -38,7 +38,7 @@ describe('MockFirebase', function () {
         foo: Firebase.ServerValue.TIMESTAMP
       });
       ref.flush();
-      expect(child.getData()).to.equal(Date.now());
+      expect(child.getData()).to.equal(new Date().getTime());
     });
 
     describe('Firebase#setClock', function () {
@@ -64,7 +64,7 @@ describe('MockFirebase', function () {
         ref.set(Firebase.ServerValue.TIMESTAMP);
         ref.flush();
         expect(spy).to.not.have.been.called;
-        expect(ref.getData()).to.equal(Date.now());
+        expect(ref.getData()).to.equal(new Date().getTime());
       });
 
     });
