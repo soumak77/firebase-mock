@@ -274,6 +274,7 @@ MockFirebase.prototype.on = function (event, callback, cancel, context) {
   else {
     this._on('on', event, callback, cancel, context);
   }
+  return callback;
 };
 
 MockFirebase.prototype.off = function (event, callback, context) {

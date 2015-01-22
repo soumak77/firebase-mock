@@ -557,6 +557,10 @@ describe('MockFirebase', function () {
       expect(spy).to.not.have.been.called;
     });
 
+    it('returns the callback',function(){
+       expect(ref.on('value', spy)).to.equal(spy);
+    });
+
   });
 
   describe('#once', function () {
