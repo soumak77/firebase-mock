@@ -387,6 +387,9 @@ MockFirebase.prototype._dataChanged = function (unparsedData) {
 };
 
 MockFirebase.prototype._priChanged = function (newPriority) {
+  if (utils.isServerTimestamp(newPriority)) {
+    newPriority = getServerTime();
+  }
   this.priority = newPriority;
   if( this.parentRef ) {
     this.parentRef._resort(this.key());

@@ -41,6 +41,12 @@ describe('MockFirebase', function () {
       expect(child.getData()).to.equal(new Date().getTime());
     });
 
+    it('parses server timestamps in priorities', function(){
+      ref.setPriority(Firebase.ServerValue.TIMESTAMP);
+      ref.flush();
+      expect(ref).to.have.property('priority', new Date().getTime());
+    });
+
     describe('Firebase#setClock', function () {
 
       afterEach(Firebase.restoreClock);
