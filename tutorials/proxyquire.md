@@ -1,6 +1,6 @@
 # Tutorial: Overriding `require('firebase')`
 
-In Node/Browserify, you need to patch `require` itself to override `Firebase` calls. [proxyquire](https://github.com/thlorenz/proxyquire) (Node) and [proxyquireify](https://github.com/thlorenz/proxyquireify) (Browserify) make this easy.
+In Node/Browserify, you need to patch `require` itself to override `Firebase` calls. The trio of [proxyquire](https://github.com/thlorenz/proxyquire) (Node), [proxyquireify](https://github.com/thlorenz/proxyquireify) (Browserify), and [proxyquire-universal](https://github.com/bendrucker/proxyquire-universal) (both) make this easy.
 
 ##### Source
 
