@@ -48,9 +48,7 @@ MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
     context = cancelCallback;
     cancelCallback = _.noop;
   }
-  else if (arguments.length < 3) {
-    cancelCallback = _.noop;
-  }
+  cancelCallback = cancelCallback || _.noop;
   var self = this;
   var isFirst = true;
   var lastSlice = this.slice();
@@ -105,7 +103,7 @@ MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
     lastSlice = slice;
   }
   this._events.push([event, callback, context, handleRefEvent]);
-  this.ref().on(event, handleRefEvent, _.bind(cancelCallback || _.noop, context));
+  this.ref().on(event, handleRefEvent, _.bind(cancelCallback, context));
 };
 
 MockQuery.prototype.off = function (event, callback, context) {

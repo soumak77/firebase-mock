@@ -227,9 +227,7 @@ MockFirebase.prototype.once = function (event, callback, cancel, context) {
     context = cancel;
     cancel = _.noop;
   }
-  else if (arguments.length < 3) {
-    cancel = _.noop;
-  }
+  cancel = cancel || _.noop;
   var err = this._nextErr('once');
   if (err) {
     this._defer('once', _.toArray(arguments), function () {
@@ -261,9 +259,7 @@ MockFirebase.prototype.on = function (event, callback, cancel, context) {
     context = cancel;
     cancel = _.noop;
   }
-  else if (arguments.length < 3) {
-    cancel = _.noop;
-  }
+  cancel = cancel || _.noop;
 
   var err = this._nextErr('on');
   if (err) {
