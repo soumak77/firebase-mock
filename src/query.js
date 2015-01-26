@@ -44,6 +44,13 @@ MockQuery.prototype.fakeEvent = function (event, snapshot) {
 };
 
 MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
+  if (arguments.length === 3 && typeof cancelCallback !== 'function') {
+    context = cancelCallback;
+    cancelCallback = _.noop;
+  }
+  else if (arguments.length < 3) {
+    cancelCallback = _.noop;
+  }
   var self = this;
   var isFirst = true;
   var lastSlice = this.slice();
