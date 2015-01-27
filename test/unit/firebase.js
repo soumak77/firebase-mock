@@ -178,6 +178,11 @@ describe('MockFirebase', function () {
         .and.calledWith(err);
     });
 
+    it('can take null as the cancel callback', function(){
+      ref.on('value', spy, null, {});
+      ref.forceCancel(new Error());
+    });
+
   });
 
   describe('#fakeEvent', function () {

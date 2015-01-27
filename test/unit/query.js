@@ -119,6 +119,14 @@ describe('MockQuery', function () {
         ref.flush();
         expect(spy).callCount(1);
       });
+
+      it('can take the context as the 3rd argument', function () {
+        var spy = sinon.spy();
+        var context = {};
+        ref.limit(1).on('value', spy, context);
+        ref.flush();
+        expect(spy).to.have.been.calledOn(context);
+      });
     });
 
     describe('once', function() {
