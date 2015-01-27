@@ -1,4 +1,4 @@
-/** mockfirebase - v0.9.3
+/** mockfirebase - v0.9.4
 https://github.com/katowulf/mockfirebase
 * Copyright (c) 2014 Kato
 * License: MIT */
@@ -10249,9 +10249,7 @@ MockFirebase.prototype.once = function (event, callback, cancel, context) {
     context = cancel;
     cancel = _.noop;
   }
-  else if (arguments.length < 3) {
-    cancel = _.noop;
-  }
+  cancel = cancel || _.noop;
   var err = this._nextErr('once');
   if (err) {
     this._defer('once', _.toArray(arguments), function () {
@@ -10283,9 +10281,7 @@ MockFirebase.prototype.on = function (event, callback, cancel, context) {
     context = cancel;
     cancel = _.noop;
   }
-  else if (arguments.length < 3) {
-    cancel = _.noop;
-  }
+  cancel = cancel || _.noop;
 
   var err = this._nextErr('on');
   if (err) {
@@ -10969,6 +10965,11 @@ MockQuery.prototype.fakeEvent = function (event, snapshot) {
 };
 
 MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
+  if (arguments.length === 3 && typeof cancelCallback !== 'function') {
+    context = cancelCallback;
+    cancelCallback = _.noop;
+  }
+  cancelCallback = cancelCallback || _.noop;
   var self = this;
   var isFirst = true;
   var lastSlice = this.slice();
@@ -11023,7 +11024,7 @@ MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
     lastSlice = slice;
   }
   this._events.push([event, callback, context, handleRefEvent]);
-  this.ref().on(event, handleRefEvent, _.bind(cancelCallback || _.noop, context));
+  this.ref().on(event, handleRefEvent, _.bind(cancelCallback, context));
 };
 
 MockQuery.prototype.off = function (event, callback, context) {
