@@ -54,6 +54,8 @@ console.assert(greeted[0].first === 'Michael', 'Michael greeted');
 console.assert(greeted[1].first === 'Ben', 'Ben greeted');
 ```
 
+We're calling [`MockFirebase.override`](override.md) to replace the real `Firebase` instance with MockFirebase. If you're loading Firebase using Node or Browserify, you need to use [proxyquire](proxyquire.md) instead.
+
 Notice that we queued up multiple changes before actually calling `ref.flush`. MockFirebase stores these changes in the order they were created and then performs local updates accordingly. You'll only need to `flush` your changes when you need listeners, callbacks, and other asynchronous responses to be triggered.
 
 ## Testing Writes
