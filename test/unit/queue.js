@@ -9,9 +9,10 @@ var EventEmitter = require('events').EventEmitter;
 
 describe('FlushQueue', function () {
 
-  var queue;
+  var queue, spy;
   beforeEach(function () {
     queue = new Queue();
+    spy = sinon.spy();
   });
 
   it('constructs an empty event queue', function () {
@@ -57,24 +58,21 @@ describe('FlushQueue', function () {
     });
 
     it('fires the events synchronously by default', function () {
-      var spy = sinon.spy();
       queue.push(spy);
       queue.flush();
       expect(spy).to.have.been.called;
     });
 
-    it('empties the queue before invoking events', function () {
-      var spy = sinon.spy(function () {
-        expect(queue.events).to.be.empty;
+    it('fires events added during queue processing', function () {
+      queue.push(function () {
+        queue.push(spy);
       });
-      queue.push(spy);
       queue.flush();
       expect(spy).to.have.been.called;
     });
 
     it('can invoke events after a delay', function () {
       var clock = sinon.useFakeTimers();
-      var spy = sinon.spy();
       queue.push(spy);
       queue.flush(100);
       expect(spy).to.not.have.been.called;
@@ -119,19 +117,20 @@ describe('FlushEvent', function () {
       expect(spy).to.have.been.calledOn(context);
     });
 
-    it('cancels itself', function () {
-      sinon.spy(event, 'cancel');
+    it('emits a done event', function () {
+      spy = sinon.spy();
+      event.on('done', spy);
       event.run();
-      expect(event.cancel).to.have.been.called;
+      expect(spy).to.have.been.called;
     });
 
   });
 
   describe('#cancel', function () {
 
-    it('emits a cancellation event', function () {
+    it('emits a done event', function () {
       spy = sinon.spy();
-      event.on('cancel', spy);
+      event.on('done', spy);
       event.cancel();
       expect(spy).to.have.been.called;
     });

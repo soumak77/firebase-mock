@@ -17,26 +17,21 @@ FlushQueue.prototype.push = function () {
       };
     }
     return new FlushEvent(event.fn, event.context, event.sourceData)
-      .once('cancel', function (event) {
+      .once('done', function (event) {
         self.events.splice(self.events.indexOf(event), 1);
       });
   }));
 };
 
 FlushQueue.prototype.flush = function (delay) {
+  var self = this;
   if (!this.events.length) {
     throw new Error('No deferred tasks to be flushed');
   }
-  var events = this.events;
-  events.forEach(function (event) {
-    event.removeAllListeners();
-  });
-  this.events = [];
   function process () {
-    events
-      .forEach(function (event) {
-        event.run();
-      });
+    while (self.events.length) {
+      self.events[0].run();
+    }
   }
   if (_.isNumber(delay)) {
     setTimeout(process, delay);
@@ -62,12 +57,12 @@ function FlushEvent (fn, context, sourceData) {
 util.inherits(FlushEvent, EventEmitter);
 
 FlushEvent.prototype.run = function () {
-  this.cancel();
   this.fn.call(this.context);
+  this.emit('done', this);
 };
 
 FlushEvent.prototype.cancel = function () {
-  this.emit('cancel', this);
+  this.emit('done', this);
 };
 
 exports.Queue = FlushQueue;

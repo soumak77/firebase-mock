@@ -26,7 +26,7 @@ Core methods of `MockFirebase` references for manipulating data and asynchronous
 
 Flushes the queue of deferred data and authentication operations. If a `delay` is passed, the flush operation will be triggered after the specified number of milliseconds. 
 
-In MockFirebase, data operations can be executed synchronously. When calling any Firebase API method that reads or writes data (e.g. `set(data)` or `on('value')`), MockFirebase will queue the operation. You can call multiple data methods in a row before flushing. MockFirebase will execute them in the order they were called when `flush` is called.
+In MockFirebase, data operations can be executed synchronously. When calling any Firebase API method that reads or writes data (e.g. `set(data)` or `on('value')`), MockFirebase will queue the operation. You can call multiple data methods in a row before flushing. MockFirebase will execute them in the order they were called when `flush` is called. If you trigger an operation inside of another (e.g. writing data somewhere when you detect a data change using `on`), all changes will be performed during the same `flush`. 
 
 `flush` will throw an exception if the queue of deferred operations is empty.
 
