@@ -89,6 +89,7 @@ FirebaseAuth.prototype.onAuth = function (onComplete, context) {
     fn: onComplete,
     context: context
   });
+  onComplete.call(context, this.getAuth());
 };
 
 FirebaseAuth.prototype.offAuth = function (onComplete, context) {

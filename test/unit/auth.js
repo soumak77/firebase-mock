@@ -52,6 +52,7 @@ describe('Auth', function () {
       };
       ref.changeAuthState(user);
       ref.onAuth(spy);
+      spy.reset();
       ref.flush();
       expect(spy.firstCall.args[0]).to.not.equal(user);
       expect(spy.firstCall.args[0]).to.deep.equal(user);
@@ -179,6 +180,11 @@ describe('Auth', function () {
       expect(spy).to.have.been.calledOn(context);
     });
 
+    it('synchronously triggers the callback with the current auth data', function () {
+      ref.onAuth(spy);
+      expect(spy).to.have.been.calledWith(null);
+    });
+
   });
 
   describe('#offAuth', function () {
@@ -206,7 +212,7 @@ describe('Auth', function () {
         uid: 'kato1'
       });
       ref.flush();
-      expect(spy).to.have.been.calledTwice;
+      expect(spy.callCount).to.equal(4);
       spy.reset();
       // will not match any context
       ref.offAuth(spy, {});
@@ -239,15 +245,16 @@ describe('Auth', function () {
       ref.flush();
       ref.onAuth(spy);
       ref.unauth();
-      expect(spy).to.have.been.called;
+      expect(spy).to.have.been.calledWith(null);
     });
 
-    it('does not trigger onAuth callback if auth data is null', function () {
+    it('does not trigger auth events if not authenticated', function () {
       ref.onAuth(spy);
+      spy.reset();
       ref.unauth();
-      expect(spy).to.not.have.been.called;
+      expect(spy.callCount).to.equal(0);
     });
-    
+
   });
 
   describe('#createUser', function () {
