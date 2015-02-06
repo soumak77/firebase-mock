@@ -1,4 +1,4 @@
-/** mockfirebase - v0.10.0
+/** mockfirebase - v0.10.1
 https://github.com/katowulf/mockfirebase
 * Copyright (c) 2014 Kato
 * License: MIT */
@@ -9859,6 +9859,7 @@ FirebaseAuth.prototype.onAuth = function (onComplete, context) {
     fn: onComplete,
     context: context
   });
+  onComplete.call(context, this.getAuth());
 };
 
 FirebaseAuth.prototype.offAuth = function (onComplete, context) {
@@ -10019,6 +10020,7 @@ function validateArgument (method, object, position, name, type) {
 }
 
 module.exports = FirebaseAuth;
+
 },{"lodash":15,"util":14}],17:[function(require,module,exports){
 'use strict';
 
