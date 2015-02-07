@@ -19,7 +19,7 @@ describe('FlushQueue', function () {
     expect(queue)
       .to.have.property('events')
       .that.is.an('array')
-      .that.is.empty;
+      .with.length(0);
   });
 
   it('removes events when they are cancelled', function () {
@@ -60,7 +60,7 @@ describe('FlushQueue', function () {
     it('fires the events synchronously by default', function () {
       queue.push(spy);
       queue.flush();
-      expect(spy).to.have.been.called;
+      expect(spy.called).to.equal(true);
     });
 
     it('fires events added during queue processing', function () {
@@ -68,16 +68,16 @@ describe('FlushQueue', function () {
         queue.push(spy);
       });
       queue.flush();
-      expect(spy).to.have.been.called;
+      expect(spy.called).to.equal(true);
     });
 
     it('can invoke events after a delay', function () {
       var clock = sinon.useFakeTimers();
       queue.push(spy);
       queue.flush(100);
-      expect(spy).to.not.have.been.called;
+      expect(spy.called).to.equal(false);
       clock.tick(100);
-      expect(spy).to.have.been.called;
+      expect(spy.called).to.equal(true);
     });
 
     it('removes internal event listeners immediately', function () {
@@ -121,7 +121,7 @@ describe('FlushEvent', function () {
       spy = sinon.spy();
       event.on('done', spy);
       event.run();
-      expect(spy).to.have.been.called;
+      expect(spy.called).to.equal(true);
     });
 
   });
@@ -132,7 +132,7 @@ describe('FlushEvent', function () {
       spy = sinon.spy();
       event.on('done', spy);
       event.cancel();
-      expect(spy).to.have.been.called;
+      expect(spy.called).to.equal(true);
     });
 
   });

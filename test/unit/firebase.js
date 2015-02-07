@@ -56,7 +56,7 @@ describe('MockFirebase', function () {
         Firebase.setClock(customClock);
         ref.set(Firebase.ServerValue.TIMESTAMP);
         ref.flush();
-        expect(customClock).to.have.been.calledOnce;
+        expect(customClock.callCount).to.equal(1);
         expect(ref.getData()).to.equal(10);
       });
 
@@ -69,7 +69,7 @@ describe('MockFirebase', function () {
         Firebase.restoreClock();
         ref.set(Firebase.ServerValue.TIMESTAMP);
         ref.flush();
-        expect(spy).to.not.have.been.called;
+        expect(spy.called).to.equal(false);
         expect(ref.getData()).to.equal(new Date().getTime());
       });
 
@@ -91,7 +91,7 @@ describe('MockFirebase', function () {
 
     it('enables autoflush with no args', function () {
       ref.autoFlush();
-      expect(ref.flushDelay).to.be.true;
+      expect(ref.flushDelay).to.equal(true);
     });
 
     it('can specify a flush delay', function () {
@@ -145,7 +145,7 @@ describe('MockFirebase', function () {
       ref.forceCancel(new Error());
       ref.set({});
       ref.flush();
-      expect(spy).to.not.have.been.called;
+      expect(spy.called).to.equal(false);
     });
 
     it('can match an event type', function () {
@@ -153,8 +153,8 @@ describe('MockFirebase', function () {
       ref.on('value', _.noop, spy);
       ref.on('child_added', _.noop, spy2);
       ref.forceCancel(new Error(), 'value');
-      expect(spy).to.have.been.called;
-      expect(spy2).to.not.have.been.called;
+      expect(spy.called).to.equal(true);
+      expect(spy2.called).to.equal(false);
     });
 
     it('can match a callback', function () {
@@ -164,7 +164,7 @@ describe('MockFirebase', function () {
       ref.forceCancel(new Error(), 'value', spy);
       ref.set({});
       ref.flush();
-      expect(spy2).to.have.been.called;
+      expect(spy2.called).to.equal(true);
     });
 
     it('can match a context', function () {
@@ -195,13 +195,13 @@ describe('MockFirebase', function () {
         foo: 'bar'
       };
       ref.fakeEvent('value', undefined, data);
-      expect(spy).to.not.have.been.called;
+      expect(spy.called).to.equal(false);
       ref.flush();
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.callCount).to.equal(1);
       var snapshot = spy.firstCall.args[0];
       expect(snapshot.ref()).to.equal(ref);
       expect(snapshot.val()).to.deep.equal(data);
-      expect(snapshot.getPriority()).to.be.null;
+      expect(snapshot.getPriority()).to.equal(null);
     });
 
     it('can trigger a fake child_added event', function () {
@@ -213,7 +213,7 @@ describe('MockFirebase', function () {
       };
       ref.fakeEvent('child_added', 'theKey', data, 'prevChild', 1);
       ref.flush();
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.callCount).to.equal(1);
       var snapshot = spy.firstCall.args[0];
       expect(snapshot.ref()).to.equal(ref.child('theKey'));
       expect(spy.firstCall.args[1]).to.equal('prevChild');
@@ -227,7 +227,7 @@ describe('MockFirebase', function () {
       ref.fakeEvent('value');
       ref.flush();
       var snapshot = spy.firstCall.args[0];
-      expect(snapshot.val()).to.be.null;
+      expect(snapshot.val()).to.equal(null);
     });
 
   });
@@ -262,7 +262,7 @@ describe('MockFirebase', function () {
   describe('#parent', function () {
 
     it('gets a parent ref', function () {
-      expect(ref.child('a').parent().getData()).to.not.be.null;
+      expect(ref.child('a').parent().getData()).not.not.equal(null);
     });
 
   });
@@ -286,7 +286,7 @@ describe('MockFirebase', function () {
         alpha: true,
         bravo: false
       });
-      expect(ref.getData().a).to.be.undefined;
+      expect(ref.getData().a).to.equal(undefined);
     });
 
     it('should set priorities on children if included in data', function () {
@@ -380,7 +380,7 @@ describe('MockFirebase', function () {
       // remove one key from data and call set()
       delete data[keys[0]];
       ref.set(data);
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.callCount).to.equal(1);
     });
 
     it('should change parent from null to object when child is set', function () {
@@ -404,14 +404,14 @@ describe('MockFirebase', function () {
       ref.on('child_moved', spy);
       ref.child(keys[0]).setPriority(250);
       ref.flush();
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.callCount).to.equal(1);
       expect(spy.firstCall.args[1]).to.equal(keys[keys.length - 1]);
     });
 
     it('should trigger a callback', function () {
       ref.setPriority(100, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
+      expect(spy.called).to.equal(true);
     });
 
     it('can be called on the root', function () {
@@ -485,7 +485,7 @@ describe('MockFirebase', function () {
       ref.on('child_removed', spy);
       ref.child('a').remove();
       ref.flush();
-      expect(spy).to.have.been.called;
+      expect(spy.called).to.equal(true);
       expect(spy.firstCall.args[0].key()).to.equal('a');
     });
 
@@ -494,7 +494,7 @@ describe('MockFirebase', function () {
         ref.child(key).remove();
       });
       ref.flush();
-      expect(ref.getData()).to.be.null;
+      expect(ref.getData()).to.equal(null);
     });
 
     it('can simulate an error', function () {
@@ -512,10 +512,10 @@ describe('MockFirebase', function () {
     it('should work when initial value is null', function () {
       ref.on('value', spy);
       ref.flush();
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.callCount).to.equal(1);
       ref.set('foo');
       ref.flush();
-      expect(spy).to.have.been.calledTwice;
+      expect(spy.callCount).to.equal(2);
     });
 
     it('can take the context as the 3rd argument', function () {
@@ -536,7 +536,7 @@ describe('MockFirebase', function () {
       expect(fail)
         .to.have.been.calledWith(err)
         .and.calledOn(context);
-      expect(success).to.not.have.been.called;
+      expect(success.called).to.equal(false);
     });
 
     it('can simulate an error', function () {
@@ -550,7 +550,7 @@ describe('MockFirebase', function () {
       expect(fail)
         .to.have.been.calledWith(err)
         .and.calledOn(context);
-      expect(success).to.not.have.been.called;
+      expect(success.called).to.equal(false);
     });
 
     it('is cancelled by an off call before flush', function () {
@@ -559,7 +559,7 @@ describe('MockFirebase', function () {
       ref._events.value = [];
       ref._events.child_added = [];
       ref.flush();
-      expect(spy).to.not.have.been.called;
+      expect(spy.called).to.equal(false);
     });
 
     it('returns the callback',function(){
@@ -573,10 +573,10 @@ describe('MockFirebase', function () {
     it('only fires the listener once', function () {
       ref.once('value', spy);
       ref.flush();
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.callCount).to.equal(1);
       ref.set({});
       ref.flush();
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.callCount).to.equal(1);
     });
 
     it('can catch a simulated error', function () {
@@ -588,7 +588,7 @@ describe('MockFirebase', function () {
       ref.set({});
       ref.flush();
       expect(cancel).to.have.been.calledWith(err);
-      expect(spy).to.not.have.been.called;
+      expect(spy.called).to.equal(false);
     });
 
     it('can provide a context in place of cancel', function () {
@@ -618,7 +618,7 @@ describe('MockFirebase', function () {
         foo: 'bar'
       });
       ref.flush();
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.callCount).to.equal(1);
     });
 
   });
@@ -628,7 +628,7 @@ describe('MockFirebase', function () {
     it('should call the transaction function', function () {
       ref.transaction(spy);
       ref.flush();
-      expect(spy).to.have.been.called;
+      expect(spy.called).to.equal(true);
     });
 
     it('should fire the callback with a "committed" boolean and error message', function () {
@@ -636,8 +636,8 @@ describe('MockFirebase', function () {
         currentValue.transacted = 'yes';
         return currentValue;
       }, function (error, committed, snapshot) {
-        expect(error).to.be.null;
-        expect(committed).to.be.true;
+        expect(error).to.equal(null);
+        expect(committed).to.equal(true);
         expect(snapshot.val().transacted).to.equal('yes');
       });
       ref.flush();
@@ -673,7 +673,7 @@ describe('MockFirebase', function () {
       var set = sinon.stub(ref.child(id), 'set');
       ref.push();
       ref.push(null);
-      expect(set).to.not.have.been.called;
+      expect(set.called).to.equal(false);
     });
 
   });

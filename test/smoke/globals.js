@@ -12,7 +12,7 @@ describe('Custom UMD Build', function () {
   });
 
   it('exposes the full module as "mockfirebase"', function () {
-    expect(window).to.have.property('mockfirebase').that.is.ok;
+    expect(window).to.have.property('mockfirebase').that.is.an('object');
   });
 
   it('exposes "MockFirebase" on the window', function () {

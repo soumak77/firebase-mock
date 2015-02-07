@@ -71,7 +71,7 @@ describe('MockFirebaseSimpleLogin', function() {
       auth.createUser(existingUser.email, existingUser.password, spy);
       auth.flush();
       var call = spy.getCall(0);
-      expect(spy).to.be.called;
+      expect(spy.called).to.equal(true);
       expect(call.args[0]).is.an('object');
       expect(call.args[0]).to.include.keys('code');
     });
@@ -197,7 +197,7 @@ describe('MockFirebaseSimpleLogin', function() {
 
     it('should not invoke if false is used', function() {
       auth.autoFlush(false);
-      expect(auth.flush).not.called;
+      expect(auth.flush.called).to.equal(false);
     });
 
     it('should invoke flush with appropriate time if int is used', function() {
@@ -209,7 +209,7 @@ describe('MockFirebaseSimpleLogin', function() {
       FirebaseSimpleLogin.DEFAULT_AUTO_FLUSH = true;
       auth = new FirebaseSimpleLogin(fb, callback);
       sinon.spy(auth, 'flush');
-      expect(auth.flush).not.called;
+      expect(auth.flush.called).to.equal(false);
       auth.login('facebook');
       expect(auth.flush).calledWith(true);
     });

@@ -81,8 +81,8 @@ describe('DataSnapshot', function () {
   describe('#exists', function () {
 
     it('checks for a null value', function () {
-      expect(new Snapshot(ref, null).exists()).to.be.false;
-      expect(new Snapshot(ref, {foo: 'bar'}).exists()).to.be.true;
+      expect(new Snapshot(ref, null).exists()).to.equal(false);
+      expect(new Snapshot(ref, {foo: 'bar'}).exists()).to.equal(true);
     });
 
   });
@@ -115,13 +115,13 @@ describe('DataSnapshot', function () {
   describe('#hasChild', function () {
 
     it('can handle null snapshots', function () {
-      expect(new Snapshot(ref, null).hasChild('foo')).to.be.false;
+      expect(new Snapshot(ref, null).hasChild('foo')).to.equal(false);
     });
 
     it('tests for the key', function () {
       var snapshot = new Snapshot(ref, {foo: 'bar'});
-      expect(snapshot.hasChild('foo')).to.be.true;
-      expect(snapshot.hasChild('bar')).to.be.false;
+      expect(snapshot.hasChild('foo')).to.equal(true);
+      expect(snapshot.hasChild('bar')).to.equal(false);
     });
 
   });
@@ -129,8 +129,8 @@ describe('DataSnapshot', function () {
   describe('#hasChildren', function () {
 
     it('tests for children', function () {
-      expect(new Snapshot(ref).hasChildren()).to.be.false;
-      expect(new Snapshot(ref, {foo: 'bar'}).hasChildren()).to.be.true;
+      expect(new Snapshot(ref).hasChildren()).to.equal(false);
+      expect(new Snapshot(ref, {foo: 'bar'}).hasChildren()).to.equal(true);
     });
 
   });

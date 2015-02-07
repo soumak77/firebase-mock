@@ -69,7 +69,7 @@ describe('MockQuery', function () {
       expect(added)
         .to.have.been.calledWith(snapshot)
         .and.calledOn(context);
-      expect(removed).to.not.have.been.called;
+      expect(removed.called).to.equal(false);
     });
   });
 
@@ -79,7 +79,7 @@ describe('MockQuery', function () {
         var spy = sinon.spy();
         ref.limit(2).on('value', spy);
         ref.flush();
-        expect(spy).called;
+        expect(spy.called).to.equal(true);
       });
 
       it('should return null if nothing in range exists', function() {
@@ -88,7 +88,7 @@ describe('MockQuery', function () {
         });
         ref.limit(2).startAt('foo').endAt('foo').on('value', spy);
         ref.flush();
-        expect(spy).called;
+        expect(spy.called).to.equal(true);
       });
 
       it('should return correct keys', function() {
@@ -97,7 +97,7 @@ describe('MockQuery', function () {
         });
         ref.startAt(3).endAt('a').on('value', spy);
         ref.flush();
-        expect(spy).called;
+        expect(spy.called).to.equal(true);
       });
 
       it('should update on change', function() {

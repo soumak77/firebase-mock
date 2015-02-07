@@ -43,7 +43,7 @@ describe('Auth', function () {
       ref.flush();
       ref.changeAuthState('auth');
       ref.flush();
-      expect(ref.getAuth()).to.be.null;
+      expect(ref.getAuth()).to.equal(null);
     });
 
     it('triggers an auth event', function () {
@@ -71,7 +71,7 @@ describe('Auth', function () {
     });
 
     it('only searches own properties', function () {
-      expect(ref.getEmailUser('toString')).to.be.null;
+      expect(ref.getEmailUser('toString')).to.equal(null);
     });
 
   });
@@ -83,13 +83,13 @@ describe('Auth', function () {
         uid: 'kato'
       };
       spy = sinon.spy(function (error, authData) {
-        expect(error).to.be.null;
+        expect(error).to.equal(null);
         expect(authData).to.deep.equal(userData);
       });
       ref.auth('goodToken', spy);
       ref.changeAuthState(userData);
       ref.flush();
-      expect(spy).to.have.been.called;
+      expect(spy.called).to.equal(true);
     });
 
   });
@@ -99,12 +99,12 @@ describe('Auth', function () {
     it('calls the callback with a nextErr', function () {
       spy = sinon.spy(function (error, result) {
         expect(error.message).to.equal('INVALID_TOKEN');
-        expect(result).to.be.null;
+        expect(result).to.equal(null);
       });
       ref.failNext('authWithCustomToken', new Error('INVALID_TOKEN'));
       ref.authWithCustomToken('invalidToken', spy);
       ref.flush();
-      expect(spy).to.have.been.called;
+      expect(spy.called).to.equal(true);
     });
 
     it('invokes the callback when auth state is set', function () {
@@ -112,13 +112,13 @@ describe('Auth', function () {
         uid: 'kato'
       };
       spy = sinon.spy(function (error, authData) {
-        expect(error).to.be.null;
+        expect(error).to.equal(null);
         expect(authData).to.deep.equal(user);
       });
       ref.authWithCustomToken('goodToken', spy);
       ref.changeAuthState(user);
       ref.flush();
-      expect(spy).to.have.been.called;
+      expect(spy.called).to.equal(true);
     });
 
     it('handles no callback', function () {
@@ -130,7 +130,7 @@ describe('Auth', function () {
   describe('#getAuth', function () {
 
     it('is null by default', function () {
-      expect(ref.getAuth()).to.be.null;
+      expect(ref.getAuth()).to.equal(null);
     });
 
     it('returns the value from changeAuthState', function () {
@@ -169,7 +169,7 @@ describe('Auth', function () {
         uid: 'kato'
       });
       ref.flush();
-      expect(spy).to.not.have.been.called;
+      expect(spy.called).to.equal(false);
     });
 
     it('can set a context', function () {
@@ -201,7 +201,7 @@ describe('Auth', function () {
         uid: 'kato1'
       });
       ref.flush();
-      expect(spy).to.not.have.been.called;
+      expect(spy.called).to.equal(false);
     });
 
     it('only removes callback that matches the context', function () {
@@ -221,7 +221,7 @@ describe('Auth', function () {
         uid: 'kato2'
       });
       ref.flush();
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.callCount).to.equal(1);
     });
 
   });
@@ -233,9 +233,9 @@ describe('Auth', function () {
         uid: 'kato'
       });
       ref.flush();
-      expect(ref.getAuth()).to.not.be.null;
+      expect(ref.getAuth()).not.not.equal(null);
       ref.unauth();
-      expect(ref.getAuth()).to.be.null;
+      expect(ref.getAuth()).to.equal(null);
     });
 
     it('triggers onAuth callback if not null', function () {
@@ -361,7 +361,7 @@ describe('Auth', function () {
       }, _.noop);
       ref.changePassword(29, spy);
       ref.flush();
-      expect(spy).to.have.been.called;
+      expect(spy.called).to.equal(true);
       expect(spy.firstCall.args[0].message).to.contain('must be a valid object');
     });
 
@@ -466,7 +466,7 @@ describe('Auth', function () {
         password: 'kato'
       }, _.noop);
       ref.flush();
-      expect(ref.getEmailUser('kato@kato.com')).to.be.null;
+      expect(ref.getEmailUser('kato@kato.com')).to.equal(null);
     });
 
     it('fails if credentials is not an object', function () {

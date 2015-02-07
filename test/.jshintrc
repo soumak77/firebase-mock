@@ -1,6 +1,5 @@
 {
   "node": true,
-  "expr": true,
   "globals": {
     "describe": false,
     "beforeEach": false,
