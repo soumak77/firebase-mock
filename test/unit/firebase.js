@@ -455,6 +455,20 @@ describe('MockFirebase', function () {
       expect(ref.getData()).to.have.property('foo', 'bar');
     });
 
+    it('handles multiple calls in the same flush', function () {
+      ref.update({
+        a: 1
+      });
+      ref.update({
+        b: 2
+      });
+      ref.flush();
+      expect(ref.getData()).to.contain({
+        a: 1,
+        b: 2
+      });
+    });
+
     it('can be called on an empty reference', function () {
       ref.set(null);
       ref.flush();
