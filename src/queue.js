@@ -23,15 +23,20 @@ FlushQueue.prototype.push = function () {
   }));
 };
 
+FlushQueue.prototype.flushing = false;
+
 FlushQueue.prototype.flush = function (delay) {
+  if (this.flushing) return;
   var self = this;
   if (!this.events.length) {
     throw new Error('No deferred tasks to be flushed');
   }
   function process () {
+    self.flushing = true;
     while (self.events.length) {
       self.events[0].run();
     }
+    self.flushing = false;
   }
   if (_.isNumber(delay)) {
     setTimeout(process, delay);

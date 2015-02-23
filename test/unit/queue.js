@@ -71,6 +71,13 @@ describe('FlushQueue', function () {
       expect(spy.called).to.equal(true);
     });
 
+    it('prevents recursive flush calls', function () {
+      queue.push(function () {
+        queue.flush();
+      });
+      queue.flush();
+    });
+
     it('can invoke events after a delay', function () {
       var clock = sinon.useFakeTimers();
       queue.push(spy);
