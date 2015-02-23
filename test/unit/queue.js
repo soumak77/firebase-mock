@@ -80,13 +80,6 @@ describe('FlushQueue', function () {
       expect(spy.called).to.equal(true);
     });
 
-    it('removes internal event listeners immediately', function () {
-      queue.push(_.noop);
-      var event = queue.getEvents()[0];
-      queue.flush();
-      expect(EventEmitter.listenerCount(event, 'cancel')).to.equal(0);
-    });
-
   });
 
   describe('#getEvents', function() {
