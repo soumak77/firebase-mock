@@ -2,6 +2,7 @@
 
 var _        = require('lodash');
 var assert   = require('assert');
+var autoId   = require('firebase-auto-ids');
 var Query    = require('./query');
 var Snapshot = require('./snapshot');
 var Queue    = require('./queue').Queue;
@@ -511,8 +512,7 @@ MockFirebase.prototype._updateChild = function (key, data, events) {
 };
 
 MockFirebase.prototype._newAutoId = function () {
-  this._lastAutoId = 'mock-'+Date.now()+'-'+Math.floor(Math.random()*10000);
-  return this._lastAutoId;
+  return (this._lastAutoId = autoId(new Date().getTime()));
 };
 
 MockFirebase.prototype._nextErr = function (type) {
