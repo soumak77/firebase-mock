@@ -174,6 +174,41 @@ describe('MockQuery', function () {
       it('should not notify for add outside range');
 
       it('should trigger a child_removed if using limit');
+
+      it('should work if connected from instead a once "value"', function() {
+        var ref = new Firebase('testing://');
+        ref.autoFlush();
+        ref.child('fruit').push('apples');
+        ref.child('fruit').push('oranges');
+
+        var third_value = 'pear';
+        var model = {};
+        var last_key = null;
+        ref.child('fruit').once('value', function(list_snapshot) {
+          list_snapshot.forEach(function(snapshot){
+            model[snapshot.key()] = snapshot.val();
+            snapshot.ref().on('value', function(snapshot) {
+              model[snapshot.key()] = snapshot.val();
+            });
+            last_key = snapshot.key();
+          });
+
+          ref.child('fruit').startAt(null, last_key).on('child_added', function(snapshot) {
+            if(model[snapshot.key()] === undefined)
+            {
+              model[snapshot.key()] = snapshot.val();
+              snapshot.ref().on('value', function(snapshot) {
+                model[snapshot.key()] = snapshot.val();
+              });
+            }
+          }, undefined, this);
+        }, undefined, this);
+
+        var third_ref = ref.child('fruit').push(third_value);
+
+        expect(model[third_ref.key()]).to.equal(third_value);
+
+      });
     });
 
     describe('child_changed', function() {

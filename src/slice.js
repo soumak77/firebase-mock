@@ -67,15 +67,15 @@ Slice.prototype.pri = function (key) {
 };
 
 Slice.prototype.changeMap = function (slice) {
-  var changes = { in: [], out: [] };
+  var changes = { added: [], removed: [] };
   _.each(this.data, function(v,k) {
     if( !slice.has(k) ) {
-      changes.out.push(k);
+      changes.removed.push(k);
     }
   });
   _.each(slice.data, function(v,k) {
     if( !this.has(k) ) {
-      changes.in.push(k);
+      changes.added.push(k);
     }
   }, this);
   return changes;
