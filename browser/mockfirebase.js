@@ -1,4 +1,4 @@
-/** mockfirebase - v0.10.2
+/** mockfirebase - v0.10.3
 https://github.com/katowulf/mockfirebase
 * Copyright (c) 2014 Kato
 * License: MIT */
@@ -9,7 +9,7 @@ exports.MockFirebase = require('./firebase');
 /** @deprecated */
 exports.MockFirebaseSimpleLogin = require('./login');
 
-},{"./firebase":17,"./login":18}],2:[function(require,module,exports){
+},{"./firebase":18,"./login":19}],2:[function(require,module,exports){
 (function (Buffer){
 (function(){
   var crypt = require('crypt'),
@@ -2979,6 +2979,55 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./support/isBuffer":13,"_process":12,"inherits":11}],15:[function(require,module,exports){
+'use strict';
+
+var allowedCharacters = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+// allowedCharacters.length = 64
+
+var run = {
+  time: 0,
+  randomCharacterIndexes: []
+};
+
+function generateTimeId (now) {
+  var length = 8;
+  var characters = new Array(length);
+  for (var i = length - 1; i >= 0; i--) {
+    characters[i] = allowedCharacters.charAt(now % 64);
+    now = Math.floor(now / 64);
+  }
+  return characters.join('');
+}
+
+var generateIndexes = {
+  random: function randomCharacterIndexes () {
+    for (var i = 0; i < 12; i++) {
+      run.randomCharacterIndexes[i] = Math.floor(Math.random() * 64);
+    }
+  },
+  sequential: function collisionSafeCharacterIndexes () {
+    for (var i = 11; i >= 0 && run.randomCharacterIndexes[i] === 63; i--) {
+      run.randomCharacters[i] = 0;
+    }
+    run.randomCharacterIndexes[i]++;
+  }
+};
+
+module.exports = function generateAutoId (now) {
+  var uniqueTime = now !== run.time;
+  run.time = now;
+  var id = generateTimeId(now);
+  generateIndexes[uniqueTime ? 'random' : 'sequential']();
+  return run.randomCharacterIndexes
+    .map(function (index) {
+      return allowedCharacters[index];
+    })
+    .reduce(function (id, character) {
+      return id + character;
+    }, id);
+};
+
+},{}],16:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -9767,7 +9816,7 @@ function hasOwnProperty(obj, prop) {
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 var _      = require('lodash');
@@ -10021,11 +10070,12 @@ function validateArgument (method, object, position, name, type) {
 
 module.exports = FirebaseAuth;
 
-},{"lodash":15,"util":14}],17:[function(require,module,exports){
+},{"lodash":16,"util":14}],18:[function(require,module,exports){
 'use strict';
 
 var _        = require('lodash');
 var assert   = require('assert');
+var autoId   = require('firebase-auto-ids');
 var Query    = require('./query');
 var Snapshot = require('./snapshot');
 var Queue    = require('./queue').Queue;
@@ -10535,8 +10585,7 @@ MockFirebase.prototype._updateChild = function (key, data, events) {
 };
 
 MockFirebase.prototype._newAutoId = function () {
-  this._lastAutoId = 'mock-'+Date.now()+'-'+Math.floor(Math.random()*10000);
-  return this._lastAutoId;
+  return (this._lastAutoId = autoId(new Date().getTime()));
 };
 
 MockFirebase.prototype._nextErr = function (type) {
@@ -10612,7 +10661,7 @@ function extractName(path) {
 
 module.exports = MockFirebase;
 
-},{"./auth":16,"./query":19,"./queue":20,"./snapshot":22,"./utils":23,"assert":5,"lodash":15}],18:[function(require,module,exports){
+},{"./auth":17,"./query":20,"./queue":21,"./snapshot":23,"./utils":24,"assert":5,"firebase-auto-ids":15,"lodash":16}],19:[function(require,module,exports){
 'use strict';
 
 var _   = require('lodash');
@@ -10920,7 +10969,7 @@ function createDefaultUser (provider) {
 
 module.exports = MockFirebaseSimpleLogin;
 
-},{"MD5":2,"lodash":15}],19:[function(require,module,exports){
+},{"MD5":2,"lodash":16}],20:[function(require,module,exports){
 'use strict';
 
 var _        = require('lodash');
@@ -11084,7 +11133,7 @@ function assertQuery (method, pri, key) {
 
 module.exports = MockQuery;
 
-},{"./slice":21,"./utils":23,"lodash":15}],20:[function(require,module,exports){
+},{"./slice":22,"./utils":24,"lodash":16}],21:[function(require,module,exports){
 'use strict';
 
 var _            = require('lodash');
@@ -11110,15 +11159,20 @@ FlushQueue.prototype.push = function () {
   }));
 };
 
+FlushQueue.prototype.flushing = false;
+
 FlushQueue.prototype.flush = function (delay) {
+  if (this.flushing) return;
   var self = this;
   if (!this.events.length) {
     throw new Error('No deferred tasks to be flushed');
   }
   function process () {
+    self.flushing = true;
     while (self.events.length) {
       self.events[0].run();
     }
+    self.flushing = false;
   }
   if (_.isNumber(delay)) {
     setTimeout(process, delay);
@@ -11155,7 +11209,7 @@ FlushEvent.prototype.cancel = function () {
 exports.Queue = FlushQueue;
 exports.Event = FlushEvent;
 
-},{"events":10,"lodash":15,"util":14}],21:[function(require,module,exports){
+},{"events":10,"lodash":16,"util":14}],22:[function(require,module,exports){
 'use strict';
 
 var _        = require('lodash');
@@ -11342,7 +11396,7 @@ Slice.prototype._build = function(ref, rawData) {
 
 module.exports = Slice;
 
-},{"./snapshot":22,"./utils":23,"lodash":15}],22:[function(require,module,exports){
+},{"./snapshot":23,"./utils":24,"lodash":16}],23:[function(require,module,exports){
 'use strict';
 
 var _ = require('lodash');
@@ -11432,7 +11486,7 @@ function isValue (value) {
 
 module.exports = MockDataSnapshot;
 
-},{"lodash":15}],23:[function(require,module,exports){
+},{"lodash":16}],24:[function(require,module,exports){
 'use strict';
 
 var Snapshot = require('./snapshot');
@@ -11509,7 +11563,7 @@ exports.isServerTimestamp = function isServerTimestamp (data) {
   return _.isObject(data) && data['.sv'] === 'timestamp';
 };
 
-},{"./snapshot":22,"lodash":15}]},{},[1])(1)
+},{"./snapshot":23,"lodash":16}]},{},[1])(1)
 });;(function (window) {
   'use strict';
   if (typeof window !== 'undefined' && window.mockfirebase) {
