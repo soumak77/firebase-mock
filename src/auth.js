@@ -134,6 +134,33 @@ FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
   });
 };
 
+FirebaseAuth.prototype.changeEmail = function (credentials, onComplete) {
+  var err = this._nextErr('changeEmail');
+  this._defer('changeEmail', _.toArray(arguments), function () {
+    err = err ||
+      validateCredentials('changeEmail', credentials, [
+        'oldEmail',
+        'newEmail',
+        'password'
+      ]) ||
+      this._validateExistingEmail({
+        email: credentials.oldEmail
+      }) ||
+      this._validPass({
+        password: credentials.password,
+        email: credentials.oldEmail
+      }, 'password');
+    if (!err) {
+      var users = this._auth.users;
+      var user = users[credentials.oldEmail];
+      delete users[credentials.oldEmail];
+      user.email = credentials.newEmail;
+      users[user.email] = user;
+    }
+    onComplete(err);
+  });
+};
+
 FirebaseAuth.prototype.changePassword = function (credentials, onComplete) {
   var err = this._nextErr('changePassword');
   this._defer('changePassword', _.toArray(arguments), function () {
