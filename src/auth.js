@@ -109,16 +109,15 @@ FirebaseAuth.prototype.unauth = function () {
 };
 
 FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
+  validateCredentials('createUser', credentials, [
+    'email',
+    'password'
+  ]);
   var err = this._nextErr('createUser');
   var users = this._auth.users;
   this._defer('createUser', _.toArray(arguments), function () {
     var user = null;
-    err = err ||
-      validateCredentials('createUser', credentials, [
-        'email',
-        'password'
-      ]) ||
-      this._validateNewEmail(credentials);
+    err = err || this._validateNewEmail(credentials);
     if (!err) {
       var key = credentials.email;
       users[key] = {
@@ -135,14 +134,14 @@ FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
 };
 
 FirebaseAuth.prototype.changeEmail = function (credentials, onComplete) {
+  validateCredentials('changeEmail', credentials, [
+    'oldEmail',
+    'newEmail',
+    'password'
+  ]);
   var err = this._nextErr('changeEmail');
   this._defer('changeEmail', _.toArray(arguments), function () {
     err = err ||
-      validateCredentials('changeEmail', credentials, [
-        'oldEmail',
-        'newEmail',
-        'password'
-      ]) ||
       this._validateExistingEmail({
         email: credentials.oldEmail
       }) ||
@@ -162,14 +161,14 @@ FirebaseAuth.prototype.changeEmail = function (credentials, onComplete) {
 };
 
 FirebaseAuth.prototype.changePassword = function (credentials, onComplete) {
+  validateCredentials('changePassword', credentials, [
+    'email',
+    'oldPassword',
+    'newPassword'
+  ]);
   var err = this._nextErr('changePassword');
   this._defer('changePassword', _.toArray(arguments), function () {
     err = err ||
-      validateCredentials('changePassword', credentials, [
-        'email',
-        'oldPassword',
-        'newPassword'
-      ]) ||
       this._validateExistingEmail(credentials) ||
       this._validPass(credentials, 'oldPassword');
     if (!err) {
@@ -182,13 +181,13 @@ FirebaseAuth.prototype.changePassword = function (credentials, onComplete) {
 };
 
 FirebaseAuth.prototype.removeUser = function (credentials, onComplete) {
+  validateCredentials('removeUser', credentials, [
+    'email',
+    'password'
+  ]);
   var err = this._nextErr('removeUser');
   this._defer('removeUser', _.toArray(arguments), function () {
     err = err ||
-      validateCredentials('removeUser', credentials, [
-        'email',
-        'password'
-      ]) ||
       this._validateExistingEmail(credentials) ||
       this._validPass(credentials, 'password');
     if (!err) {
@@ -199,12 +198,12 @@ FirebaseAuth.prototype.removeUser = function (credentials, onComplete) {
 };
 
 FirebaseAuth.prototype.resetPassword = function (credentials, onComplete) {
+  validateCredentials('resetPassword', credentials, [
+    'email'
+  ]);
   var err = this._nextErr('resetPassword');
   this._defer('resetPassword', _.toArray(arguments), function() {
     err = err ||
-      validateCredentials('resetPassword', credentials, [
-        'email'
-      ]) ||
       this._validateExistingEmail(credentials);
     onComplete(err);
   });
@@ -243,29 +242,25 @@ FirebaseAuth.prototype._validPass = function (object, name) {
 };
 
 function validateCredentials (method, credentials, fields) {
-  var err = validateObject(credentials, method, 'First');
-  var i = 0;
-  while (err === null && i < fields.length) {
-    err = validateArgument(method, credentials, 'First', fields[i], 'string');
-    i++;
-  }
-  return err;
+  validateObject(credentials, method, 'First');
+  fields.forEach(function (field) {
+    validateArgument(method, credentials, 'First', field, 'string');
+  });
 }
 
 function validateObject (object, method, position) {
   if (!_.isObject(object)) {
-    return new Error(format(
+    throw new Error(format(
       'Firebase.%s failed: %s argument must be a valid object.',
       method,
       position
     ));
   }
-  return null;
 }
 
 function validateArgument (method, object, position, name, type) {
   if (!object.hasOwnProperty(name) || typeof object[name] !== type) {
-    return new Error(format(
+    throw new Error(format(
       'Firebase.%s failed: %s argument must contain the key "%s" with type "%s"',
       method,
       position,
@@ -273,7 +268,6 @@ function validateArgument (method, object, position, name, type) {
       type
     ));
   }
-  return null;
 }
 
 module.exports = FirebaseAuth;
