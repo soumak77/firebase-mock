@@ -58,6 +58,10 @@ describe('MockQuery', function () {
 
   describe('#fakeEvent', function () {
 
+    it('validates the event name', function () {
+      expect(query.fakeEvent.bind(query, 'bad')).to.throw();
+    });
+
     it('fires the matched event with a snapshot', function () {
       var added = sinon.spy();
       var snapshot = {};
@@ -74,6 +78,11 @@ describe('MockQuery', function () {
   });
 
   describe('on', function() {
+
+    it('validates the event name', function () {
+      expect(query.on.bind(query, 'bad')).to.throw();
+    });
+
     describe('value', function() {
       it('should provide value immediately', function() {
         var spy = sinon.spy();
@@ -130,6 +139,11 @@ describe('MockQuery', function () {
     });
 
     describe('once', function() {
+
+      it('validates the event name', function () {
+        expect(query.once.bind(query, 'bad')).to.throw();
+      });
+
       it('should be triggered if value is null', function() {
         var spy = sinon.spy();
         ref.child('notavalidkey').limit(3).once('value', spy);

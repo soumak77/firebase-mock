@@ -523,6 +523,10 @@ describe('MockFirebase', function () {
 
   describe('#on', function () {
 
+    it('validates the event name', function () {
+      expect(ref.on.bind(ref, 'bad')).to.throw();
+    });
+
     it('should work when initial value is null', function () {
       ref.on('value', spy);
       ref.flush();
@@ -584,6 +588,10 @@ describe('MockFirebase', function () {
 
   describe('#once', function () {
 
+    it('validates the event name', function () {
+      expect(ref.once.bind(ref, 'bad')).to.throw();
+    });
+
     it('only fires the listener once', function () {
       ref.once('value', spy);
       ref.flush();
@@ -615,6 +623,10 @@ describe('MockFirebase', function () {
   });
 
   describe('#off', function () {
+
+    it('validates the event name', function () {
+      expect(ref.off.bind(ref, 'bad')).to.throw();
+    });
 
     it('can disable all events', function () {
       sinon.spy(ref, 'off');
