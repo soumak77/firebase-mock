@@ -4,7 +4,7 @@
   "description": "Firebase mock library for writing unit tests",
   "main": "./src",
   "scripts": {
-    "test": "babel-tape-runner test/*.js"
+    "test": "standard && babel-tape-runner test/*.js"
   },
   "repository": {
     "type": "git",
@@ -53,6 +53,7 @@
     "semver": "~3.0.1",
     "sinon": "~1.10.3",
     "sinon-chai": "~2.5.0",
+    "standard": "bendrucker/standard#babel",
     "stream-to-promise": "~1.0.4",
     "tape": "~4.0.0",
     "vinyl-buffer": "1.0.0",

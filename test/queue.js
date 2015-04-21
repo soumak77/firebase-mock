@@ -18,8 +18,7 @@ test('FlushQueue', (t) => {
     t.equal(queue.events.size, 0, 'clears itself when run')
     fn.reset()
     queue.add({fn: () => {
-      // can't be destructured (output becomes circular)
-      queue.add({fn: fn})
+      queue.add({fn: fn}) // can't be destructured (output becomes circular)
     }})
     queue.flush()
     t.ok(fn.called, 'fires events added during processing')

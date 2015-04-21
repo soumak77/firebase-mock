@@ -8,7 +8,7 @@ class FlushQueue {
     this.flushing = false
   }
   add (event) {
-    let {fn, context, sourceData} = event;
+    let {fn, context, sourceData} = event
     event = new FlushEvent(fn, context, sourceData)
       .once('done', (event) => {
         this.events.delete(event)
