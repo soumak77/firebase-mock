@@ -1,9 +1,8 @@
 'use strict'
 
 export default class MockFirebase {
-  constructor (path, parent) {
-    path = this.path = path || 'Mock://'
-    // ^ temp until https://github.com/eslint/eslint/issues/2345
+  constructor (path = 'Mock://', parent) {
+    this.path = path //eslint-disable-line no-undef
     this._parent = parent
   }
 }
