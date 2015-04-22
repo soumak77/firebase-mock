@@ -1,8 +1,10 @@
 'use strict'
 
+import * as url from './url'
+
 export default class MockFirebase {
-  constructor (path = 'Mock://', parent) {
-    this.path = path //eslint-disable-line no-undef
+  constructor (path, parent) {
+    this.path = url.random()
     this._parent = parent
   }
 }
