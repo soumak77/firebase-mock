@@ -6,9 +6,9 @@ import Firebase from '../'
 
 test('Constructor', (t) => {
   let ref = new Firebase()
-  t.test('path defaults', (t) => {
-    t.ok(startsWith(ref.path, 'mock://'), 'uses mock protocol')
-    t.notEqual(ref.path, new Firebase().path, 'randomizes host')
+  t.test('url', (t) => {
+    t.ok(startsWith(ref.url, 'mock://'), 'defaults to mock protocol')
+    t.notEqual(ref.url, new Firebase().url, 'defaults to random host')
     t.end()
   })
   t.end()
