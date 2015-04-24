@@ -20,14 +20,14 @@ export default class Snapshot {
   exportVal () {
     const output = {}
     const priority = this.getPriority()
-    const hasPriority = priority == null
+    const hasPriority = priority != null
     if (hasPriority) {
       output['.priority'] = priority
     }
     const data = this.val()
     if (typeof data !== 'object') {
       if (hasPriority) {
-        return set(['.value', data], output)
+        return set(output, ['.value', data])
       } else {
         return data
       }
