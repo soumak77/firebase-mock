@@ -18,18 +18,33 @@ test('Snapshot', (t) => {
       '.priority': 2,
       '.value': 1
     }, 'value with priority')
-    const snapshot = new Snapshot(null, {
+    let snapshot = new Snapshot(null, {
       foo: 'bar'
     }, 1)
     stub(snapshot, 'child').withArgs('foo').returns({
-      exportVal: () => {
-        return 'fooExport'
-      }
+      val: stub().returns('bar'),
+      getPriority: stub().returns(null)
     })
     t.deepEqual(snapshot.exportVal(), {
       '.priority': 1,
-      foo: 'fooExport'
+      foo: 'bar'
     }, 'object with priority')
+    const data = {foo: {bar: 'baz'}}
+    snapshot = new Snapshot(null, data, 1)
+    stub(snapshot, 'child').withArgs('foo').returns({
+      val: stub().returns(data.foo),
+      getPriority: stub().returns(null),
+      child: stub().withArgs('baz').returns({
+        val: stub().returns(data.foo.bar),
+        getPriority: stub().returns(null)
+      })
+    })
+    t.deepEqual(snapshot.exportVal(), {
+      '.priority': 1,
+      foo: {
+        bar: 'baz'
+      }
+    }, 'deep object')
     t.end()
   })
   t.test('forEach', (t) => {

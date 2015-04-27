@@ -1,5 +1,6 @@
 'use strict'
 
+import exportValue from 'firebase-export-value'
 import isEmpty from 'is-empty-object'
 import underscore from 'underscore-keys'
 import {unary} from 'nary'
@@ -18,23 +19,14 @@ export default class Snapshot {
     return this.val() !== null
   }
   exportVal () {
-    const output = {}
-    const priority = this.getPriority()
-    const hasPriority = priority != null
-    if (hasPriority) {
-      output['.priority'] = priority
+    function params (snapshot) {
+      return [snapshot.val(), snapshot.getPriority(), child.bind(snapshot)]
     }
-    const data = this.val()
-    if (typeof data !== 'object') {
-      if (hasPriority) {
-        return set(output, ['.value', data])
-      } else {
-        return data
-      }
+    function child (key) {
+      const snapshot = this.child(key)
+      return [...params(snapshot)]
     }
-    return Object.keys(data)
-      .map((key) => [key, this.child(key).exportVal()])
-      .reduce(set, output)
+    return exportValue(...params(this))
   }
   forEach (callback, context) {
     Object.keys(this.val())
@@ -63,9 +55,4 @@ export default class Snapshot {
   val () {
     return this._data
   }
-}
-
-function set (destination, [key, value]) {
-  destination[key] = value
-  return destination
 }
