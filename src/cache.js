@@ -1,25 +1,27 @@
 'use strict'
 
-class EndpointMap extends Map {
-  add (endpoint) {
-    const key = {endpoint}
-    this.set(endpoint, key)
-    return key
+export default class RefCache extends Map {
+  constructor () {
+    super()
+    this.disable()
   }
-}
-
-export default class RefCache extends WeakMap {
-  constructor (...args) {
-    super(...args)
-    this.endpoints = new EndpointMap()
+  enable () {
+    this.enabled = true
   }
-  get (endpoint) {
-    const key = this.endpoints.get(endpoint)
-    if (!key) return
-    return super.get(key)
+  disable () {
+    this.enabled = false
   }
-  set (endpoint, ref) {
-    const key = this.endpoints.add(endpoint)
-    return super.set(key, ref)
+  clear () {
+    for (let key of this.keys()) {
+      this.delete(key)
+    }
+  }
+  get () {
+    if (!this.enabled) return
+    return super.get(...arguments)
+  }
+  set () {
+    if (!this.enabled) return this
+    return super.set(...arguments)
   }
 }

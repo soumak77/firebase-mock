@@ -8,7 +8,10 @@ test('Firebase', (t) => {
   t.test('Constructor', (t) => {
     t.ok(startsWith(new Firebase().endpoint, 'mock://'), 'defaults to mock protocol')
     t.skip('caching', (t) => {
-      t.equal(new Firebase('mock://'), new Firebase('mock://'), 'caches root endpoints')
+      t.notEqual(new Firebase('mock://'), new Firebase('mock://'), 'disabled by default')
+      Firebase.cache.enable()
+      t.equal(new Firebase('mock://', new Firebase('mock://')), 'can cache roots')
+      Firebase.cache.disable()
       t.end()
     })
     t.end()
