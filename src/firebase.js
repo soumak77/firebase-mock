@@ -3,6 +3,7 @@
 import {resolve as resolveUrl} from 'url'
 import {posix as posixPath} from 'path'
 import assert from 'assert'
+import {Queue} from './queue'
 import Cache from './cache'
 import Clock from './clock'
 import {random as randomEndpoint, parse as parseUrl} from './url'
@@ -27,6 +28,14 @@ export default class MockFirebase {
     } else {
       this._root = root || new this.constructor(this.endpoint)
     }
+    this.queue = this.isRoot ? new Queue() : this.root().queue
+  }
+  flush () {
+    this.queue.flush()
+    return this
+  }
+  getFlushQueue () {
+    return this.queue.getEvents()
   }
   parent () {
     const parentUrl = this.endpoint + resolve(this.path, '..')
