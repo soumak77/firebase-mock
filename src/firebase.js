@@ -2,12 +2,12 @@
 
 import {posix as posixPath} from 'path'
 import assert from 'assert'
-import {Map} from 'immutable'
 import last from 'array-last'
 import * as url from './url'
 import {Queue} from './queue'
 import Cache from './cache'
 import Clock from './clock'
+import Map from './map'
 import {random as randomEndpoint, parse as parseUrl} from './url'
 
 const {join, resolve} = posixPath
@@ -21,7 +21,6 @@ export default class MockFirebase {
     }
   }
   priority = null
-  data = null
   constructor (url = randomEndpoint(), root) {
     Object.assign(this, parseUrl(url)) // eslint-disable-line no-undef
     if (this.isRoot) {
@@ -29,6 +28,7 @@ export default class MockFirebase {
       const cached = cache.get(this.endpoint)
       if (cached) return cached
       cache.set(this.endpoint, this)
+      this.data = new Map()
     } else {
       this._root = root || new this.constructor(this.endpoint)
     }
@@ -42,16 +42,10 @@ export default class MockFirebase {
     return this.queue.getEvents()
   }
   getData () {
-    let data = this.root().data
-    if (this.isRoot) {
-      return data && data.toJS()
-    }
-    const parts = this.path.substring(1).split('/')
-    let value = this.root().data
-    while (parts.length && value != null) {
-      value = Map.isMap(value) ? value.get(parts.shift()) : null
-    }
-    return value
+    const path = this.path.split('/')
+    path.shift()
+    const value = this.root().data.getIn(path, null)
+    return Map.isMap(value) ? value.toJS() : value
   }
   parent () {
     return this.isRoot ? null : new this.constructor(url.format({
