@@ -4,12 +4,14 @@ import {resolve as resolveUrl} from 'url'
 import {posix as posixPath} from 'path'
 import assert from 'assert'
 import Cache from './cache'
+import Clock from './clock'
 import {random as randomEndpoint, parse as parseUrl} from './url'
 
 const {join, resolve} = posixPath
 
 export default class MockFirebase {
   static cache = new Cache()
+  static clock = new Clock()
   constructor (url = randomEndpoint(), root) {
     Object.assign(this, parseUrl(url)) // eslint-disable-line no-undef
     if (this.isRoot) {
