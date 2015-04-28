@@ -8,6 +8,7 @@ import {Queue} from './queue'
 import Cache from './cache'
 import Clock from './clock'
 import Map from './map'
+import {dispatch} from './events'
 import {fromJS as toImmutable} from 'immutable'
 import {random as randomEndpoint, parse as parseUrl} from './url'
 
@@ -29,6 +30,11 @@ export default class MockFirebase {
       if (cached) return cached
       cache.set(this.endpoint, this)
       this.data = new Map()
+      this.setData = (data) => {
+        const diff = this.data.diff(data)
+        this.data = data
+        dispatch(this.listeners, diff)
+      }
     } else {
       this._root = root || new this.constructor(this.endpoint)
     }
