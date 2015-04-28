@@ -30,5 +30,10 @@ test('Firebase', (t) => {
     t.throws(parent.child.bind(parent), /must be a string/)
     t.end()
   })
+  t.test('key', (t) => {
+    t.equal(new Firebase('parent:///foo/bar').key(), 'bar')
+    t.equal(new Firebase('parent://').key(), null)
+    t.end()
+  })
   t.end()
 })

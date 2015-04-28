@@ -27,6 +27,9 @@ export default class MockFirebase {
     const parentUrl = this.endpoint + resolve(this.path, '..')
     return this.isRoot ? null : new this.constructor(parentUrl, this.root())
   }
+  ref () {
+    return this
+  }
   root () {
     return this.isRoot ? this : this._root
   }
@@ -35,5 +38,9 @@ export default class MockFirebase {
     if (path.charAt(0) !== '/') path = '/' + path
     const url = this.endpoint + join(this.path, path)
     return new this.constructor(url, this.root())
+  }
+  key () {
+    const parts = this.path.split('/')
+    return parts[parts.length - 1] || null
   }
 }
