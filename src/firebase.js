@@ -57,4 +57,7 @@ export default class MockFirebase {
     const parts = this.path.split('/')
     return parts[parts.length - 1] || null
   }
+  toString () {
+    return this.url
+  }
 }

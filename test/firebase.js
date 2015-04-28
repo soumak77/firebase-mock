@@ -35,5 +35,9 @@ test('Firebase', (t) => {
     t.equal(new Firebase('parent://').key(), null)
     t.end()
   })
+  t.test('toString', (t) => {
+    t.equal(new Firebase('m://').toString(), 'm://')
+    t.end()
+  })
   t.end()
 })
