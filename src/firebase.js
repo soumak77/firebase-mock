@@ -20,7 +20,6 @@ export default class MockFirebase {
       '.sv': 'timestamp'
     }
   }
-  priority = null
   constructor (url = randomEndpoint(), root) {
     Object.assign(this, parseUrl(url)) // eslint-disable-line no-undef
     if (this.isRoot) {

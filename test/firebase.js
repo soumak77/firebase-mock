@@ -15,7 +15,6 @@ test('Firebase', (t) => {
       Firebase.cache.disable()
       t.end()
     })
-    t.equal(new Firebase().priority, null)
     t.end()
   })
   t.test('getData', (t) => {
