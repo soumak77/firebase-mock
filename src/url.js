@@ -2,6 +2,7 @@
 
 import cuid from 'cuid'
 import {parse as parseUrl} from 'url'
+import stripTrailingSlash from 'remove-trailing-slash'
 
 export function random () {
   return `mock://${cuid()}`
@@ -9,8 +10,12 @@ export function random () {
 
 export function parse (url) {
   const parsed = parseUrl(url)
+  const endpoint = `${parsed.protocol}//${parsed.host}`
+  const path = stripTrailingSlash(parsed.path || '')
   return {
-    endpoint: `${parsed.protocol}//${parsed.host}`,
-    path: parsed.path
+    endpoint,
+    path,
+    isRoot: path === '',
+    url: endpoint + path
   }
 }

@@ -30,6 +30,7 @@
     "is-empty-object": "~1.1.0",
     "lodash": "~2.4.1",
     "nary": "~1.0.0",
+    "remove-trailing-slash": "~0.1.0",
     "underscore-keys": "~1.0.0"
   },
   "devDependencies": {

@@ -6,13 +6,25 @@ import Firebase from '../'
 
 test('Firebase', (t) => {
   t.test('Constructor', (t) => {
-    let ref = new Firebase()
-    t.test('url', (t) => {
-      t.ok(startsWith(ref.url, 'mock://'), 'defaults to mock protocol')
-      t.notEqual(ref.url, new Firebase().url, 'defaults to random host')
-      t.equal(new Firebase('mock://'), new Firebase('mock://'), 'caches endpoints')
+    t.ok(startsWith(new Firebase().endpoint, 'mock://'), 'defaults to mock protocol')
+    t.skip('caching', (t) => {
+      t.equal(new Firebase('mock://'), new Firebase('mock://'), 'caches root endpoints')
       t.end()
     })
+    t.end()
+  })
+  t.test('parent', (t) => {
+    t.equal(new Firebase().parent(), null)
+    const child = new Firebase('parent:///path/foo')
+    t.equal(child.parent().url, 'parent:///path')
+    t.notEqual(child.parent(), child.parent(), 'nondeterministic')
+    t.end()
+  })
+  t.test('child', (t) => {
+    const parent = new Firebase('parent://')
+    t.equal(parent.child('foo').url, 'parent:///foo')
+    t.notEqual(parent.child('foo'), parent.child('foo'), 'nondeterministic')
+    t.throws(parent.child.bind(parent), /must be a string/)
     t.end()
   })
   t.end()

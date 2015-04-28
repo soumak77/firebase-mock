@@ -1,31 +1,30 @@
 'use strict'
 
-import {random as randomUrl, parse as parseUrl} from './url'
-import RefCache from './cache'
+import {resolve as resolveUrl} from 'url'
+import {posix as posixPath} from 'path'
+import assert from 'assert'
+import {random as randomEndpoint, parse as parseUrl} from './url'
 
-const cache = ((cache) => {
-  return {
-    get (url) {
-      const {endpoint} = parseUrl(url)
-      return cache.get(endpoint)
-    },
-    put (ref) {
-      const {endpoint} = parseUrl(ref.url)
-      cache.set(endpoint, ref)
-      return ref
-    }
-  }
-})(new RefCache())
+const {join, resolve} = posixPath
 
 export default class MockFirebase {
-  constructor (url = randomUrl(), parent) {
-    const cached = cache.get(url) // eslint-disable-line no-undef
-    if (cached) {
-      return cached
-    } else {
-      this.url = url // eslint-disable-line no-undef
-      cache.put(this)
+  constructor (url = randomEndpoint(), root) {
+    Object.assign(this, parseUrl(url)) // eslint-disable-line no-undef
+    if (!this.isRoot) {
+      this._root = root || new this.constructor(this.endpoint)
     }
-    this._parent = parent
+  }
+  parent () {
+    const parentUrl = this.endpoint + resolve(this.path, '..')
+    return this.isRoot ? null : new this.constructor(parentUrl, this.root())
+  }
+  root () {
+    return this.isRoot ? this : this._root
+  }
+  child (path) {
+    assert(path && typeof path === 'string', '"path" must be a string')
+    if (path.charAt(0) !== '/') path = '/' + path
+    const url = this.endpoint + join(this.path, path)
+    return new this.constructor(url, this.root())
   }
 }
