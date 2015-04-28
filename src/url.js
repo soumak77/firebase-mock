@@ -2,7 +2,7 @@
 
 import cuid from 'cuid'
 import {parse as parseUrl} from 'url'
-import stripTrailingSlash from 'remove-trailing-slash'
+import normalize from 'normalize-pathname'
 
 export function random () {
   return `mock://${cuid()}`
@@ -11,11 +11,15 @@ export function random () {
 export function parse (url) {
   const parsed = parseUrl(url)
   const endpoint = `${parsed.protocol}//${parsed.host}`
-  const path = stripTrailingSlash(parsed.path || '')
+  const path = normalize(parsed.path || '')
   return {
     endpoint,
     path,
     isRoot: path === '',
     url: endpoint + path
   }
+}
+
+export function format ({endpoint, path}) {
+  return endpoint + normalize(path)
 }

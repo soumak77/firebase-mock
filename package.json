@@ -22,6 +22,7 @@
   "homepage": "https://github.com/katowulf/mockfirebase",
   "dependencies": {
     "MD5": "~1.2.1",
+    "array-last": "~1.0.2",
     "browserify": "^6.3.2",
     "browserify-shim": "^3.8.0",
     "cuid": "^1.2.4",
@@ -31,6 +32,7 @@
     "is-empty-object": "~1.1.0",
     "lodash": "~2.4.1",
     "nary": "~1.0.0",
+    "normalize-pathname": "~1.0.1",
     "remove-trailing-slash": "~0.1.0",
     "underscore-keys": "~1.0.0"
   },

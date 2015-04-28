@@ -1,9 +1,10 @@
 'use strict'
 
-import {resolve as resolveUrl} from 'url'
 import {posix as posixPath} from 'path'
 import assert from 'assert'
 import {Map} from 'immutable'
+import last from 'array-last'
+import * as url from './url'
 import {Queue} from './queue'
 import Cache from './cache'
 import Clock from './clock'
@@ -53,8 +54,10 @@ export default class MockFirebase {
     return value
   }
   parent () {
-    const parentUrl = this.endpoint + resolve(this.path, '..')
-    return this.isRoot ? null : new this.constructor(parentUrl, this.root())
+    return this.isRoot ? null : new this.constructor(url.format({
+      endpoint: this.endpoint,
+      path: resolve(this.path, '..')
+    }), this.root())
   }
   ref () {
     return this
@@ -64,13 +67,13 @@ export default class MockFirebase {
   }
   child (path) {
     assert(path && typeof path === 'string', '"path" must be a string')
-    if (path.charAt(0) !== '/') path = '/' + path
-    const url = this.endpoint + join(this.path, path)
-    return new this.constructor(url, this.root())
+    return new this.constructor(url.format({
+      endpoint: this.endpoint,
+      path: join(this.path, path)
+    }), this.root())
   }
   key () {
-    const parts = this.path.split('/')
-    return parts[parts.length - 1] || null
+    return last(this.path.split('/')) || null
   }
   toString () {
     return this.url
