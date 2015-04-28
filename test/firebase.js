@@ -2,9 +2,10 @@
 
 import test from 'tape'
 import startsWith from 'core-js/fn/string/starts-with'
+import {fromJS as toImmutable} from 'immutable'
 import Firebase from '../'
 
-test('Firebase', (t) => {
+test.only('Firebase', (t) => {
   t.test('Constructor', (t) => {
     t.ok(startsWith(new Firebase().endpoint, 'mock://'), 'defaults to mock protocol')
     t.skip('caching', (t) => {
@@ -14,6 +15,18 @@ test('Firebase', (t) => {
       Firebase.cache.disable()
       t.end()
     })
+    t.equal(new Firebase().priority, null)
+    t.end()
+  })
+  t.test('getData', (t) => {
+    t.equal(new Firebase().getData(), null, 'null by default')
+    let ref = new Firebase()
+    ref.data = toImmutable({foo: 'bar'})
+    t.deepEqual(ref.getData(), {foo: 'bar'})
+    ref = new Firebase('mock:///foo/bar')
+    ref.root().data = toImmutable({foo: {bar: 'baz'}})
+    t.deepEqual(ref.getData(), 'baz')
+    t.equal(ref.child('baz').getData(), null)
     t.end()
   })
   t.test('parent', (t) => {

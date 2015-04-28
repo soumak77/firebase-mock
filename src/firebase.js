@@ -3,6 +3,7 @@
 import {resolve as resolveUrl} from 'url'
 import {posix as posixPath} from 'path'
 import assert from 'assert'
+import {Map} from 'immutable'
 import {Queue} from './queue'
 import Cache from './cache'
 import Clock from './clock'
@@ -18,6 +19,8 @@ export default class MockFirebase {
       '.sv': 'timestamp'
     }
   }
+  priority = null
+  data = null
   constructor (url = randomEndpoint(), root) {
     Object.assign(this, parseUrl(url)) // eslint-disable-line no-undef
     if (this.isRoot) {
@@ -36,6 +39,18 @@ export default class MockFirebase {
   }
   getFlushQueue () {
     return this.queue.getEvents()
+  }
+  getData () {
+    let data = this.root().data
+    if (this.isRoot) {
+      return data && data.toJS()
+    }
+    const parts = this.path.substring(1).split('/')
+    let value = this.root().data
+    while (parts.length && value != null) {
+      value = Map.isMap(value) ? value.get(parts.shift()) : null
+    }
+    return value
   }
   parent () {
     const parentUrl = this.endpoint + resolve(this.path, '..')

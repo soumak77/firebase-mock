@@ -27,6 +27,7 @@
     "cuid": "^1.2.4",
     "firebase-auto-ids": "~1.1.0",
     "firebase-export-value": "~1.0.2",
+    "immutable": "~3.7.2",
     "is-empty-object": "~1.1.0",
     "lodash": "~2.4.1",
     "nary": "~1.0.0",
