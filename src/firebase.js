@@ -8,6 +8,7 @@ import {Queue} from './queue'
 import Cache from './cache'
 import Clock from './clock'
 import Map from './map'
+import {fromJS as toImmutable} from 'immutable'
 import {random as randomEndpoint, parse as parseUrl} from './url'
 
 const {join, resolve} = posixPath
@@ -40,10 +41,11 @@ export default class MockFirebase {
   getFlushQueue () {
     return this.queue.getEvents()
   }
+  get keyPath () {
+    return this.path.split('/').slice(1)
+  }
   getData () {
-    const path = this.path.split('/')
-    path.shift()
-    const value = this.root().data.getIn(path, null)
+    const value = this.root().data.getIn(this.keyPath, null)
     return Map.isMap(value) ? value.toJS() : value
   }
   parent () {
