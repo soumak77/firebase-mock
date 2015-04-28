@@ -12,6 +12,11 @@ const {join, resolve} = posixPath
 export default class MockFirebase {
   static cache = new Cache()
   static clock = new Clock()
+  static ServerValue = {
+    TIMESTAMP: {
+      '.sv': 'timestamp'
+    }
+  }
   constructor (url = randomEndpoint(), root) {
     Object.assign(this, parseUrl(url)) // eslint-disable-line no-undef
     if (this.isRoot) {
