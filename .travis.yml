@@ -19,3 +19,5 @@ deploy:
     tags: true
     repo: katowulf/mockfirebase
     all_branches: true
+notifications:
+  email: false
