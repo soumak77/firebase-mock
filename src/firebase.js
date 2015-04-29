@@ -4,12 +4,12 @@ import {posix as posixPath} from 'path'
 import assert from 'assert'
 import last from 'array-last'
 import * as url from './url'
-import Queue from './queue'
 import Cache from './cache'
 import Clock from './clock'
 import Map from './map'
 import {dispatch} from './events'
 import {fromJS as toImmutable} from 'immutable'
+import Queue from 'flush-queue'
 import {random as randomEndpoint, parse as parseUrl} from './url'
 
 const {join, resolve} = posixPath
