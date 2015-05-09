@@ -6,6 +6,7 @@ import last from 'array-last'
 import * as url from './url'
 import Cache from './cache'
 import Clock from './clock'
+import Store from './store'
 import Map from './map'
 import {dispatch} from './events'
 import {fromJS as toImmutable} from 'immutable'
@@ -14,8 +15,10 @@ import {random as randomEndpoint, parse as parseUrl} from './url'
 
 const {join, resolve} = posixPath
 
+Store.setCache(new Cache())
+
 export default class MockFirebase {
-  static cache = new Cache()
+  static cache = Store.cache
   static clock = new Clock()
   static ServerValue = {
     TIMESTAMP: {
@@ -25,11 +28,7 @@ export default class MockFirebase {
   constructor (url = randomEndpoint(), root) {
     Object.assign(this, parseUrl(url)) // eslint-disable-line no-undef
     if (this.isRoot) {
-      const cache = this.constructor.cache
-      const cached = cache.get(this.endpoint)
-      if (cached) return cached
-      cache.set(this.endpoint, this)
-      this.data = new Map()
+      this.store = new Store(this.endpoint).proxy(this)
       this.setData = (data) => {
         const diff = this.data.diff(data)
         this.data = data

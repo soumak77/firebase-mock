@@ -8,10 +8,12 @@ import Firebase from '../'
 test('Firebase', (t) => {
   t.test('Constructor', (t) => {
     t.ok(startsWith(new Firebase().endpoint, 'mock://'), 'defaults to mock protocol')
-    t.skip('caching', (t) => {
-      t.notEqual(new Firebase('mock://'), new Firebase('mock://'), 'disabled by default')
+    t.test('caching', (t) => {
       Firebase.cache.enable()
-      t.equal(new Firebase('mock://', new Firebase('mock://')), 'can cache roots')
+      const ref1 = new Firebase('mock://')
+      const ref2 = new Firebase('mock://')
+      t.equal(ref1.store, ref2.store, 'can cache root stores')
+      t.notEqual(ref1, ref2, 'refs not strictly equal')
       Firebase.cache.disable()
       t.end()
     })
