@@ -2,8 +2,10 @@
 
 import Queue from 'flush-queue'
 import Map from './map'
+import Cache from './cache'
 
 export default class Store {
+  static cache = new Cache()
   constructor (endpoint) {
     const {cache} = this.constructor
     const cached = cache.get(endpoint)
@@ -27,8 +29,5 @@ export default class Store {
         return properties
       }, {}))
     return this
-  }
-  static setCache (cache) {
-    this.cache = cache
   }
 }

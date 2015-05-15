@@ -4,7 +4,6 @@ import {posix as posixPath} from 'path'
 import assert from 'assert'
 import last from 'array-last'
 import * as url from './url'
-import Cache from './cache'
 import Clock from './clock'
 import Store from './store'
 import {isMap} from './map'
@@ -13,8 +12,6 @@ import {fromJS as toImmutable} from 'immutable'
 import {random as randomEndpoint, parse as parseUrl} from './url'
 
 const {join, resolve} = posixPath
-
-Store.setCache(new Cache())
 
 export default class MockFirebase {
   static cache = Store.cache
