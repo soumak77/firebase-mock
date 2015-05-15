@@ -3,13 +3,12 @@
 import {posix as posixPath} from 'path'
 import assert from 'assert'
 import last from 'array-last'
-import * as url from './url'
 import Clock from './clock'
 import Store from './store'
 import {isMap} from './map'
 import {dispatch} from './events'
 import {fromJS as toImmutable} from 'immutable'
-import {random as randomEndpoint, parse as parseUrl} from './url'
+import {random as randomEndpoint, parse as parseUrl, format as formatUrl} from './url'
 
 const {join, resolve} = posixPath
 
@@ -48,7 +47,7 @@ export default class MockFirebase {
     return isMap(value) ? value.toJS() : value
   }
   parent () {
-    return this.isRoot ? null : new this.constructor(url.format({
+    return this.isRoot ? null : new this.constructor(formatUrl({
       endpoint: this.endpoint,
       path: resolve(this.path, '..')
     }), this.root())
@@ -61,7 +60,7 @@ export default class MockFirebase {
   }
   child (path) {
     assert(path && typeof path === 'string', '"path" must be a string')
-    return new this.constructor(url.format({
+    return new this.constructor(formatUrl({
       endpoint: this.endpoint,
       path: join(this.path, path)
     }), this.root())
