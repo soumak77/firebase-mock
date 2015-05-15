@@ -3,7 +3,8 @@
 import {posix as posixPath} from 'path'
 import assert from 'assert'
 import last from 'array-last'
-import Clock from './clock'
+import {ServerValue} from 'firebase-server-value'
+import clock from './clock'
 import Store from './store'
 import {isMap} from './map'
 import {dispatch} from './events'
@@ -14,12 +15,8 @@ const {join, resolve} = posixPath
 
 export default class MockFirebase {
   static cache = Store.cache
-  static clock = new Clock()
-  static ServerValue = {
-    TIMESTAMP: {
-      '.sv': 'timestamp'
-    }
-  }
+  static clock = clock
+  static ServerValue = ServerValue
   constructor (url = randomEndpoint(), root) {
     Object.assign(this, parseUrl(url)) // eslint-disable-line no-undef
     if (this.isRoot) {

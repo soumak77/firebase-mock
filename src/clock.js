@@ -1,15 +1,13 @@
 'use strict'
 
-export default class Clock {
-  time = getTime
-  set (time) {
-    Object.assign(this, {time})
-  }
-  restore () {
-    this.time = getTime
-  }
-}
+import Clock from 'clockwise'
+import {sv1} from 'value-to-firebase'
+import {sv2} from 'object-to-firebase'
 
-function getTime () {
-  return new Date().getTime()
-}
+const clock = new Clock()
+
+;[sv1, sv2]
+  .map(sv => sv.values)
+  .forEach(values => values.timestamp = ::clock.time)
+
+export default clock

@@ -25,9 +25,11 @@
     "array-last": "~1.0.2",
     "browserify": "^6.3.2",
     "browserify-shim": "^3.8.0",
+    "clockwise": "^1.0.0",
     "cuid": "^1.2.4",
     "firebase-auto-ids": "~1.1.0",
     "firebase-export-value": "~1.0.2",
+    "firebase-server-value": "^1.0.0",
     "flush-queue": "~1.0.1",
     "immutable": "~3.7.2",
     "immutablediff": "~0.4.2",
@@ -35,11 +37,13 @@
     "lodash": "~2.4.1",
     "nary": "~1.0.0",
     "normalize-pathname": "~1.0.1",
+    "object-to-firebase": "^1.1.0",
     "remove-trailing-slash": "~0.1.0",
-    "underscore-keys": "~1.0.0"
+    "underscore-keys": "~1.0.0",
+    "value-to-firebase": "^1.1.2"
   },
   "devDependencies": {
-    "babel": "~5.1.11",
+    "babel": "^5.4.0",
     "babel-tape-runner": "~1.1.0",
     "chai": "~1.9.1",
     "core-js": "^0.8.4",
