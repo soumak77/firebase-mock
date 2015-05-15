@@ -7,10 +7,9 @@ import * as url from './url'
 import Cache from './cache'
 import Clock from './clock'
 import Store from './store'
-import Map from './map'
+import {isMap} from './map'
 import {dispatch} from './events'
 import {fromJS as toImmutable} from 'immutable'
-import Queue from 'flush-queue'
 import {random as randomEndpoint, parse as parseUrl} from './url'
 
 const {join, resolve} = posixPath
@@ -38,7 +37,7 @@ export default class MockFirebase {
     } else {
       this._root = root || new this.constructor(this.endpoint)
     }
-    this.queue = this.isRoot ? new Queue() : this.root().queue
+    if (!this.isRoot) this.queue = this.root().queue
   }
   flush () {
     this.queue.flush()
@@ -49,7 +48,7 @@ export default class MockFirebase {
   }
   getData () {
     const value = this.root().data.getIn(this.keyPath, null)
-    return Map.isMap(value) ? value.toJS() : value
+    return isMap(value) ? value.toJS() : value
   }
   parent () {
     return this.isRoot ? null : new this.constructor(url.format({

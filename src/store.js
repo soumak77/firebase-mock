@@ -1,5 +1,6 @@
 'use strict'
 
+import Queue from 'flush-queue'
 import Map from './map'
 
 export default class Store {
@@ -7,6 +8,7 @@ export default class Store {
     const {cache} = this.constructor
     const cached = cache.get(endpoint)
     if (cached) return cached
+    this.queue = new Queue()
     this.data = new Map()
     this.listeners = new Set()
     cache.set(endpoint, this)
