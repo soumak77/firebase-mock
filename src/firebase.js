@@ -44,9 +44,6 @@ export default class MockFirebase {
     this.queue.flush()
     return this
   }
-  getFlushQueue () {
-    return this.queue.getEvents()
-  }
   get keyPath () {
     return this.path.split('/').slice(1)
   }
@@ -84,19 +81,17 @@ export default class MockFirebase {
     return this
   }
   on (event, callback, cancel, context) {
-    const path = {this}
+    const path = this.path
     const listener = {event, callback, cancel, context, path}
     this.listeners.add(listener)
     if (calledOnRegister(event)) {
       this.defer(() => {
         if (!this.listeners.has(listener)) return
-
       })
     }
   }
 }
 
-function noop () {}
 function calledOnRegister (event) {
   return event === 'value' || event === 'child_added'
 }
