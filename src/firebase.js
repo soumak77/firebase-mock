@@ -79,4 +79,24 @@ export default class MockFirebase {
   toString () {
     return this.url
   }
+  defer (callback) {
+    this.queue.add(callback)
+    return this
+  }
+  on (event, callback, cancel, context) {
+    const path = {this}
+    const listener = {event, callback, cancel, context, path}
+    this.listeners.add(listener)
+    if (calledOnRegister(event)) {
+      this.defer(() => {
+        if (!this.listeners.has(listener)) return
+
+      })
+    }
+  }
+}
+
+function noop () {}
+function calledOnRegister (event) {
+  return event === 'value' || event === 'child_added'
 }

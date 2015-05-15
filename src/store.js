@@ -8,6 +8,7 @@ export default class Store {
     const cached = cache.get(endpoint)
     if (cached) return cached
     this.data = new Map()
+    this.listeners = new Set()
     cache.set(endpoint, this)
   }
   proxy (destination) {
