@@ -1,8 +1,8 @@
 'use strict'
 
-export default class RefCache extends Map {
+export default class RefCache {
   constructor () {
-    super()
+    this.store = new Map()
     this.disable()
   }
   enable () {
@@ -12,16 +12,19 @@ export default class RefCache extends Map {
     this.enabled = false
   }
   clear () {
-    for (let key of this.keys()) {
-      this.delete(key)
+    for (let key of this.store.keys()) {
+      this.store.delete(key)
     }
   }
   get () {
     if (!this.enabled) return
-    return super.get(...arguments)
+    return this.store.get(...arguments)
   }
   set () {
     if (!this.enabled) return this
-    return super.set(...arguments)
+    return this.store.set(...arguments)
+  }
+  get size () {
+    return this.store.size
   }
 }
