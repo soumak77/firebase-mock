@@ -1,6 +1,7 @@
 'use strict'
 
 import test from 'tape'
+import {spy} from 'sinon'
 import startsWith from 'core-js/fn/string/starts-with'
 import {fromJS as toImmutable} from 'immutable'
 import Firebase from '../'
@@ -50,15 +51,18 @@ test('Firebase', (t) => {
     t.end()
   })
   t.test('toString', (t) => {
-    t.equal(new Firebase('m://').toString(), 'm://')
+    t.equal(new Firebase('m:///').toString(), 'm:///')
     t.end()
   })
   t.test('set', (t) => {
     const ref = new Firebase()
+    const listener = spy()
     ref.set({foo: 'bar'})
+    ref.on('value', listener)
     t.equal(ref.getData(), null, 'deferred')
     ref.flush()
     t.deepEqual(ref.getData(), {foo: 'bar'}, 'sets data')
+    t.equal(listener.callCount, 1)
     t.end()
   })
   t.end()

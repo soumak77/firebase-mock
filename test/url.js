@@ -12,9 +12,9 @@ test('url', (t) => {
       isRoot: false,
       url: 'mock://host/path'
     }, 'parses to endpoint and path')
-    t.equal(url.parse('mock://foo').path, '', 'no path')
-    t.equal(url.parse('mock://foo/').path, '', 'strips trailing slash')
-    t.equal(url.parse('mock:///').path, '')
+    t.equal(url.parse('mock://foo').path, '/', 'no path is /')
+    t.equal(url.parse('mock://foo/bar/').path, '/bar', 'strips trailing slash')
+    t.equal(url.parse('mock:///').path, '/')
     t.ok(url.parse('mock://foo/').isRoot)
     t.notOk(url.parse('mock://foo/bar').isRoot)
     t.end()

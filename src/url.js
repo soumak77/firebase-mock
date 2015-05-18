@@ -11,11 +11,11 @@ export function random () {
 export function parse (url) {
   const parsed = parseUrl(url)
   const endpoint = `${parsed.protocol}//${parsed.host}`
-  const path = normalize(parsed.path || '')
+  const path = normalize(parsed.path || '') || '/'
   return {
     endpoint,
     path,
-    isRoot: path === '',
+    isRoot: path === '/',
     url: endpoint + path
   }
 }

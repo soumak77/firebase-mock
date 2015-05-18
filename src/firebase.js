@@ -36,7 +36,7 @@ export default class MockFirebase {
     return this
   }
   get keyPath () {
-    return this.path.split('/').slice(1)
+    return this.isRoot ? [] : this.path.split('/').slice(1)
   }
   getData () {
     const value = this.root().data.getIn(this.keyPath, null)

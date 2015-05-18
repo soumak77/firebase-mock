@@ -39,6 +39,7 @@
     "normalize-pathname": "~1.0.1",
     "object-to-firebase": "^1.1.0",
     "remove-trailing-slash": "~0.1.0",
+    "subdir": "0.0.3",
     "underscore-keys": "~1.0.0",
     "value-to-firebase": "^1.1.2"
   },
