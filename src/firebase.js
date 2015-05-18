@@ -22,7 +22,6 @@ export default class MockFirebase {
     if (this.isRoot) {
       this.store = new Store(this.endpoint).proxy(this)
       this.setData = (data) => {
-        data = toImmutable(data)
         const diff = this.data.diff(data)
         this.data = data
         dispatch(this.listeners, diff)
@@ -81,6 +80,12 @@ export default class MockFirebase {
         if (!this.listeners.has(listener)) return
       })
     }
+  }
+  set (data) {
+    this.defer(() => {
+      const root = this.root()
+      root.setData(root.data.setIn(this.keyPath, toImmutable(data)))
+    })
   }
 }
 

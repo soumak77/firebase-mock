@@ -53,5 +53,13 @@ test('Firebase', (t) => {
     t.equal(new Firebase('m://').toString(), 'm://')
     t.end()
   })
+  t.test('set', (t) => {
+    const ref = new Firebase()
+    ref.set({foo: 'bar'})
+    t.equal(ref.getData(), null, 'deferred')
+    ref.flush()
+    t.deepEqual(ref.getData(), {foo: 'bar'}, 'sets data')
+    t.end()
+  })
   t.end()
 })
