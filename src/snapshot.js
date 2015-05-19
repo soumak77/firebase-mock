@@ -3,7 +3,6 @@
 import exportValue from 'firebase-export-value'
 import isEmpty from 'is-empty-object'
 import underscore from 'underscore-keys'
-import {unary} from 'nary'
 
 export default class Snapshot {
   constructor (ref, data, priority) {
@@ -30,8 +29,8 @@ export default class Snapshot {
   }
   forEach (callback, context) {
     Object.keys(this.val())
-      .map(unary(this.child), this)
-      .forEach(unary(callback), context)
+      .map(key => this.child(key))
+      .forEach(child => callback.call(context, child))
   }
   getPriority () {
     return this._priority
