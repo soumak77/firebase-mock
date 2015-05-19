@@ -3,10 +3,11 @@
 import exportValue from 'firebase-export-value'
 import isEmpty from 'is-empty-object'
 import underscore from 'underscore-keys'
+import define from 'define-properties'
 
 export default class Snapshot {
   constructor (ref, data, priority) {
-    Object.assign(this, underscore({ref, data, priority}))
+    define(this, underscore({ref, data, priority}))
   }
   static create (ref) {
     return new this(ref, ref.getData(), ref.priority)

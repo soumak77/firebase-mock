@@ -27,6 +27,7 @@
     "browserify-shim": "^3.8.0",
     "clockwise": "^1.0.0",
     "cuid": "^1.2.4",
+    "define-properties": "^1.0.1",
     "firebase-auto-ids": "~1.1.0",
     "firebase-export-value": "~1.0.2",
     "firebase-server-value": "^1.0.0",
