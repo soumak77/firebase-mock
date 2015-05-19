@@ -24,7 +24,7 @@ export default class MockFirebase {
       this.setData = (data) => {
         const diff = this.data.diff(data)
         this.data = data
-        dispatch(this.listeners, diff)
+        dispatch(this, this.listeners, diff)
       }
     } else {
       this._root = root || new this.constructor(this.endpoint)

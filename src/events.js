@@ -1,17 +1,18 @@
 'use strict'
 
 import isParent from 'subdir'
+import Snapshot from './snapshot'
 
-export function dispatch (listeners, diff) {
+export function dispatch (reference, listeners, diff) {
   diff.forEach((change) => {
-    listeners.forEach(listener => trigger(listener, change))
+    listeners.forEach(listener => trigger(reference, listener, change))
   })
 }
 
-function trigger (listener, change) {
+function trigger (reference, listener, change) {
   if (below(listener.path, change.get('path'))) {
     if ((listener.event) === 'value') {
-      listener.callback.call(listener.context)
+      listener.callback.call(listener.context, Snapshot.create(reference))
     }
   }
 }

@@ -8,6 +8,9 @@ export default class Snapshot {
   constructor (ref, data, priority) {
     Object.assign(this, underscore({ref, data, priority}))
   }
+  static create (ref) {
+    return new this(ref, ref.getData(), ref.priority)
+  }
   child (key) {
     const ref = this.ref().child(key)
     const data = this.hasChild(key) ? this.val()[key] : null

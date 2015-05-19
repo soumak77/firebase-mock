@@ -63,6 +63,7 @@ test('Firebase', (t) => {
     ref.flush()
     t.deepEqual(ref.getData(), {foo: 'bar'}, 'sets data')
     t.equal(listener.callCount, 1)
+    t.deepEqual(listener.firstCall.args[0].val(), {foo: 'bar'}, 'calls listener with snapshot')
     t.end()
   })
   t.end()
