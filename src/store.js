@@ -1,7 +1,7 @@
 'use strict'
 
 import Queue from 'flush-queue'
-import Map from './map'
+import {Map} from './map'
 import Cache from './cache'
 
 export default class Store {

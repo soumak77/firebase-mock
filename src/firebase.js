@@ -6,9 +6,8 @@ import last from 'array-last'
 import {ServerValue} from 'firebase-server-value'
 import clock from './clock'
 import Store from './store'
-import {isMap} from './map'
+import * as map from './map'
 import {dispatch} from './events'
-import {fromJS as toImmutable} from 'immutable'
 import {random as randomEndpoint, parse as parseUrl, format as formatUrl} from './url'
 
 const {join, resolve} = posixPath
@@ -22,7 +21,7 @@ export default class MockFirebase {
     if (this.isRoot) {
       this.store = new Store(this.endpoint).proxy(this)
       this.setData = (data) => {
-        const diff = this.data.diff(data)
+        const diff = map.diff(this.data, data)
         this.data = data
         dispatch(this, this.listeners, diff)
       }
@@ -39,8 +38,7 @@ export default class MockFirebase {
     return this.isRoot ? [] : this.path.split('/').slice(1)
   }
   getData () {
-    const value = this.root().data.getIn(this.keyPath, null)
-    return isMap(value) ? value.toJS() : value
+    return map.toJSIn(this.root().data, this.keyPath)
   }
   parent () {
     return this.isRoot ? null : new this.constructor(formatUrl({
@@ -56,6 +54,7 @@ export default class MockFirebase {
   }
   child (path) {
     assert(path && typeof path === 'string', '"path" must be a string')
+    if (path === '/') return this
     return new this.constructor(formatUrl({
       endpoint: this.endpoint,
       path: join(this.path, path)
@@ -84,7 +83,7 @@ export default class MockFirebase {
   set (data) {
     this.defer(() => {
       const root = this.root()
-      root.setData(root.data.setIn(this.keyPath, toImmutable(data)))
+      root.setData(root.data.setIn(this.keyPath, map.fromJS(data)))
     })
   }
 }

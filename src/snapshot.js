@@ -2,21 +2,25 @@
 
 import exportValue from 'firebase-export-value'
 import isEmpty from 'is-empty-object'
-import underscore from 'underscore-keys'
 import define from 'define-properties'
+import {join} from 'path'
+import underscore from 'underscore-keys'
+import * as map from './map'
 
 export default class Snapshot {
-  constructor (ref, data, priority) {
-    define(this, underscore({ref, data, priority}))
+  constructor (ref, root) {
+    if (!root) {
+      root = this
+      define(this, {data: ref.root().data})
+    }
+    define(this, underscore({ref}))
+    define(this, {root})
   }
-  static create (ref) {
-    return new this(ref, ref.getData(), ref.priority)
-  }
-  child (key) {
-    const ref = this.ref().child(key)
-    const data = this.hasChild(key) ? this.val()[key] : null
-    const priority = this.ref().child(key).priority
-    return new this.constructor(ref, data, priority)
+  child (path) {
+    return new this.constructor(
+      this.ref().child(path),
+      this.root
+    )
   }
   exists () {
     return this.val() !== null
@@ -56,6 +60,6 @@ export default class Snapshot {
     return this._ref
   }
   val () {
-    return this._data
+    return map.toJSIn(this.root.data, this.ref().keyPath)
   }
 }

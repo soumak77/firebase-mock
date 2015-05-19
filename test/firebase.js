@@ -3,7 +3,6 @@
 import test from 'tape'
 import {spy} from 'sinon'
 import startsWith from 'core-js/fn/string/starts-with'
-import {fromJS as toImmutable} from 'immutable'
 import Firebase from '../'
 
 test('Firebase', (t) => {
