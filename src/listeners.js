@@ -1,6 +1,7 @@
 'use strict'
 
 import define from 'define-properties'
+import {EventEmitter} from 'events'
 
 export default class ListenerSet {
   constructor () {
@@ -11,11 +12,11 @@ export default class ListenerSet {
     this.listeners.add(listener)
     return listener
   }
-  delete (listener) {
-    listener.deleted = true
-    this.listeners.delete(listener)
+  removed (listener) {
+    listener.removed = true
+    this.listeners.remove(listener)
   }
-  deleteWhere (path, event, callback, context) {
+  removeWhere (path, event, callback, context) {
     for (let listener of this.listeners) {
       if (path !== listener.path) continue
       if (event) {
@@ -23,7 +24,7 @@ export default class ListenerSet {
         if (callback && callback !== listener.callback) continue
         if (arguments.length === 3 && context !== listener.context) continue
       }
-      this.delete(listener)
+      this.remove(listener)
     }
   }
   has (listener) {
@@ -34,8 +35,9 @@ export default class ListenerSet {
   }
 }
 
-class Listener {
+class Listener extends EventEmitter {
   constructor (path, event, callback, cancel, context) {
+    super()
     if (typeof cancel !== 'function') {
       cancel = noop
       context = cancel
@@ -44,7 +46,8 @@ class Listener {
     this.initial = event === 'value' || event === 'child_added'
   }
   call () {
-    if (this.deleted) return
+    if (this.removed) return
+    this.emit('call', this)
     this.callback.apply(this.context, arguments)
   }
 }

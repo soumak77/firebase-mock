@@ -71,14 +71,22 @@ export default class MockFirebase {
     this.queue.add(callback)
     return this
   }
-  on (event, callback, cancel, context) {
+  addListener (event, callback, cancel, context) {
     const listener = this.root().listeners.add(this.path, ...arguments)
     if (listener.initial) {
       this.defer(() => {
         listener.call(new Snapshot(this))
       })
     }
-    return callback
+    return listener
+  }
+  on (event, callback, cancel, context) {
+    return this.addListener(event, callback, cancel, context).callback
+  }
+  once (event, callback, cancel, context) {
+    return this.addListener(event, callback, cancel, context)
+      .on('call', listener => this.listeners.remove(listener))
+      .callback
   }
   set (data) {
     this.defer(() => {
