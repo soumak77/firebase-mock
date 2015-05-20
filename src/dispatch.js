@@ -3,7 +3,7 @@
 import isParent from 'subdir'
 import Snapshot from './snapshot'
 
-export function dispatch (root, listeners, diff) {
+export default function dispatch (root, listeners, diff) {
   diff.forEach((change) => {
     listeners.forEach(listener => trigger(root, listener, change))
   })

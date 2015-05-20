@@ -7,7 +7,7 @@ import {ServerValue} from 'firebase-server-value'
 import clock from './clock'
 import Store from './store'
 import * as map from './map'
-import {dispatch} from './events'
+import dispatch from './dispatch'
 import {random as randomEndpoint, parse as parseUrl, format as formatUrl} from './url'
 
 const {join, resolve} = posixPath
