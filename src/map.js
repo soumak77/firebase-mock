@@ -11,6 +11,10 @@ export function toJS (map) {
 }
 
 export function getIn (map, keyPath) {
+  if (!Map.isMap(map)) {
+    if (!keyPath.length) return map
+    return null
+  }
   return map.getIn(keyPath, null)
 }
 

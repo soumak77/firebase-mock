@@ -85,7 +85,9 @@ export default class MockFirebase {
   }
   once (event, callback, cancel, context) {
     return this.addListener(event, callback, cancel, context)
-      .on('call', listener => this.listeners.remove(listener))
+      .on('call', (listener) => {
+        this.listeners.remove(listener)
+      })
       .callback
   }
   set (data) {

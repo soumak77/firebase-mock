@@ -12,9 +12,9 @@ export default class ListenerSet {
     this.listeners.add(listener)
     return listener
   }
-  removed (listener) {
+  remove (listener) {
     listener.removed = true
-    this.listeners.remove(listener)
+    this.listeners.delete(listener)
   }
   removeWhere (path, event, callback, context) {
     for (let listener of this.listeners) {
