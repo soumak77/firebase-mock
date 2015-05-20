@@ -41,13 +41,11 @@ class Listener {
       context = cancel
     }
     Object.assign(this, {path, event, callback, cancel, context})
+    this.initial = event === 'value' || event === 'child_added'
   }
   call () {
     if (this.deleted) return
     this.callback.apply(this.context, arguments)
-  }
-  get initial () {
-    return this.event === 'value' || this.event === 'child_added'
   }
 }
 
