@@ -3,6 +3,7 @@
 import Queue from 'flush-queue'
 import {Map} from './map'
 import Cache from './cache'
+import Listeners from './listeners'
 
 export default class Store {
   static cache = new Cache()
@@ -12,7 +13,7 @@ export default class Store {
     if (cached) return cached
     this.queue = new Queue()
     this.data = new Map()
-    this.listeners = new Set()
+    this.listeners = new Listeners()
     cache.set(endpoint, this)
   }
   proxy (destination) {

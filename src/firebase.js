@@ -6,6 +6,7 @@ import last from 'array-last'
 import {ServerValue} from 'firebase-server-value'
 import clock from './clock'
 import Store from './store'
+import Snapshot from './snapshot'
 import * as map from './map'
 import dispatch from './dispatch'
 import {random as randomEndpoint, parse as parseUrl, format as formatUrl} from './url'
@@ -71,14 +72,13 @@ export default class MockFirebase {
     return this
   }
   on (event, callback, cancel, context) {
-    const path = this.path
-    const listener = {event, callback, cancel, context, path}
-    this.listeners.add(listener)
-    if (calledOnRegister(event)) {
+    const listener = this.root().listeners.add(this.path, ...arguments)
+    if (listener.initial) {
       this.defer(() => {
-        if (!this.listeners.has(listener)) return
+        listener.call(new Snapshot(this))
       })
     }
+    return callback
   }
   set (data) {
     this.defer(() => {
@@ -86,8 +86,4 @@ export default class MockFirebase {
       root.setData(root.data.setIn(this.keyPath, map.fromJS(data)))
     })
   }
-}
-
-function calledOnRegister (event) {
-  return event === 'value' || event === 'child_added'
 }

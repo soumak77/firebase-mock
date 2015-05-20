@@ -12,7 +12,7 @@ export default function dispatch (root, listeners, diff) {
 function trigger (root, listener, change) {
   if (below(listener.path, change.get('path'))) {
     if ((listener.event) === 'value') {
-      listener.callback.call(listener.context, new Snapshot(root.child(listener.path)))
+      listener.call(new Snapshot(root.child(listener.path)))
     }
   }
 }
