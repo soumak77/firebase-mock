@@ -11,7 +11,7 @@ export default class Snapshot {
   constructor (ref, root) {
     if (!root) {
       root = this
-      define(this, {data: ref.root().data})
+      define(this, {data: ref.store.data})
     }
     define(this, underscore({ref}))
     define(this, {root})

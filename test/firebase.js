@@ -22,10 +22,10 @@ test('Firebase', (t) => {
   t.test('getData', (t) => {
     t.equal(new Firebase().getData(), null, 'null by default')
     let ref = new Firebase()
-    ref.data = ref.data.merge({foo: 'bar'})
+    ref.store.data = ref.store.data.merge({foo: 'bar'})
     t.deepEqual(ref.getData(), {foo: 'bar'})
     ref = new Firebase('mock:///foo/bar')
-    ref.root().data = ref.root().data.mergeDeep({foo: {bar: 0}})
+    ref.store.data = ref.store.data.mergeDeep({foo: {bar: 0}})
     t.deepEqual(ref.getData(), 0)
     t.equal(ref.child('baz').getData(), null)
     t.end()

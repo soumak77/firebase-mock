@@ -4,11 +4,12 @@ import {posix as posixPath} from 'path'
 import assert from 'assert'
 import last from 'array-last'
 import {ServerValue} from 'firebase-server-value'
+import define from 'define-properties'
+import underscore from 'underscore-keys'
 import clock from './clock'
 import Store from './store'
 import Snapshot from './snapshot'
 import * as map from './map'
-import dispatch from './dispatch'
 import {random as randomEndpoint, parse as parseUrl, format as formatUrl} from './url'
 
 const {join, resolve} = posixPath
@@ -20,26 +21,21 @@ export default class MockFirebase {
   constructor (url = randomEndpoint(), root) {
     Object.assign(this, parseUrl(url)) // eslint-disable-line no-undef
     if (this.isRoot) {
-      this.store = new Store(this.endpoint).proxy(this)
-      this.setData = (data) => {
-        const diff = map.diff(this.data, data)
-        this.data = data
-        dispatch(this, this.listeners, diff)
-      }
+      const store = new Store(this.endpoint)
+      define(this, underscore({store}))
     } else {
-      this._root = root || new this.constructor(this.endpoint)
+      define(this, {_root: root || new this.constructor(this.endpoint)})
     }
-    this.queue = this.root().queue
   }
   flush () {
-    this.queue.flush()
+    this.store.queue.flush()
     return this
   }
   get keyPath () {
     return this.isRoot ? [] : this.path.split('/').slice(1)
   }
   getData () {
-    return map.toJSIn(this.root().data, this.keyPath)
+    return map.toJSIn(this.store.data, this.keyPath)
   }
   parent () {
     return this.isRoot ? null : new this.constructor(formatUrl({
@@ -52,6 +48,9 @@ export default class MockFirebase {
   }
   root () {
     return this.isRoot ? this : this._root
+  }
+  get store () {
+    return this.root()._store
   }
   child (path) {
     assert(path && typeof path === 'string', '"path" must be a string')
@@ -68,11 +67,11 @@ export default class MockFirebase {
     return this.url
   }
   defer (callback) {
-    this.queue.add(callback)
+    this.store.queue.add(callback)
     return this
   }
   addListener (event, callback, cancel, context) {
-    const listener = this.root().listeners.add(this.path, ...arguments)
+    const listener = this.store.listeners.add(this.path, ...arguments)
     if (listener.initial) {
       this.defer(() => {
         listener.call(new Snapshot(this))
@@ -86,14 +85,16 @@ export default class MockFirebase {
   once (event, callback, cancel, context) {
     return this.addListener(event, callback, cancel, context)
       .on('call', (listener) => {
-        this.listeners.remove(listener)
+        this.store.listeners.remove(listener)
       })
       .callback
   }
   set (data) {
     this.defer(() => {
-      const root = this.root()
-      root.setData(root.data.setIn(this.keyPath, map.fromJS(data)))
+      this.store.setData(
+        this.root(),
+        this.store.data.setIn(this.keyPath, map.fromJS(data))
+      )
     })
   }
 }

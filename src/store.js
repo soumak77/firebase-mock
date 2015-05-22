@@ -1,9 +1,12 @@
 'use strict'
 
 import Queue from 'flush-queue'
+import define from 'define-properties'
 import {Map} from './map'
 import Cache from './cache'
 import Listeners from './listeners'
+import dispatch from './dispatch'
+import * as map from './map'
 
 export default class Store {
   static cache = new Cache()
@@ -16,19 +19,9 @@ export default class Store {
     this.listeners = new Listeners()
     cache.set(endpoint, this)
   }
-  proxy (destination) {
-    Object.defineProperties(destination, Object.getOwnPropertyNames(this)
-      .reduce((properties, property) => {
-        properties[property] = {
-          get: () => {
-            return this[property]
-          },
-          set: (value) => {
-            this[property] = value
-          }
-        }
-        return properties
-      }, {}))
-    return this
+  setData (root, data) {
+    const diff = map.diff(this.data, data)
+    this.data = data
+    dispatch(root, this.listeners, diff)
   }
 }
