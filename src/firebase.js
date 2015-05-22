@@ -89,6 +89,9 @@ export default class MockFirebase {
       })
       .callback
   }
+  off (event, callback, context) {
+    this.store.listeners.removeWhere(this.path, event, callback, context)
+  }
   set (data) {
     this.defer(() => {
       this.store.setData(

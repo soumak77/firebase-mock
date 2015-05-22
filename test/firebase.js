@@ -76,6 +76,32 @@ test('Firebase', (t) => {
     t.equal(callback.callCount, 1, 'only called once')
     t.end()
   })
+  t.test('off', (t) => {
+    const ref = new Firebase()
+    const {listeners} = ref.store
+    const child = ref.child('foo')
+    const callback = function () {}
+    const context = {}
+    ref.on('value', callback)
+    child.on('value', callback)
+    t.equal(listeners.size, 2)
+    ref.off()
+    t.equal(listeners.size, 1, 'disable all at path')
+    child.off('value')
+    t.equal(listeners.size, 0, 'disable all for event')
+    ref.on('child_added', callback)
+    ref.off('child_added', function () {})
+    t.equal(listeners.size, 1, 'filter by callback')
+    ref.off('child_added', callback)
+    t.equal(listeners.size, 0, 'filter by callback')
+    ref.on('value', callback, context)
+    t.equal(listeners.size, 1)
+    ref.off('value', callback, {})
+    t.equal(listeners.size, 1, 'filter by context')
+    ref.off('value', callback, context)
+    t.equal(listeners.size, 0, 'filter by context')
+    t.end()
+  })
   t.test('set', (t) => {
     const ref = new Firebase()
     ref.set('foo')

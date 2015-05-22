@@ -22,7 +22,7 @@ export default class ListenerSet {
       if (event) {
         if (event !== listener.event) continue
         if (callback && callback !== listener.callback) continue
-        if (arguments.length === 3 && context !== listener.context) continue
+        if (typeof context !== 'undefined' && context !== listener.context) continue
       }
       this.remove(listener)
     }
@@ -33,14 +33,17 @@ export default class ListenerSet {
   forEach () {
     return this.listeners.forEach.apply(this.listeners, arguments)
   }
+  get size () {
+    return this.listeners.size
+  }
 }
 
 class Listener extends EventEmitter {
   constructor (path, event, callback, cancel, context) {
     super()
     if (typeof cancel !== 'function') {
-      cancel = noop
       context = cancel
+      cancel = noop
     }
     Object.assign(this, {path, event, callback, cancel, context})
     this.initial = event === 'value' || event === 'child_added'
