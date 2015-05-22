@@ -29,7 +29,7 @@ export default class MockFirebase {
     } else {
       this._root = root || new this.constructor(this.endpoint)
     }
-    if (!this.isRoot) this.queue = this.root().queue
+    this.queue = this.root().queue
   }
   flush () {
     this.queue.flush()
