@@ -1,6 +1,5 @@
 {
   "optional": [
-    "es7.classProperties",
-    "es7.functionBind"
+    "es7.classProperties"
   ]
 }
