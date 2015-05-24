@@ -31,6 +31,7 @@
     "firebase-auto-ids": "~1.1.0",
     "firebase-export-value": "~1.0.2",
     "firebase-server-value": "^1.0.0",
+    "firebase-url": "~1.0.0",
     "flush-queue": "~1.0.1",
     "immutable": "~3.7.2",
     "immutablediff": "~0.4.2",

@@ -10,7 +10,7 @@ import clock from './clock'
 import Store from './store'
 import Snapshot from './snapshot'
 import * as map from './map'
-import {parse as parseUrl, format as formatUrl} from './url'
+import {parse as parseUrl, format as formatUrl} from 'firebase-url'
 
 const {join, resolve} = posixPath
 
