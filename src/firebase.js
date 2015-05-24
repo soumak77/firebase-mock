@@ -10,7 +10,7 @@ import clock from './clock'
 import Store from './store'
 import Snapshot from './snapshot'
 import * as map from './map'
-import {random as randomEndpoint, parse as parseUrl, format as formatUrl} from './url'
+import {parse as parseUrl, format as formatUrl} from './url'
 
 const {join, resolve} = posixPath
 
@@ -18,8 +18,8 @@ export default class MockFirebase {
   static cache = Store.cache
   static clock = clock
   static ServerValue = ServerValue
-  constructor (url = randomEndpoint(), root) {
-    Object.assign(this, parseUrl(url)) // eslint-disable-line no-undef
+  constructor (url, root) {
+    Object.assign(this, parseUrl(url))
     if (this.isRoot) {
       const store = new Store(this.endpoint)
       define(this, underscore({store}))

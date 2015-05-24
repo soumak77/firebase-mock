@@ -7,7 +7,7 @@ import Snapshot from '../src/snapshot'
 import Firebase from '../'
 
 test.skip('Snapshot', (t) => {
-  const ref = new Firebase()
+  const ref = new Firebase('mock://')
   function withData (data) {
     ref.data = fromJS(data)
     return new Snapshot(ref)

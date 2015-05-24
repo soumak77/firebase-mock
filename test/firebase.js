@@ -7,7 +7,6 @@ import Firebase from '../'
 
 test('Firebase', (t) => {
   t.test('Constructor', (t) => {
-    t.ok(startsWith(new Firebase().endpoint, 'mock://'), 'defaults to mock protocol')
     t.test('caching', (t) => {
       Firebase.cache.enable()
       const ref1 = new Firebase('mock://')
@@ -20,8 +19,8 @@ test('Firebase', (t) => {
     t.end()
   })
   t.test('getData', (t) => {
-    t.equal(new Firebase().getData(), null, 'null by default')
-    let ref = new Firebase()
+    t.equal(createRef().getData(), null, 'null by default')
+    let ref = createRef()
     ref.store.data = ref.store.data.merge({foo: 'bar'})
     t.deepEqual(ref.getData(), {foo: 'bar'})
     ref = new Firebase('mock:///foo/bar')
@@ -31,7 +30,7 @@ test('Firebase', (t) => {
     t.end()
   })
   t.test('parent', (t) => {
-    t.equal(new Firebase().parent(), null)
+    t.equal(createRef().parent(), null)
     const child = new Firebase('parent:///path/foo')
     t.equal(child.parent().url, 'parent:///path')
     t.notEqual(child.parent(), child.parent(), 'nondeterministic')
@@ -54,7 +53,7 @@ test('Firebase', (t) => {
     t.end()
   })
   t.test('on', (t) => {
-    const ref = new Firebase()
+    const ref = createRef()
     const callback = spy()
     t.equal(ref.on('value', callback), callback, 'returns callback')
     ref.flush()
@@ -67,7 +66,7 @@ test('Firebase', (t) => {
     t.end()
   })
   t.test('once', (t) => {
-    const ref = new Firebase()
+    const ref = createRef()
     const callback = spy()
     t.equal(ref.once('value', callback), callback, 'returns callback')
     ref.flush()
@@ -77,7 +76,7 @@ test('Firebase', (t) => {
     t.end()
   })
   t.test('off', (t) => {
-    const ref = new Firebase()
+    const ref = createRef()
     const {listeners} = ref.store
     const child = ref.child('foo')
     const callback = function () {}
@@ -103,7 +102,7 @@ test('Firebase', (t) => {
     t.end()
   })
   t.test('set', (t) => {
-    const ref = new Firebase()
+    const ref = createRef()
     ref.set('foo')
     t.equal(ref.getData(), null, 'deferred')
     ref.flush()
@@ -112,3 +111,7 @@ test('Firebase', (t) => {
   })
   t.end()
 })
+
+function createRef () {
+  return new Firebase('mock://')
+}
