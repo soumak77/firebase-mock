@@ -1,7 +1,6 @@
 'use strict'
 
 import exportValue from 'firebase-export-value'
-import isEmpty from 'is-empty-object'
 import define from 'define-properties'
 import {join} from 'path'
 import underscore from 'underscore-keys'
