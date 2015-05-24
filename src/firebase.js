@@ -19,6 +19,7 @@ export default class MockFirebase {
   static clock = clock
   static ServerValue = ServerValue
   constructor (url, root) {
+    assert(url, 'url is required')
     Object.assign(this, parseUrl(url))
     if (this.isRoot) {
       const store = new Store(this.endpoint)

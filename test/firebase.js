@@ -7,6 +7,7 @@ import Firebase from '../'
 
 test('Firebase', (t) => {
   t.test('Constructor', (t) => {
+    t.throws(() => {return new Firebase()}, /url is required/)
     t.test('caching', (t) => {
       Firebase.cache.enable()
       const ref1 = new Firebase('mock://')
