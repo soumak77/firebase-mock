@@ -41,6 +41,7 @@
     "babel": "^5.4.0",
     "babel-tape-runner": "~1.1.0",
     "core-js": "^0.8.4",
+    "sinon": "~1.14.1",
     "standard": "bendrucker/standard#babel",
     "tape": "~4.0.0"
   }
