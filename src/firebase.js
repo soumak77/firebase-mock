@@ -1,6 +1,6 @@
 'use strict'
 
-import {posix as posixPath} from 'path'
+import {join, resolve} from 'path-posix'
 import assert from 'assert'
 import last from 'array-last'
 import {ServerValue} from 'firebase-server-value'
@@ -11,8 +11,6 @@ import Store from './store'
 import Snapshot from './snapshot'
 import * as map from './map'
 import {parse as parseUrl, format as formatUrl} from 'firebase-url'
-
-const {join, resolve} = posixPath
 
 export default class MockFirebase {
   static cache = Store.cache

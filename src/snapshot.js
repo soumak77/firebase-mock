@@ -2,7 +2,7 @@
 
 import exportValue from 'firebase-export-value'
 import define from 'define-properties'
-import {join} from 'path'
+import {join} from 'path-posix'
 import underscore from 'underscore-keys'
 import * as map from './map'
 
