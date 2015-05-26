@@ -23,7 +23,7 @@ var mock;
 var mySrc = proxyquire('./mySrc', {
   firebase: function (url) {
     return (mock = new MockFirebase(url));
-  };
+  }
 });
 mock.flush();
 // data is logged
