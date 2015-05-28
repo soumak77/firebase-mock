@@ -6,7 +6,6 @@ import last from 'array-last'
 import {ServerValue} from 'firebase-server-value'
 import define from 'define-properties'
 import underscore from 'underscore-keys'
-import clock from './clock'
 import Store from './store'
 import Snapshot from './snapshot'
 import * as map from './map'
@@ -14,7 +13,6 @@ import {parse as parseUrl, format as formatUrl} from 'firebase-url'
 
 export default class MockFirebase {
   static cache = Store.cache
-  static clock = clock
   static ServerValue = ServerValue
   constructor (url, root) {
     assert(url, 'url is required')
