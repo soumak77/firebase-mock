@@ -4,7 +4,7 @@ import exportValue from 'firebase-export-value'
 import define from 'define-properties'
 import {join} from 'path-posix'
 import underscore from 'underscore-keys'
-import * as map from './map'
+import Map from './map'
 
 export default class Snapshot {
   constructor (ref, root) {
@@ -59,6 +59,6 @@ export default class Snapshot {
     return this._ref
   }
   val () {
-    return map.toJSIn(this.root.data, this.ref().keyPath)
+    return this.root.data.toJSIn(this.ref().keyPath)
   }
 }

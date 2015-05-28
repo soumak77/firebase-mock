@@ -2,11 +2,10 @@
 
 import Queue from 'flush-queue'
 import define from 'define-properties'
-import {Map} from './map'
+import Map from './map'
 import Cache from './cache'
 import Listeners from './listeners'
 import dispatch from './dispatch'
-import * as map from './map'
 
 export default class Store {
   static cache = new Cache()
@@ -20,7 +19,7 @@ export default class Store {
     cache.set(endpoint, this)
   }
   setData (root, data) {
-    const diff = map.diff(this.data, data)
+    const diff = this.data.diff(data)
     this.data = data
     dispatch(root, this.listeners, diff)
   }

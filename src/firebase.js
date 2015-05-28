@@ -8,7 +8,7 @@ import define from 'define-properties'
 import underscore from 'underscore-keys'
 import Store from './store'
 import Snapshot from './snapshot'
-import * as map from './map'
+import Map from './map'
 import {parse as parseUrl, format as formatUrl} from 'firebase-url'
 
 export default class MockFirebase {
@@ -32,7 +32,7 @@ export default class MockFirebase {
     return this.isRoot ? [] : this.path.split('/').slice(1)
   }
   getData () {
-    return map.toJSIn(this.store.data, this.keyPath)
+    return this.store.data.toJSIn(this.keyPath)
   }
   parent () {
     return this.isRoot ? null : new this.constructor(formatUrl({
@@ -93,7 +93,7 @@ export default class MockFirebase {
     this.defer(() => {
       this.store.setData(
         this.root(),
-        this.store.data.setIn(this.keyPath, map.fromJS(data))
+        this.store.data.setIn(this.keyPath, Map.fromJS(data))
       )
     })
   }

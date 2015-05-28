@@ -1,28 +1,23 @@
 'use strict'
 
-import {Map, fromJS} from 'immutable'
-const {isMap} = Map
-import immutablediff from 'immutablediff'
+import ValueMap from 'immutable-value-map'
+import toJSIn from 'immutable-to-js-in'
+import toFirebase from 'to-firebase'
+import immutableDiff from 'immutablediff'
+import {fromJS} from 'immutable'
 
-export {Map, fromJS}
-
-export function toJS (map) {
-  return map.size ? map.toJS() : null
-}
-
-export function getIn (map, keyPath) {
-  if (!Map.isMap(map)) {
-    if (!keyPath.length) return map
-    return null
+export default class FirebaseMap extends ValueMap {
+  static fromJS = fromJS
+  getIn (keyPath, notSetValue = null) {
+    return super.getIn(keyPath, notSetValue) // eslint-disable-line no-undef
   }
-  return map.getIn(keyPath, null)
-}
-
-export function toJSIn (map, keyPath) {
-  const data = getIn(map, keyPath)
-  return isMap(data) ? toJS(data) : data
-}
-
-export function diff (map1, map2) {
-  return immutablediff(map1, map2)
+  toJSIn (keyPath) {
+    return toFirebase(toJSIn(this, keyPath))
+  }
+  toJS () {
+    return toFirebase(super.toJS())
+  }
+  diff (newMap) {
+    return immutableDiff(this.get(), newMap.get())
+  }
 }
