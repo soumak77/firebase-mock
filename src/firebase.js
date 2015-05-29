@@ -34,6 +34,9 @@ export default class MockFirebase {
   getData () {
     return this.store.data.toJSIn(this.keyPath)
   }
+  getPriority () {
+    return this.store.priority.get(this.keyPath)
+  }
   parent () {
     return this.isRoot ? null : new this.constructor(formatUrl({
       endpoint: this.endpoint,
@@ -94,6 +97,14 @@ export default class MockFirebase {
       this.store.setData(
         this.root(),
         this.store.data.setIn(this.keyPath, Map.fromJS(data))
+      )
+    })
+  }
+  setPriority (priority) {
+    this.defer(() => {
+      this.store.setPriority(
+        this.root(),
+        this.store.priority.set(this.keyPath, priority)
       )
     })
   }

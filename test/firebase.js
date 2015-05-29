@@ -110,6 +110,14 @@ test('Firebase', (t) => {
     t.equal(ref.getData(), 'foo', 'sets data')
     t.end()
   })
+  t.test('setPriority', (t) => {
+    const ref = createRef()
+    ref.set({foo: 'bar'})
+    ref.child('foo').setPriority(10)
+    ref.flush()
+    t.equal(ref.child('foo').getPriority(), 10)
+    t.end()
+  })
   t.end()
 })
 
