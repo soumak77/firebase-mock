@@ -10,7 +10,8 @@ export default class Snapshot {
   constructor (ref, root) {
     if (!root) {
       root = this
-      define(this, {data: ref.store.data})
+      const {data, priority} = ref.store
+      define(this, {data, priority})
     }
     define(this, underscore({ref}))
     define(this, {root})
@@ -40,7 +41,7 @@ export default class Snapshot {
       .forEach(child => callback.call(context, child))
   }
   getPriority () {
-    return this._priority
+    return this.root.priority.get(this.ref().keyPath)
   }
   hasChild (key) {
     return !!(this.val() && this.val()[key])
