@@ -22,7 +22,6 @@
   "homepage": "https://github.com/katowulf/mockfirebase",
   "dependencies": {
     "array-last": "~1.0.2",
-    "clockwise": "^1.0.0",
     "define-properties": "^1.0.1",
     "firebase-auto-ids": "~1.1.0",
     "firebase-export-value": "~1.0.2",
