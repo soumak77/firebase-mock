@@ -1,3 +1,3 @@
 'use strict'
 
-export {default} from './firebase'
+module.exports = require('./firebase')
