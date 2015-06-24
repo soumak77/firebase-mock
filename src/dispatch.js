@@ -1,11 +1,13 @@
 'use strict'
 
-import isParent from 'subdir'
-import Snapshot from './snapshot'
+var isParent = require('subdir')
+var Snapshot = require('./snapshot')
 
-export default function dispatch (root, listeners, diff) {
-  diff.forEach((change) => {
-    listeners.forEach(listener => trigger(root, listener, change))
+module.exports = function dispatch (root, listeners, diff) {
+  diff.forEach(function (change) {
+    listeners.forEach(function (listener) {
+      trigger(root, listener, change)
+    })
   })
 }
 
