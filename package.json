@@ -19,6 +19,12 @@
   "bugs": {
     "url": "https://github.com/katowulf/mockfirebase/issues"
   },
+  "files": [
+    "*.md",
+    "src/",
+    "tutorials/",
+    "browser/"
+  ],
   "homepage": "https://github.com/katowulf/mockfirebase",
   "dependencies": {
     "MD5": "~1.2.1",
