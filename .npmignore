@@ -1,7 +1,0 @@
-test/
-browser/
-gulpfile.js
-.travis.yml
-.npmignore
-helpers/
-coverage/
