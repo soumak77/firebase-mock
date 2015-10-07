@@ -1,4 +1,4 @@
-/** mockfirebase - v0.11.0
+/** mockfirebase - v0.12.0
 https://github.com/katowulf/mockfirebase
 * Copyright (c) 2014 Kato
 * License: MIT */
@@ -1020,7 +1020,7 @@ function base64Write (buf, string, offset, length) {
 }
 
 function utf16leWrite (buf, string, offset, length) {
-  var charsWritten = blitBuffer(utf16leToBytes(string), buf, offset, length)
+  var charsWritten = blitBuffer(utf16leToBytes(string), buf, offset, length, 2)
   return charsWritten
 }
 
@@ -1704,7 +1704,8 @@ function base64ToBytes (str) {
   return base64.toByteArray(str)
 }
 
-function blitBuffer (src, dst, offset, length) {
+function blitBuffer (src, dst, offset, length, unitSize) {
+  if (unitSize) length -= length % unitSize;
   for (var i = 0; i < length; i++) {
     if ((i + offset >= dst.length) || (i >= src.length))
       break
@@ -1844,90 +1845,90 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 },{}],8:[function(require,module,exports){
-exports.read = function(buffer, offset, isLE, mLen, nBytes) {
-  var e, m,
-      eLen = nBytes * 8 - mLen - 1,
-      eMax = (1 << eLen) - 1,
-      eBias = eMax >> 1,
-      nBits = -7,
-      i = isLE ? (nBytes - 1) : 0,
-      d = isLE ? -1 : 1,
-      s = buffer[offset + i];
+exports.read = function (buffer, offset, isLE, mLen, nBytes) {
+  var e, m
+  var eLen = nBytes * 8 - mLen - 1
+  var eMax = (1 << eLen) - 1
+  var eBias = eMax >> 1
+  var nBits = -7
+  var i = isLE ? (nBytes - 1) : 0
+  var d = isLE ? -1 : 1
+  var s = buffer[offset + i]
 
-  i += d;
+  i += d
 
-  e = s & ((1 << (-nBits)) - 1);
-  s >>= (-nBits);
-  nBits += eLen;
-  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8);
+  e = s & ((1 << (-nBits)) - 1)
+  s >>= (-nBits)
+  nBits += eLen
+  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
 
-  m = e & ((1 << (-nBits)) - 1);
-  e >>= (-nBits);
-  nBits += mLen;
-  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8);
+  m = e & ((1 << (-nBits)) - 1)
+  e >>= (-nBits)
+  nBits += mLen
+  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
 
   if (e === 0) {
-    e = 1 - eBias;
+    e = 1 - eBias
   } else if (e === eMax) {
-    return m ? NaN : ((s ? -1 : 1) * Infinity);
+    return m ? NaN : ((s ? -1 : 1) * Infinity)
   } else {
-    m = m + Math.pow(2, mLen);
-    e = e - eBias;
+    m = m + Math.pow(2, mLen)
+    e = e - eBias
   }
-  return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
-};
+  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)
+}
 
-exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
-  var e, m, c,
-      eLen = nBytes * 8 - mLen - 1,
-      eMax = (1 << eLen) - 1,
-      eBias = eMax >> 1,
-      rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0),
-      i = isLE ? 0 : (nBytes - 1),
-      d = isLE ? 1 : -1,
-      s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
+exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
+  var e, m, c
+  var eLen = nBytes * 8 - mLen - 1
+  var eMax = (1 << eLen) - 1
+  var eBias = eMax >> 1
+  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0)
+  var i = isLE ? 0 : (nBytes - 1)
+  var d = isLE ? 1 : -1
+  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0
 
-  value = Math.abs(value);
+  value = Math.abs(value)
 
   if (isNaN(value) || value === Infinity) {
-    m = isNaN(value) ? 1 : 0;
-    e = eMax;
+    m = isNaN(value) ? 1 : 0
+    e = eMax
   } else {
-    e = Math.floor(Math.log(value) / Math.LN2);
+    e = Math.floor(Math.log(value) / Math.LN2)
     if (value * (c = Math.pow(2, -e)) < 1) {
-      e--;
-      c *= 2;
+      e--
+      c *= 2
     }
     if (e + eBias >= 1) {
-      value += rt / c;
+      value += rt / c
     } else {
-      value += rt * Math.pow(2, 1 - eBias);
+      value += rt * Math.pow(2, 1 - eBias)
     }
     if (value * c >= 2) {
-      e++;
-      c /= 2;
+      e++
+      c /= 2
     }
 
     if (e + eBias >= eMax) {
-      m = 0;
-      e = eMax;
+      m = 0
+      e = eMax
     } else if (e + eBias >= 1) {
-      m = (value * c - 1) * Math.pow(2, mLen);
-      e = e + eBias;
+      m = (value * c - 1) * Math.pow(2, mLen)
+      e = e + eBias
     } else {
-      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
-      e = 0;
+      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen)
+      e = 0
     }
   }
 
-  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8);
+  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
 
-  e = (e << mLen) | m;
-  eLen += mLen;
-  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8);
+  e = (e << mLen) | m
+  eLen += mLen
+  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
 
-  buffer[offset + i - d] |= s * 128;
-};
+  buffer[offset + i - d] |= s * 128
+}
 
 },{}],9:[function(require,module,exports){
 
@@ -3048,12 +3049,12 @@ exports.Generator = IdGenerator;
 (function (global){
 /**
  * @license
- * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Lo-Dash 2.4.2 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern -o ./dist/lodash.js`
  * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <http://lodash.com/license>
+ * Available under MIT license <https://lodash.com/license>
  */
 ;(function() {
 
@@ -4542,6 +4543,7 @@ exports.Generator = IdGenerator;
     var setBindData = !defineProperty ? noop : function(func, value) {
       descriptor.value = value;
       defineProperty(func, '__bindData__', descriptor);
+      descriptor.value = null;
     };
 
     /**
@@ -9187,7 +9189,7 @@ exports.Generator = IdGenerator;
      * debugging. See http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/#toc-sourceurl
      *
      * For more information on precompiling templates see:
-     * http://lodash.com/custom-builds
+     * https://lodash.com/custom-builds
      *
      * For more information on Chrome extension sandboxes see:
      * http://developer.chrome.com/stable/extensions/sandboxingEval.html
@@ -9756,7 +9758,7 @@ exports.Generator = IdGenerator;
      * @memberOf _
      * @type string
      */
-    lodash.VERSION = '2.4.1';
+    lodash.VERSION = '2.4.2';
 
     // add "Chaining" functions to the wrapper
     lodash.prototype.chain = wrapperChain;
@@ -9945,16 +9947,15 @@ FirebaseAuth.prototype.unauth = function () {
 };
 
 FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
+  validateCredentials('createUser', credentials, [
+    'email',
+    'password'
+  ]);
   var err = this._nextErr('createUser');
   var users = this._auth.users;
   this._defer('createUser', _.toArray(arguments), function () {
     var user = null;
-    err = err ||
-      validateCredentials('createUser', credentials, [
-        'email',
-        'password'
-      ]) ||
-      this._validateNewEmail(credentials);
+    err = err || this._validateNewEmail(credentials);
     if (!err) {
       var key = credentials.email;
       users[key] = {
@@ -9971,14 +9972,14 @@ FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
 };
 
 FirebaseAuth.prototype.changeEmail = function (credentials, onComplete) {
+  validateCredentials('changeEmail', credentials, [
+    'oldEmail',
+    'newEmail',
+    'password'
+  ]);
   var err = this._nextErr('changeEmail');
   this._defer('changeEmail', _.toArray(arguments), function () {
     err = err ||
-      validateCredentials('changeEmail', credentials, [
-        'oldEmail',
-        'newEmail',
-        'password'
-      ]) ||
       this._validateExistingEmail({
         email: credentials.oldEmail
       }) ||
@@ -9998,14 +9999,14 @@ FirebaseAuth.prototype.changeEmail = function (credentials, onComplete) {
 };
 
 FirebaseAuth.prototype.changePassword = function (credentials, onComplete) {
+  validateCredentials('changePassword', credentials, [
+    'email',
+    'oldPassword',
+    'newPassword'
+  ]);
   var err = this._nextErr('changePassword');
   this._defer('changePassword', _.toArray(arguments), function () {
     err = err ||
-      validateCredentials('changePassword', credentials, [
-        'email',
-        'oldPassword',
-        'newPassword'
-      ]) ||
       this._validateExistingEmail(credentials) ||
       this._validPass(credentials, 'oldPassword');
     if (!err) {
@@ -10018,13 +10019,13 @@ FirebaseAuth.prototype.changePassword = function (credentials, onComplete) {
 };
 
 FirebaseAuth.prototype.removeUser = function (credentials, onComplete) {
+  validateCredentials('removeUser', credentials, [
+    'email',
+    'password'
+  ]);
   var err = this._nextErr('removeUser');
   this._defer('removeUser', _.toArray(arguments), function () {
     err = err ||
-      validateCredentials('removeUser', credentials, [
-        'email',
-        'password'
-      ]) ||
       this._validateExistingEmail(credentials) ||
       this._validPass(credentials, 'password');
     if (!err) {
@@ -10035,12 +10036,12 @@ FirebaseAuth.prototype.removeUser = function (credentials, onComplete) {
 };
 
 FirebaseAuth.prototype.resetPassword = function (credentials, onComplete) {
+  validateCredentials('resetPassword', credentials, [
+    'email'
+  ]);
   var err = this._nextErr('resetPassword');
   this._defer('resetPassword', _.toArray(arguments), function() {
     err = err ||
-      validateCredentials('resetPassword', credentials, [
-        'email'
-      ]) ||
       this._validateExistingEmail(credentials);
     onComplete(err);
   });
@@ -10079,29 +10080,25 @@ FirebaseAuth.prototype._validPass = function (object, name) {
 };
 
 function validateCredentials (method, credentials, fields) {
-  var err = validateObject(credentials, method, 'First');
-  var i = 0;
-  while (err === null && i < fields.length) {
-    err = validateArgument(method, credentials, 'First', fields[i], 'string');
-    i++;
-  }
-  return err;
+  validateObject(credentials, method, 'First');
+  fields.forEach(function (field) {
+    validateArgument(method, credentials, 'First', field, 'string');
+  });
 }
 
 function validateObject (object, method, position) {
   if (!_.isObject(object)) {
-    return new Error(format(
+    throw new Error(format(
       'Firebase.%s failed: %s argument must be a valid object.',
       method,
       position
     ));
   }
-  return null;
 }
 
 function validateArgument (method, object, position, name, type) {
   if (!object.hasOwnProperty(name) || typeof object[name] !== type) {
-    return new Error(format(
+    throw new Error(format(
       'Firebase.%s failed: %s argument must contain the key "%s" with type "%s"',
       method,
       position,
@@ -10109,7 +10106,6 @@ function validateArgument (method, object, position, name, type) {
       type
     ));
   }
-  return null;
 }
 
 module.exports = FirebaseAuth;
@@ -10125,6 +10121,7 @@ var Snapshot = require('./snapshot');
 var Queue    = require('./queue').Queue;
 var utils    = require('./utils');
 var Auth     = require('./auth');
+var validate = require('./validators');
 
 function MockFirebase (path, data, parent, name) {
   this.path = path || 'Mock://';
@@ -10223,6 +10220,7 @@ MockFirebase.prototype.getKeys = function () {
 };
 
 MockFirebase.prototype.fakeEvent = function (event, key, data, prevChild, priority) {
+  validate.event(event);
   if (arguments.length < 5) priority = null;
   if (arguments.length < 4) prevChild = null;
   if (arguments.length < 3) data = null;
@@ -10341,6 +10339,7 @@ MockFirebase.prototype.push = function (data, callback) {
 };
 
 MockFirebase.prototype.once = function (event, callback, cancel, context) {
+  validate.event(event);
   if (arguments.length === 3 && !_.isFunction(cancel)) {
     context = cancel;
     cancel = _.noop;
@@ -10373,6 +10372,7 @@ MockFirebase.prototype.remove = function (callback) {
 };
 
 MockFirebase.prototype.on = function (event, callback, cancel, context) {
+  validate.event(event);
   if (arguments.length === 3 && typeof cancel !== 'function') {
     context = cancel;
     cancel = _.noop;
@@ -10400,17 +10400,20 @@ MockFirebase.prototype.off = function (event, callback, context) {
       }
     }
   }
-  else if (callback) {
-    var events = this._events[event];
-    var newEvents = this._events[event] = [];
-    _.each(events, function (parts) {
-      if (parts[0] !== callback || parts[1] !== context) {
-        newEvents.push(parts);
-      }
-    });
-  }
   else {
-    this._events[event] = [];
+    validate.event(event);
+    if (callback) {
+      var events = this._events[event];
+      var newEvents = this._events[event] = [];
+      _.each(events, function (parts) {
+        if (parts[0] !== callback || parts[1] !== context) {
+          newEvents.push(parts);
+        }
+      });
+    }
+    else {
+      this._events[event] = [];      
+    }
   }
 };
 
@@ -10705,7 +10708,7 @@ function extractName(path) {
 
 module.exports = MockFirebase;
 
-},{"./auth":18,"./query":21,"./queue":22,"./snapshot":24,"./utils":25,"assert":5,"firebase-auto-ids":16,"lodash":17}],20:[function(require,module,exports){
+},{"./auth":18,"./query":21,"./queue":22,"./snapshot":24,"./utils":25,"./validators":26,"assert":5,"firebase-auto-ids":16,"lodash":17}],20:[function(require,module,exports){
 'use strict';
 
 var _   = require('lodash');
@@ -11019,6 +11022,7 @@ module.exports = MockFirebaseSimpleLogin;
 var _        = require('lodash');
 var Slice    = require('./slice');
 var utils    = require('./utils');
+var validate = require('./validators');
 
 function MockQuery (ref) {
   this.ref = function () {
@@ -11050,6 +11054,7 @@ MockQuery.prototype.getData = function () {
 };
 
 MockQuery.prototype.fakeEvent = function (event, snapshot) {
+  validate.event(event);
   _(this._events)
     .filter(function (parts) {
       return parts[0] === event;
@@ -11060,6 +11065,7 @@ MockQuery.prototype.fakeEvent = function (event, snapshot) {
 };
 
 MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
+  validate.event(event);
   if (arguments.length === 3 && typeof cancelCallback !== 'function') {
     context = cancelCallback;
     cancelCallback = _.noop;
@@ -11100,8 +11106,6 @@ MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
       case 'child_changed':
         callback.call(context, snap);
         break;
-      default:
-        throw new Error('Invalid event: ' + event);
     }
 
     if (map) {
@@ -11132,6 +11136,7 @@ MockQuery.prototype.off = function (event, callback, context) {
 };
 
 MockQuery.prototype.once = function (event, callback, context) {
+  validate.event(event);
   var self = this;
   // once is tricky because we want the first match within our range
   // so we use the on() method above which already does the needed legwork
@@ -11177,7 +11182,7 @@ function assertQuery (method, pri, key) {
 
 module.exports = MockQuery;
 
-},{"./slice":23,"./utils":25,"lodash":17}],22:[function(require,module,exports){
+},{"./slice":23,"./utils":25,"./validators":26,"lodash":17}],22:[function(require,module,exports){
 'use strict';
 
 var _            = require('lodash');
@@ -11607,7 +11612,20 @@ exports.isServerTimestamp = function isServerTimestamp (data) {
   return _.isObject(data) && data['.sv'] === 'timestamp';
 };
 
-},{"./snapshot":24,"lodash":17}]},{},[1])(1)
+},{"./snapshot":24,"lodash":17}],26:[function(require,module,exports){
+'use strict';
+
+var assert = require('assert');
+var format = require('util').format;
+
+var events = ['value', 'child_added', 'child_removed', 'child_changed', 'child_moved'];
+exports.event = function (name) {
+  assert(events.indexOf(name) > -1, format('"%s" is not a valid event, must be: %s', name, events.map(function (event) {
+    return format('"%s"', event);
+  }).join(', ')));
+};
+
+},{"assert":5,"util":14}]},{},[1])(1)
 });;(function (window) {
   'use strict';
   if (typeof window !== 'undefined' && window.mockfirebase) {
