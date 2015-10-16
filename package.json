@@ -20,9 +20,7 @@
     "url": "https://github.com/katowulf/mockfirebase/issues"
   },
   "files": [
-    "*.md",
     "src/",
-    "tutorials/",
     "browser/"
   ],
   "homepage": "https://github.com/katowulf/mockfirebase",
