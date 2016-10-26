@@ -1,7 +1,7 @@
 Firebase Mock [![Build Status](https://travis-ci.org/soumak77/firebase-mock.svg?branch=master)](https://travis-ci.org/soumak77/firebase-mock)
 ============
 
-Firebase Mock extends [mockfirebase](https://github.com/soumak77/firebase-mock) to provide support for Firebase 3.0.
+Firebase Mock extends [mockfirebase](https://github.com/katowulf/mockfirebase) to provide support for Firebase 3.0.
 
 ## Setup
 
