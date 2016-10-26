@@ -8,7 +8,6 @@ var source          = require('vinyl-source-stream');
 var buffer          = require('vinyl-buffer');
 var fs              = require('fs');
 var argv            = require('yargs').argv;
-var streamToPromise = require('stream-to-promise');
 var path            = require('path');
 var os              = require('os');
 
@@ -22,11 +21,11 @@ function version () {
 function bundle () {
   var pkg = require('./package.json');
   return browserify({
-      standalone: 'mockfirebase'
+      standalone: 'firebasemock'
     })
     .add(pkg.main)
     .bundle()
-    .pipe(source('mockfirebase.js'))
+    .pipe(source('firebasemock.js'))
     .pipe(buffer())
     .pipe(plugins.header(fs.readFileSync('./helpers/header.txt'), {
       pkg: _.extend(require('./package.json'), {
@@ -35,6 +34,16 @@ function bundle () {
     }))
     .pipe(plugins.footer(fs.readFileSync('./helpers/globals.js')));
 }
+
+var bundlePath;
+gulp.task('bundle-smoke', function () {
+  var name = Date.now() + '-firebasemock.js';
+  var dir = os.tmpdir();
+  bundlePath = path.join(dir, name);
+  return bundle()
+    .pipe(plugins.rename(name))
+    .pipe(gulp.dest(dir));
+});
 
 gulp.task('bundle', function () {
   return bundle().pipe(gulp.dest('./browser'));
@@ -76,28 +85,20 @@ gulp.task('karma', function () {
   });
 });
 
-gulp.task('smoke', function () {
-  var name = Date.now() + '-mockfirebase.js';
-  var dir = os.tmpdir();
-  var bundlePath = path.join(dir, name);
-  return streamToPromise(bundle()
-    .pipe(plugins.rename(name))
-    .pipe(gulp.dest(dir)))
-    .then(function () {
-      return require('karma-as-promised').server.start({
-        frameworks: ['mocha', 'chai'],
-        browsers: ['PhantomJS'],
-        client: {
-          args: ['--grep', argv.grep]
-        },
-        files: [
-          bundlePath,
-          'test/smoke/globals.js'
-        ],
-        autoWatch: false,
-        singleRun: true
-      });
-    });
+gulp.task('smoke', ['bundle-smoke'], function () {
+  return require('karma-as-promised').server.start({
+    frameworks: ['mocha', 'chai'],
+    browsers: ['PhantomJS'],
+    client: {
+      args: ['--grep', argv.grep]
+    },
+    files: [
+      bundlePath,
+      'test/smoke/globals.js'
+    ],
+    autoWatch: false,
+    singleRun: true
+  });
 });
 
 gulp.task('lint', function () {
@@ -120,7 +121,7 @@ gulp.task('release', ['bundle', 'bump'], function () {
   var versionString = 'v' + version();
   var message = 'Release ' + versionString;
   return plugins.shell.task([
-    'git add -f ./browser/mockfirebase.js',
+    'git add -f ./browser/firebasemock.js',
     'git add ' + pkgs.join(' '),
     'git commit -m "' + message + '"',
     'git tag ' + versionString
