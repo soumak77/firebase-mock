@@ -51,6 +51,7 @@
     "karma-chai": "~0.1.0",
     "karma-mocha": "~0.1.6",
     "karma-sinon": "~1.0.3",
+    "phantomjs-prebuilt": "^2.1.13",
     "semver": "~3.0.1",
     "sinon": "~1.10.3",
     "sinon-chai": "~2.5.0",
