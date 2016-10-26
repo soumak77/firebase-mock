@@ -18,7 +18,7 @@ ref.on('value', function (snapshot) {
 ```js
 // ./test.js
 var proxyquire   = require('proxyquire');
-var MockFirebase = require('mockfirebase').MockFirebase;
+var MockFirebase = require('firebase-mock').MockFirebase;
 var mock;
 var mySrc = proxyquire('./mySrc', {
   firebase: function (url) {

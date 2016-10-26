@@ -11,8 +11,8 @@ describe('Custom UMD Build', function () {
     window.FirebaseSimpleLogin = OriginalFirebaseSimpleLogin = {};
   });
 
-  it('exposes the full module as "mockfirebase"', function () {
-    expect(window).to.have.property('mockfirebase').that.is.an('object');
+  it('exposes the full module as "firebasemock"', function () {
+    expect(window).to.have.property('firebasemock').that.is.an('object');
   });
 
   it('exposes "MockFirebase" on the window', function () {
