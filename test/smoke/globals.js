@@ -18,13 +18,13 @@ describe('Custom UMD Build', function () {
   it('exposes "MockFirebase" on the window', function () {
     expect(window)
       .to.have.property('MockFirebase')
-      .that.equals(window.mockfirebase.MockFirebase);
+      .that.equals(window.firebasemock.MockFirebase);
   });
 
   it('exposes "MockFirebaseSimpleLogin" on the window', function () {
     expect(window)
       .to.have.property('MockFirebaseSimpleLogin')
-      .that.equals(window.mockfirebase.MockFirebaseSimpleLogin);
+      .that.equals(window.firebasemock.MockFirebaseSimpleLogin);
   });
 
   describe('#restore', function () {
@@ -58,10 +58,10 @@ describe('Custom UMD Build', function () {
       window.MockFirebase.override();
       expect(window)
         .to.have.property('Firebase')
-        .that.equals(window.mockfirebase.MockFirebase);
+        .that.equals(window.firebasemock.MockFirebase);
       expect(window)
         .to.have.property('FirebaseSimpleLogin')
-        .that.equals(window.mockfirebase.MockFirebaseSimpleLogin);
+        .that.equals(window.firebasemock.MockFirebaseSimpleLogin);
     });
 
   });

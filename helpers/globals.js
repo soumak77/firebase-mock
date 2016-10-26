@@ -1,8 +1,8 @@
 ;(function (window) {
   'use strict';
-  if (typeof window !== 'undefined' && window.mockfirebase) {
-    window.MockFirebase = window.mockfirebase.MockFirebase;
-    window.MockFirebaseSimpleLogin = window.mockfirebase.MockFirebaseSimpleLogin;
+  if (typeof window !== 'undefined' && window.firebasemock) {
+    window.MockFirebase = window.firebasemock.MockFirebase;
+    window.MockFirebaseSimpleLogin = window.firebasemock.MockFirebaseSimpleLogin;
 
     var originals = false;
     window.MockFirebase.override = function () {
@@ -10,8 +10,8 @@
         firebase: window.Firebase,
         login: window.FirebaseSimpleLogin
       };
-      window.Firebase = window.mockfirebase.MockFirebase;
-      window.FirebaseSimpleLogin = window.mockfirebase.MockFirebaseSimpleLogin;
+      window.Firebase = window.firebasemock.MockFirebase;
+      window.FirebaseSimpleLogin = window.firebasemock.MockFirebaseSimpleLogin;
     };
     window.MockFirebase.restore = function () {
       if (!originals) return;
