@@ -74,6 +74,12 @@ gulp.task('karma', function () {
       'node_modules/es5-shim/es5-shim.js',
       'test/unit/*.js'
     ],
+    plugins: [
+      'karma-phantomjs-launcher',
+      'karma-mocha',
+      'karma-sinon',
+      'karma-browserify'
+    ],
     preprocessors: {
       'test/unit/*.js': ['browserify']
     },
@@ -95,6 +101,11 @@ gulp.task('smoke', ['bundle-smoke'], function () {
     files: [
       bundlePath,
       'test/smoke/globals.js'
+    ],
+    plugins: [
+      'karma-phantomjs-launcher',
+      'karma-mocha',
+      'karma-chai'
     ],
     autoWatch: false,
     singleRun: true
