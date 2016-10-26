@@ -3,9 +3,7 @@
 var _ = require('lodash');
 
 function MockDataSnapshot (ref, data, priority) {
-  this.ref = function () {
-    return ref;
-  };
+  this.ref = ref;
   data = _.cloneDeep(data);
   if (_.isObject(data) && _.isEmpty(data)) {
     data = null;
@@ -19,9 +17,9 @@ function MockDataSnapshot (ref, data, priority) {
 }
 
 MockDataSnapshot.prototype.child = function (key) {
-  var ref = this.ref().child(key);
+  var ref = this.ref.child(key);
   var data = this.hasChild(key) ? this.val()[key] : null;
-  var priority = this.ref().child(key).priority;
+  var priority = this.ref.child(key).priority;
   return new MockDataSnapshot(ref, data, priority);
 };
 
@@ -44,7 +42,7 @@ MockDataSnapshot.prototype.hasChildren = function () {
 };
 
 MockDataSnapshot.prototype.key = function () {
-  return this.ref().key();
+  return this.ref.key();
 };
 
 MockDataSnapshot.prototype.name = function () {

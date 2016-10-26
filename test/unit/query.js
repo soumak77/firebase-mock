@@ -19,7 +19,7 @@ describe('MockQuery', function () {
   describe('#ref', function() {
 
     it('returns the ref used to create the query', function() {
-      expect(ref.limit(2).startAt('a').ref()).to.equal(ref);
+      expect(ref.limit(2).startAt('a').ref).to.equal(ref);
     });
 
   });
@@ -201,7 +201,7 @@ describe('MockQuery', function () {
         ref.child('fruit').once('value', function(list_snapshot) {
           list_snapshot.forEach(function(snapshot){
             model[snapshot.key()] = snapshot.val();
-            snapshot.ref().on('value', function(snapshot) {
+            snapshot.ref.on('value', function(snapshot) {
               model[snapshot.key()] = snapshot.val();
             });
             last_key = snapshot.key();
@@ -211,7 +211,7 @@ describe('MockQuery', function () {
             if(model[snapshot.key()] === undefined)
             {
               model[snapshot.key()] = snapshot.val();
-              snapshot.ref().on('value', function(snapshot) {
+              snapshot.ref.on('value', function(snapshot) {
                 model[snapshot.key()] = snapshot.val();
               });
             }

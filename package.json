@@ -29,7 +29,8 @@
     "browserify": "^6.3.2",
     "browserify-shim": "^3.8.0",
     "firebase-auto-ids": "~1.1.0",
-    "lodash": "~2.4.1"
+    "lodash": "~2.4.1",
+    "rsvp": "^3.3.3"
   },
   "devDependencies": {
     "chai": "~1.9.1",

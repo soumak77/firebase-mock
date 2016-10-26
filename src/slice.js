@@ -5,8 +5,8 @@ var Snapshot = require('./snapshot');
 var utils    = require('./utils');
 
 function Slice (queue, snap) {
-  var data = snap? snap.val() : queue.ref().getData();
-  this.ref = snap? snap.ref() : queue.ref();
+  var data = snap? snap.val() : queue.ref.getData();
+  this.ref = snap? snap.ref : queue.ref;
   this.priority = snap? snap.getPriority() : this.ref.priority;
   this.pris = {};
   this.data = {};

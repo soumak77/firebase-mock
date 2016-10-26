@@ -11,6 +11,7 @@ var Auth     = require('./auth');
 var validate = require('./validators');
 
 function MockFirebase (path, data, parent, name) {
+  this.ref = this;
   this.path = path || 'Mock://';
   this.errs = {};
   this.priority = null;
@@ -198,10 +199,6 @@ MockFirebase.prototype.name = function () {
   return this.key.apply(this, arguments);
 };
 
-MockFirebase.prototype.ref = function () {
-  return this;
-};
-
 MockFirebase.prototype.parent = function () {
   return this.parentRef;
 };
@@ -299,7 +296,7 @@ MockFirebase.prototype.off = function (event, callback, context) {
       });
     }
     else {
-      this._events[event] = [];      
+      this._events[event] = [];
     }
   }
 };
@@ -376,7 +373,7 @@ MockFirebase.prototype._dataChanged = function (unparsedData) {
       keysToChange.forEach(function(key) {
         var childData = unparsedData[key];
           if (utils.isServerTimestamp(childData)) {
-            childData = getServerTime();  
+            childData = getServerTime();
           }
         this._updateOrAdd(key, childData, events);
       }, this);

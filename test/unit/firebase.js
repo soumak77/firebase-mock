@@ -199,7 +199,7 @@ describe('MockFirebase', function () {
       ref.flush();
       expect(spy.callCount).to.equal(1);
       var snapshot = spy.firstCall.args[0];
-      expect(snapshot.ref()).to.equal(ref);
+      expect(snapshot.ref).to.equal(ref);
       expect(snapshot.val()).to.deep.equal(data);
       expect(snapshot.getPriority()).to.equal(null);
     });
@@ -215,7 +215,7 @@ describe('MockFirebase', function () {
       ref.flush();
       expect(spy.callCount).to.equal(1);
       var snapshot = spy.firstCall.args[0];
-      expect(snapshot.ref()).to.equal(ref.child('theKey'));
+      expect(snapshot.ref).to.equal(ref.child('theKey'));
       expect(spy.firstCall.args[1]).to.equal('prevChild');
       expect(snapshot.getPriority()).to.equal(1);
     });
@@ -270,7 +270,7 @@ describe('MockFirebase', function () {
   describe('#ref', function () {
 
     it('returns itself', function () {
-      expect(ref.ref()).to.equal(ref);
+      expect(ref.ref).to.equal(ref);
     });
 
   });

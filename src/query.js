@@ -6,22 +6,20 @@ var utils    = require('./utils');
 var validate = require('./validators');
 
 function MockQuery (ref) {
-  this.ref = function () {
-    return ref;
-  };
+  this.ref = ref;
   this._events = [];
   // startPri, endPri, startKey, endKey, and limit
   this._q = {};
 }
 
 MockQuery.prototype.flush = function () {
-  var ref = this.ref();
+  var ref = this.ref;
   ref.flush.apply(ref, arguments);
   return this;
 };
 
 MockQuery.prototype.autoFlush = function () {
-  var ref = this.ref();
+  var ref = this.ref;
   ref.autoFlush.apply(ref, arguments);
   return this;
 };
@@ -57,7 +55,7 @@ MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
   var lastSlice = this.slice();
   var map;
   function handleRefEvent (snap, prevChild) {
-    var slice = new Slice(self, event === 'value' ? snap : utils.makeRefSnap(snap.ref().parent()));
+    var slice = new Slice(self, event === 'value' ? snap : utils.makeRefSnap(snap.ref.parent()));
     switch (event) {
       case 'value':
         if (isFirst || !lastSlice.equals(slice)) {
@@ -104,11 +102,11 @@ MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
     lastSlice = slice;
   }
   this._events.push([event, callback, context, handleRefEvent]);
-  this.ref().on(event, handleRefEvent, _.bind(cancelCallback, context));
+  this.ref.on(event, handleRefEvent, _.bind(cancelCallback, context));
 };
 
 MockQuery.prototype.off = function (event, callback, context) {
-  var ref = this.ref();
+  var ref = this.ref;
   _.each(this._events, function (parts) {
     if( parts[0] === event && parts[1] === callback && parts[2] === context ) {
       ref.off(event, parts[3]);
@@ -133,21 +131,21 @@ MockQuery.prototype.limit = function (intVal) {
   if( typeof intVal !== 'number' ) {
     throw new Error('Query.limit: First argument must be a positive integer.');
   }
-  var q = new MockQuery(this.ref());
+  var q = new MockQuery(this.ref);
   _.extend(q._q, this._q, {limit: intVal});
   return q;
 };
 
 MockQuery.prototype.startAt = function (priority, key) {
   assertQuery('Query.startAt', priority, key);
-  var q = new MockQuery(this.ref());
+  var q = new MockQuery(this.ref);
   _.extend(q._q, this._q, {startKey: key, startPri: priority});
   return q;
 };
 
 MockQuery.prototype.endAt = function (priority, key) {
   assertQuery('Query.endAt', priority, key);
-  var q = new MockQuery(this.ref());
+  var q = new MockQuery(this.ref);
   _.extend(q._q, this._q, {endKey: key, endPri: priority});
   return q;
 };

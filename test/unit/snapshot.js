@@ -15,7 +15,7 @@ describe('DataSnapshot', function () {
   describe('#ref', function () {
 
     it('returns the reference', function () {
-      expect(new Snapshot(ref).ref()).to.equal(ref);
+      expect(new Snapshot(ref).ref).to.equal(ref);
     });
 
   });
@@ -53,7 +53,7 @@ describe('DataSnapshot', function () {
     it('generates a snapshot for a child ref', function () {
       var parent = new Snapshot(ref);
       var child = parent.child('key');
-      expect(parent.ref().child('key')).to.equal(child.ref());
+      expect(parent.ref.child('key')).to.equal(child.ref);
     });
 
     it('uses child data', function () {
