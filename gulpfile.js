@@ -135,6 +135,8 @@ gulp.task('release', ['bundle', 'bump'], function () {
     'git add -f ./browser/firebasemock.js',
     'git add ' + pkgs.join(' '),
     'git commit -m "' + message + '"',
-    'git tag ' + versionString
+    'git tag ' + versionString,
+    'git push',
+    'git push --tags'
   ])();
 });
