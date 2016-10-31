@@ -5,7 +5,9 @@
   "main": "./src",
   "scripts": {
     "test": "gulp lint && gulp test",
-    "prepublish": "gulp release"
+    "publish-patch": "gulp release",
+    "publish-minor": "gulp release --type minor",
+    "publish-major": "gulp release --type major"
   },
   "repository": {
     "type": "git",
