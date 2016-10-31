@@ -179,7 +179,7 @@ describe('MockQuery', function () {
         query.flush();
         expect(spy).callCount(4);
         _.each(_.keys(data), function(k, i) {
-          expect(spy.getCall(i).args[0].key()).equals(k);
+          expect(spy.getCall(i).args[0].key).equals(k);
         });
       });
 
@@ -200,19 +200,19 @@ describe('MockQuery', function () {
         var last_key = null;
         ref.child('fruit').once('value', function(list_snapshot) {
           list_snapshot.forEach(function(snapshot){
-            model[snapshot.key()] = snapshot.val();
+            model[snapshot.key] = snapshot.val();
             snapshot.ref.on('value', function(snapshot) {
-              model[snapshot.key()] = snapshot.val();
+              model[snapshot.key] = snapshot.val();
             });
-            last_key = snapshot.key();
+            last_key = snapshot.key;
           });
 
           ref.child('fruit').startAt(null, last_key).on('child_added', function(snapshot) {
-            if(model[snapshot.key()] === undefined)
+            if(model[snapshot.key] === undefined)
             {
-              model[snapshot.key()] = snapshot.val();
+              model[snapshot.key] = snapshot.val();
               snapshot.ref.on('value', function(snapshot) {
-                model[snapshot.key()] = snapshot.val();
+                model[snapshot.key] = snapshot.val();
               });
             }
           }, undefined, this);
@@ -220,7 +220,7 @@ describe('MockQuery', function () {
 
         var third_ref = ref.child('fruit').push(third_value);
 
-        expect(model[third_ref.key()]).to.equal(third_value);
+        expect(model[third_ref.key]).to.equal(third_value);
 
       });
     });

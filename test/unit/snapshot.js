@@ -138,7 +138,9 @@ describe('DataSnapshot', function () {
   describe('#key', function () {
 
     it('returns the ref key', function () {
-      expect(new Snapshot(ref).key()).to.equal(ref.key());
+      var parent = new Snapshot(ref);
+      var child = parent.child('aChild');
+      expect(new Snapshot(child).key).to.equal(child.key);
     });
 
   });
@@ -147,7 +149,7 @@ describe('DataSnapshot', function () {
 
     it('passes through to #key', function () {
       var snapshot = new Snapshot(ref);
-      expect(snapshot.key()).to.equal(snapshot.name());
+      expect(snapshot.key).to.equal(snapshot.name());
     });
 
   });
