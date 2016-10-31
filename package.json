@@ -1,10 +1,11 @@
 {
   "name": "firebase-mock",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Firebase mock library for writing unit tests",
   "main": "./src",
   "scripts": {
-    "test": "gulp lint && gulp test"
+    "test": "gulp lint && gulp test",
+    "prepublish": "gulp release"
   },
   "repository": {
     "type": "git",

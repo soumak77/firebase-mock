@@ -1,4 +1,4 @@
-/** firebase-mock - v1.0.0
+/** firebase-mock - v1.0.1
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -12731,6 +12731,7 @@ function MockFirebase (path, data, parent, name) {
   this.errs = {};
   this.priority = null;
   this.myName = parent ? name : extractName(path);
+  this.key = this.myName;
   this.flushDelay = parent ? parent.flushDelay : false;
   this.queue = parent ? parent.queue : new Queue();
   this._events = {
@@ -12742,7 +12743,7 @@ function MockFirebase (path, data, parent, name) {
   };
   this.parentRef = parent || null;
   this.children = {};
-  if (parent) parent.children[this.key()] = this;
+  if (parent) parent.children[this.key] = this;
   this.sortedDataKeys = [];
   this.data = null;
   this._dataChanged(_.cloneDeep(data) || null);
@@ -12859,7 +12860,7 @@ MockFirebase.prototype.child = function (childPath) {
   var child = this.children[childKey];
   if (!child) {
     child = new MockFirebase(utils.mergePaths(this.path, childKey), this._childData(childKey), this, childKey);
-    this.children[child.key()] = child;
+    this.children[child.key] = child;
   }
   if (parts.length) {
     child = child.child(parts.join('/'));
@@ -12904,14 +12905,10 @@ MockFirebase.prototype.setWithPriority = function (data, pri, callback) {
   this.set(data, callback);
 };
 
-MockFirebase.prototype.key = function () {
-  return this.myName;
-};
-
 /* istanbul ignore next */
 MockFirebase.prototype.name = function () {
-  console.warn('ref.name() is deprecated. Use ref.key()');
-  return this.key.apply(this, arguments);
+  console.warn('ref.name() is deprecated. Use ref.key');
+  return this.key;
 };
 
 MockFirebase.prototype.parent = function () {
@@ -13047,7 +13044,7 @@ MockFirebase.prototype.endAt = function (priority, key) {
 
 MockFirebase.prototype._childChanged = function (ref) {
   var events = [];
-  var childKey = ref.key();
+  var childKey = ref.key;
   var data = ref.getData();
   if( data === null ) {
     this._removeChild(childKey, events);
@@ -13109,7 +13106,7 @@ MockFirebase.prototype._priChanged = function (newPriority) {
   }
   this.priority = newPriority;
   if( this.parentRef ) {
-    this.parentRef._resort(this.key());
+    this.parentRef._resort(this.key);
   }
 };
 
@@ -13681,8 +13678,8 @@ MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
         }
         break;
       case 'child_moved':
-        var x = slice.pos(snap.key());
-        var y = slice.insertPos(snap.key());
+        var x = slice.pos(snap.key);
+        var y = slice.insertPos(snap.key);
         if (x > -1 && y > -1) {
           callback.call(context, snap, prevChild);
         }
@@ -13691,7 +13688,7 @@ MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
         }
         break;
       case 'child_added':
-        if (slice.has(snap.key()) && lastSlice.has(snap.key())) {
+        if (slice.has(snap.key) && lastSlice.has(snap.key)) {
           // is a child_added for existing event so allow it
           callback.call(context, snap, prevChild);
         }
@@ -14049,6 +14046,7 @@ var _ = require('lodash');
 
 function MockDataSnapshot (ref, data, priority) {
   this.ref = ref;
+  this.key = ref.key;
   data = _.cloneDeep(data);
   if (_.isObject(data) && _.isEmpty(data)) {
     data = null;
@@ -14086,13 +14084,9 @@ MockDataSnapshot.prototype.hasChildren = function () {
   return !!this.numChildren();
 };
 
-MockDataSnapshot.prototype.key = function () {
-  return this.ref.key();
-};
-
 MockDataSnapshot.prototype.name = function () {
-  console.warn('DataSnapshot.name() is deprecated. Use DataSnapshot.key()');
-  return this.key.apply(this, arguments);
+  console.warn('DataSnapshot.name() is deprecated. Use DataSnapshot.key');
+  return this.key;
 };
 
 MockDataSnapshot.prototype.numChildren = function () {
