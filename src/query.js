@@ -63,8 +63,8 @@ MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
         }
         break;
       case 'child_moved':
-        var x = slice.pos(snap.key());
-        var y = slice.insertPos(snap.key());
+        var x = slice.pos(snap.key);
+        var y = slice.insertPos(snap.key);
         if (x > -1 && y > -1) {
           callback.call(context, snap, prevChild);
         }
@@ -73,7 +73,7 @@ MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
         }
         break;
       case 'child_added':
-        if (slice.has(snap.key()) && lastSlice.has(snap.key())) {
+        if (slice.has(snap.key) && lastSlice.has(snap.key)) {
           // is a child_added for existing event so allow it
           callback.call(context, snap, prevChild);
         }

@@ -4,6 +4,7 @@ var _ = require('lodash');
 
 function MockDataSnapshot (ref, data, priority) {
   this.ref = ref;
+  this.key = ref.key;
   data = _.cloneDeep(data);
   if (_.isObject(data) && _.isEmpty(data)) {
     data = null;
@@ -41,13 +42,9 @@ MockDataSnapshot.prototype.hasChildren = function () {
   return !!this.numChildren();
 };
 
-MockDataSnapshot.prototype.key = function () {
-  return this.ref.key();
-};
-
 MockDataSnapshot.prototype.name = function () {
-  console.warn('DataSnapshot.name() is deprecated. Use DataSnapshot.key()');
-  return this.key.apply(this, arguments);
+  console.warn('DataSnapshot.name() is deprecated. Use DataSnapshot.key');
+  return this.key;
 };
 
 MockDataSnapshot.prototype.numChildren = function () {
