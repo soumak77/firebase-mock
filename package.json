@@ -5,9 +5,9 @@
   "main": "./src",
   "scripts": {
     "test": "gulp lint && gulp test",
-    "publish-patch": "gulp release",
-    "publish-minor": "gulp release --type minor",
-    "publish-major": "gulp release --type major"
+    "publish-patch": "gulp release && npm publish",
+    "publish-minor": "gulp release --type minor && npm publish",
+    "publish-major": "gulp release --type major && npm publish"
   },
   "repository": {
     "type": "git",
