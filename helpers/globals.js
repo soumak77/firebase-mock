@@ -1,36 +1,36 @@
 ;(function (window) {
   'use strict';
-  if (typeof window !== 'undefined' && window.mockfirebase) {
-    window.MockFirebase = window.mockfirebase.MockFirebase;
-    window.MockFirebaseSimpleLogin = window.mockfirebase.MockFirebaseSimpleLogin;
+  if (typeof window !== 'undefined' && window.firebasemock) {
+    window.MockFirebase = window.firebasemock.MockFirebase;
+    window.MockFirebaseSimpleLogin = window.firebasemock.MockFirebaseSimpleLogin;
 
-    window.mockfirebase.MockFirebaseSdk = {
+    window.firebasemock.MockFirebaseSdk = {
       database: function() {
         return {
           ref: function(path) {
-            return new window.mockfirebase.MockFirebase(path);
+            return new window.firebasemock.MockFirebase(path);
           },
           refFromURL: function(url) {
-            return new window.mockfirebase.MockFirebase(url);
+            return new window.firebasemock.MockFirebase(url);
           }
         };
       },
       auth: function() {
-        var auth = new window.mockfirebase.MockFirebase();
+        var auth = new window.firebasemock.MockFirebase();
         delete auth.ref;
         return auth;
       }
     };
-    window.mockfirebase.MockFirebaseSdk.auth.GoogleAuthProvider = function() {
+    window.firebasemock.MockFirebaseSdk.auth.GoogleAuthProvider = function() {
       this.providerId = "google.com";
     };
-    window.mockfirebase.MockFirebaseSdk.auth.TwitterAuthProvider = function() {
+    window.firebasemock.MockFirebaseSdk.auth.TwitterAuthProvider = function() {
       this.providerId = "twitter.com";
     };
-    window.mockfirebase.MockFirebaseSdk.auth.FacebookAuthProvider = function() {
+    window.firebasemock.MockFirebaseSdk.auth.FacebookAuthProvider = function() {
       this.providerId = "facebook.com";
     };
-    window.mockfirebase.MockFirebaseSdk.auth.GithubAuthProvider = function() {
+    window.firebasemock.MockFirebaseSdk.auth.GithubAuthProvider = function() {
       this.providerId = "github.com";
     };
 
@@ -41,9 +41,9 @@
         firebase: window.Firebase,
         login: window.FirebaseSimpleLogin
       };
-      window.firebase = window.mockfirebase.MockFirebaseSdk;
-      window.Firebase = window.mockfirebase.MockFirebase;
-      window.FirebaseSimpleLogin = window.mockfirebase.MockFirebaseSimpleLogin;
+      window.firebase = window.firebasemock.MockFirebaseSdk;
+      window.Firebase = window.firebasemock.MockFirebase;
+      window.FirebaseSimpleLogin = window.firebasemock.MockFirebaseSimpleLogin;
     };
     window.MockFirebase.restore = function () {
       if (!originals) return;
