@@ -269,8 +269,12 @@ describe('MockFirebase', function () {
 
   describe('#ref', function () {
 
-    it('returns itself', function () {
-      expect(ref.ref).to.equal(ref);
+    it('returns itself without arguments', function () {
+      expect(ref.ref()).to.equal(ref);
+    });
+
+    it('behaves like #child with a path', function () {
+      expect(ref.ref('foo')).to.equal(ref.child('foo'));
     });
 
   });

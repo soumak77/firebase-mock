@@ -11,7 +11,6 @@ var Auth     = require('./auth');
 var validate = require('./validators');
 
 function MockFirebase (path, data, parent, name) {
-  this.ref = this;
   this.path = path || 'Mock://';
   this.errs = {};
   this.priority = null;
@@ -151,6 +150,15 @@ MockFirebase.prototype.child = function (childPath) {
     child = child.child(parts.join('/'));
   }
   return child;
+};
+
+MockFirebase.prototype.ref = function (childPath) {
+  if (childPath === undefined) {
+    return this;
+  }
+  else {
+    return this.child(childPath);
+  }
 };
 
 MockFirebase.prototype.set = function (data, callback) {
