@@ -22,7 +22,7 @@ var log = {
 };
 var people = {
   ref: function () {
-    return new Firebase('htttps://example.firebaseio.com/people')
+    return firebase.database().ref()
   },
   create: function (person) {
     people.ref().push(person, function (err) {
