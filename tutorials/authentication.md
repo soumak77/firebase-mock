@@ -11,7 +11,7 @@ In this example, we'll create a new user via our source code and test that he is
 ```js
 var users = {
   ref: function () {
-    return new Firebase('https://example.firebaseio.com');
+    return firebase.database().ref();
   }
   create: function (credentials, callback) {
     users.ref().createUser(credentials, callback);
