@@ -5,6 +5,18 @@ MockFirebase [![Build Status](https://travis-ci.org/katowulf/mockfirebase.svg?br
 
 ## Setup
 
+### Karma/Jasmine
+
+```bash
+$ npm install mockfirebase
+```
+
+```js
+files: [ 
+    'www/lib/firebase-mock/browser/firebasemock.js'
+]
+```
+
 ### Node/Browserify
 
 ```bash
