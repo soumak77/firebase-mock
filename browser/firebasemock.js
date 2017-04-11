@@ -1,4 +1,4 @@
-/** firebase-mock - v1.0.3
+/** firebase-mock - v1.0.4
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -6,10 +6,11 @@ https://github.com/soumak77/firebase-mock
 'use strict';
 
 exports.MockFirebase = require('./firebase');
+exports.MockFirebaseSdk = require('./sdk');
 /** @deprecated */
 exports.MockFirebaseSimpleLogin = require('./login');
 
-},{"./firebase":20,"./login":21}],2:[function(require,module,exports){
+},{"./firebase":20,"./login":21,"./sdk":24}],2:[function(require,module,exports){
 (function (Buffer){
 (function(){
   var crypt = require('crypt'),
@@ -13304,7 +13305,7 @@ function extractName(path) {
 
 module.exports = MockFirebase;
 
-},{"./auth":19,"./query":22,"./queue":23,"./snapshot":25,"./utils":26,"./validators":27,"assert":5,"firebase-auto-ids":16,"lodash":17}],21:[function(require,module,exports){
+},{"./auth":19,"./query":22,"./queue":23,"./snapshot":26,"./utils":27,"./validators":28,"assert":5,"firebase-auto-ids":16,"lodash":17}],21:[function(require,module,exports){
 'use strict';
 
 var _   = require('lodash');
@@ -13776,7 +13777,7 @@ function assertQuery (method, pri, key) {
 
 module.exports = MockQuery;
 
-},{"./slice":24,"./utils":26,"./validators":27,"lodash":17}],23:[function(require,module,exports){
+},{"./slice":25,"./utils":27,"./validators":28,"lodash":17}],23:[function(require,module,exports){
 'use strict';
 
 var _            = require('lodash');
@@ -13853,6 +13854,51 @@ exports.Queue = FlushQueue;
 exports.Event = FlushEvent;
 
 },{"events":10,"lodash":17,"util":14}],24:[function(require,module,exports){
+var MockFirebase = require('./firebase');
+
+function MockFirebaseAuth() {
+  var auth = new MockFirebase();
+  delete auth.ref;
+  return auth;
+}
+MockFirebaseAuth.GoogleAuthProvider = function() {
+  this.providerId = "google.com";
+};
+MockFirebaseAuth.TwitterAuthProvider = function() {
+  this.providerId = "twitter.com";
+};
+MockFirebaseAuth.FacebookAuthProvider = function() {
+  this.providerId = "facebook.com";
+};
+MockFirebaseAuth.GithubAuthProvider = function() {
+  this.providerId = "github.com";
+};
+
+function MockFirebaseDatabase() {
+  return {
+    ref: function(path) {
+      return new MockFirebase(path);
+    },
+    refFromURL: function(url) {
+      return new MockFirebase(url);
+    }
+  };
+}
+
+module.exports = {
+  database: MockFirebaseDatabase,
+  auth: MockFirebaseAuth,
+  initializeApp: function() {
+    return {
+      database: MockFirebaseDatabase,
+      auth: MockFirebaseAuth,
+      messaging: function() {},
+      storage: function() {}
+    };
+  }
+};
+
+},{"./firebase":20}],25:[function(require,module,exports){
 'use strict';
 
 var _        = require('lodash');
@@ -14039,7 +14085,7 @@ Slice.prototype._build = function(ref, rawData) {
 
 module.exports = Slice;
 
-},{"./snapshot":25,"./utils":26,"lodash":17}],25:[function(require,module,exports){
+},{"./snapshot":26,"./utils":27,"lodash":17}],26:[function(require,module,exports){
 'use strict';
 
 var _ = require('lodash');
@@ -14124,7 +14170,7 @@ function isValue (value) {
 
 module.exports = MockDataSnapshot;
 
-},{"lodash":17}],26:[function(require,module,exports){
+},{"lodash":17}],27:[function(require,module,exports){
 'use strict';
 
 var Snapshot = require('./snapshot');
@@ -14201,7 +14247,7 @@ exports.isServerTimestamp = function isServerTimestamp (data) {
   return _.isObject(data) && data['.sv'] === 'timestamp';
 };
 
-},{"./snapshot":25,"lodash":17}],27:[function(require,module,exports){
+},{"./snapshot":26,"lodash":17}],28:[function(require,module,exports){
 'use strict';
 
 var assert = require('assert');
@@ -14219,37 +14265,8 @@ exports.event = function (name) {
   'use strict';
   if (typeof window !== 'undefined' && window.firebasemock) {
     window.MockFirebase = window.firebasemock.MockFirebase;
+    window.MockFirebaseSdk = window.firebasemock.MockFirebaseSdk;
     window.MockFirebaseSimpleLogin = window.firebasemock.MockFirebaseSimpleLogin;
-
-    window.firebasemock.MockFirebaseSdk = {
-      database: function() {
-        return {
-          ref: function(path) {
-            return new window.firebasemock.MockFirebase(path);
-          },
-          refFromURL: function(url) {
-            return new window.firebasemock.MockFirebase(url);
-          }
-        };
-      },
-      auth: function() {
-        var auth = new window.firebasemock.MockFirebase();
-        delete auth.ref;
-        return auth;
-      }
-    };
-    window.firebasemock.MockFirebaseSdk.auth.GoogleAuthProvider = function() {
-      this.providerId = "google.com";
-    };
-    window.firebasemock.MockFirebaseSdk.auth.TwitterAuthProvider = function() {
-      this.providerId = "twitter.com";
-    };
-    window.firebasemock.MockFirebaseSdk.auth.FacebookAuthProvider = function() {
-      this.providerId = "facebook.com";
-    };
-    window.firebasemock.MockFirebaseSdk.auth.GithubAuthProvider = function() {
-      this.providerId = "github.com";
-    };
 
     var originals = false;
     window.MockFirebase.override = function () {
