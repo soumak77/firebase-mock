@@ -41,10 +41,8 @@ var myFunction    = proxyquire('./myFunction', {
   firebase: mocksdk
 });
 
-var abeRef = mockdatabase.child('myRefUrl').push();
-abeRef.set({ name: 'abe' });
-var bobRef = mockdatabase.child('myRefUrl').push();
-bobRef.set({ name: 'bob' });
+mockdatabase.child('myRefUrl').child('key1').set({ name: 'abe' });
+mockdatabase.child('myRefUrl').child('key2').set({ name: 'bob' });
 mock.flush();
 
 // The mocks for orderByChild and equalTo will return the entire dataset at the current reference.
@@ -61,9 +59,11 @@ sinon.stub(mockdatabase.child('myRefUrl'), 'orderByChild', function() {
         once: function() {
           return Promise.resolve({
             val: function() {
-              var data = {};
-              data[bobRef.key] = { name: 'bob' };
-              return data;
+              return {
+                key1: {
+                  name: 'bob'
+                }
+              };
             }
           });
         }
