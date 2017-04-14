@@ -43,12 +43,12 @@ var myFunction    = proxyquire('./myFunction', {
 
 mockdatabase.child('myRefUrl').child('key1').set({ name: 'abe' });
 mockdatabase.child('myRefUrl').child('key2').set({ name: 'bob' });
-mock.flush();
+mockdatabase.flush();
 
 // The mocks for orderByChild and equalTo will return the entire dataset at the current reference.
 // This causes myFunction to log the value 2 without any spies being configured
 myFunction();
-mock.flush(); // logs "Total keys: 2"
+mockdatabase.flush(); // logs "Total keys: 2"
 
 // We can stub out the orderByChild so that it returns the data we need in our source code.
 // This causes myFunction to log the value 1 since our spy is configured to only return the matched data.
