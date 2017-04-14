@@ -17,7 +17,7 @@ module.exports = function() {
   var query = ref.orderByChild('name').equalTo('bob');
   query.once('value', function (snapshot) {
     var keys = Object.keys(snapshot.val());
-    console.log(keys.length);
+    console.log("Total keys: " + keys.length);
   });
 }
 ```
@@ -50,7 +50,7 @@ mock.flush();
 // The mocks for orderByChild and equalTo will return the entire dataset at the current reference.
 // This causes myFunction to log the value 2 without any spies being configured
 myFunction();
-mock.flush();
+mock.flush(); // logs "Total keys: 2"
 
 // We can stub out the orderByChild so that it returns the data we need in our source code.
 // This causes myFunction to log the value 1 since our spy is configured to only return the matched data.
@@ -72,5 +72,5 @@ sinon.stub(mockdatabase, 'orderByChild', function() {
   };
 });
 myFunction();
-mock.flush();
+mock.flush(); // logs "Total keys: 1"
 ```
