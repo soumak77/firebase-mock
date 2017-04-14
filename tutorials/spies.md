@@ -60,7 +60,7 @@ sinon.stub(mockdatabase.child('myRefUrl'), 'orderByChild', function() {
           return Promise.resolve({
             val: function() {
               return {
-                key1: {
+                key2: {
                   name: 'bob'
                 }
               };
