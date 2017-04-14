@@ -52,7 +52,7 @@ mock.flush(); // logs "Total keys: 2"
 
 // We can stub out the orderByChild so that it returns the data we need in our source code.
 // This causes myFunction to log the value 1 since our spy is configured to only return the matched data.
-sinon.stub(mockdatabase.child('myRefUrl'), 'orderByChild', function() {
+sinon.stub(mockdatabase.child('myRefUrl'), 'orderByChild').callsFake(function() {
   return {
     equalTo: function() {
       return {
