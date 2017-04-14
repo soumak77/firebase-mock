@@ -1,4 +1,4 @@
-/** firebase-mock - v1.0.5
+/** firebase-mock - v1.0.6
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -12763,6 +12763,7 @@ module.exports = FirebaseAuth;
 
 var _        = require('lodash');
 var assert   = require('assert');
+var rsvp     = require('rsvp');
 var autoId   = require('firebase-auto-ids');
 var Query    = require('./query');
 var Snapshot = require('./snapshot');
@@ -12987,19 +12988,28 @@ MockFirebase.prototype.once = function (event, callback, cancel, context) {
     cancel = _.noop;
   }
   cancel = cancel || _.noop;
-  var err = this._nextErr('once');
-  if (err) {
-    this._defer('once', _.toArray(arguments), function () {
-      cancel.call(context, err);
-    });
-  }
-  else {
-    var fn = _.bind(function (snapshot) {
-      this.off(event, fn, context);
-      callback.call(context, snapshot);
-    }, this);
-    this._on('once', event, fn, cancel, context);
-  }
+  var self = this;
+  return new rsvp.Promise(function(resolve, reject) {
+    var err = self._nextErr('once');
+    if (err) {
+      self._defer('once', _.toArray(arguments), function () {
+        if (cancel) {
+          cancel.call(context, err);
+        }
+        reject(err);
+      });
+    }
+    else {
+      var fn = _.bind(function (snapshot) {
+        self.off(event, fn, context);
+        if (callback) {
+          callback.call(context, snapshot);
+        }
+        resolve(snapshot);
+      }, self);
+      self._on('once', event, fn, cancel, context);
+    }
+  });
 };
 
 MockFirebase.prototype.remove = function (callback) {
@@ -13072,12 +13082,40 @@ MockFirebase.prototype.transaction = function (valueFn, finishedFn, applyLocally
   return [valueFn, finishedFn, applyLocally];
 };
 
-MockFirebase.prototype./**
+/**
  * Just a stub at this point.
  * @param {int} limit
  */
-limit = function (limit) {
+MockFirebase.prototype.limit = function (limit) {
   return new Query(this).limit(limit);
+};
+
+/**
+ * Just a stub so it can be spied on during testing
+ */
+MockFirebase.prototype.orderByChild = function (child) {
+  return new Query(this);
+};
+
+/**
+ * Just a stub so it can be spied on during testing
+ */
+MockFirebase.prototype.orderByKey = function (key) {
+ return new Query(this);
+};
+
+/**
+ * Just a stub so it can be spied on during testing
+ */
+MockFirebase.prototype.orderByPriority = function (property) {
+ return new Query(this);
+};
+
+/**
+ * Just a stub so it can be spied on during testing
+ */
+MockFirebase.prototype.orderByValue = function (value) {
+ return new Query(this);
 };
 
 MockFirebase.prototype.startAt = function (priority, key) {
@@ -13350,7 +13388,7 @@ function extractName(path) {
 
 module.exports = MockFirebase;
 
-},{"./auth":19,"./query":22,"./queue":23,"./snapshot":26,"./utils":27,"./validators":28,"assert":5,"firebase-auto-ids":16,"lodash":17}],21:[function(require,module,exports){
+},{"./auth":19,"./query":22,"./queue":23,"./snapshot":26,"./utils":27,"./validators":28,"assert":5,"firebase-auto-ids":16,"lodash":17,"rsvp":18}],21:[function(require,module,exports){
 'use strict';
 
 var _   = require('lodash');
@@ -13665,6 +13703,7 @@ var _        = require('lodash');
 var Slice    = require('./slice');
 var utils    = require('./utils');
 var validate = require('./validators');
+var rsvp     = require('rsvp');
 
 function MockQuery (ref) {
   this.ref = ref;
@@ -13778,14 +13817,19 @@ MockQuery.prototype.off = function (event, callback, context) {
 MockQuery.prototype.once = function (event, callback, context) {
   validate.event(event);
   var self = this;
-  // once is tricky because we want the first match within our range
-  // so we use the on() method above which already does the needed legwork
-  function fn() {
-    self.off(event, fn);
-    // the snap is already sliced in on() so we can just pass it on here
-    callback.apply(context, arguments);
-  }
-  self.on(event, fn);
+  return new rsvp.Promise(function(resolve, reject) {
+    // once is tricky because we want the first match within our range
+    // so we use the on() method above which already does the needed legwork
+    function fn() {
+      self.off(event, fn);
+      // the snap is already sliced in on() so we can just pass it on here
+      if (callback) {
+        callback.apply(context, arguments[0]);
+      }
+      resolve(arguments[0]);
+    }
+    self.on(event, fn, reject);
+  });
 };
 
 MockQuery.prototype.limit = function (intVal) {
@@ -13794,6 +13838,12 @@ MockQuery.prototype.limit = function (intVal) {
   }
   var q = new MockQuery(this.ref);
   _.extend(q._q, this._q, {limit: intVal});
+  return q;
+};
+
+MockQuery.prototype.equalTo = function () {
+  var q = new MockQuery(this.ref);
+  _.extend(q._q, this._q);
   return q;
 };
 
@@ -13822,7 +13872,7 @@ function assertQuery (method, pri, key) {
 
 module.exports = MockQuery;
 
-},{"./slice":25,"./utils":27,"./validators":28,"lodash":17}],23:[function(require,module,exports){
+},{"./slice":25,"./utils":27,"./validators":28,"lodash":17,"rsvp":18}],23:[function(require,module,exports){
 'use strict';
 
 var _            = require('lodash');
@@ -13901,47 +13951,51 @@ exports.Event = FlushEvent;
 },{"events":10,"lodash":17,"util":14}],24:[function(require,module,exports){
 var MockFirebase = require('./firebase');
 
-function MockFirebaseAuth() {
-  var auth = new MockFirebase();
-  delete auth.ref;
-  return auth;
-}
-MockFirebaseAuth.GoogleAuthProvider = function() {
-  this.providerId = "google.com";
-};
-MockFirebaseAuth.TwitterAuthProvider = function() {
-  this.providerId = "twitter.com";
-};
-MockFirebaseAuth.FacebookAuthProvider = function() {
-  this.providerId = "facebook.com";
-};
-MockFirebaseAuth.GithubAuthProvider = function() {
-  this.providerId = "github.com";
-};
+function MockFirebaseSdk(createDatabase, createAuth) {
+  function MockFirebaseAuth() {
+    var auth = createAuth ? createAuth() : new MockFirebase();
+    delete auth.ref;
+    return auth;
+  }
+  MockFirebaseAuth.GoogleAuthProvider = function() {
+    this.providerId = "google.com";
+  };
+  MockFirebaseAuth.TwitterAuthProvider = function() {
+    this.providerId = "twitter.com";
+  };
+  MockFirebaseAuth.FacebookAuthProvider = function() {
+    this.providerId = "facebook.com";
+  };
+  MockFirebaseAuth.GithubAuthProvider = function() {
+    this.providerId = "github.com";
+  };
 
-function MockFirebaseDatabase() {
+  function MockFirebaseDatabase() {
+    return {
+      ref: function(path) {
+        return createDatabase ? createDatabase(path) : new MockFirebase(path);
+      },
+      refFromURL: function(url) {
+        return createDatabase ? createDatabase(url) : new MockFirebase(url);
+      }
+    };
+  }
+
   return {
-    ref: function(path) {
-      return new MockFirebase(path);
-    },
-    refFromURL: function(url) {
-      return new MockFirebase(url);
+    database: MockFirebaseDatabase,
+    auth: MockFirebaseAuth,
+    initializeApp: function() {
+      return {
+        database: MockFirebaseDatabase,
+        auth: MockFirebaseAuth,
+        messaging: function() {},
+        storage: function() {}
+      };
     }
   };
 }
 
-module.exports = {
-  database: MockFirebaseDatabase,
-  auth: MockFirebaseAuth,
-  initializeApp: function() {
-    return {
-      database: MockFirebaseDatabase,
-      auth: MockFirebaseAuth,
-      messaging: function() {},
-      storage: function() {}
-    };
-  }
-};
+module.exports = MockFirebaseSdk;
 
 },{"./firebase":20}],25:[function(require,module,exports){
 'use strict';
@@ -14320,7 +14374,7 @@ exports.event = function (name) {
         firebase: window.Firebase,
         login: window.FirebaseSimpleLogin
       };
-      window.firebase = window.firebasemock.MockFirebaseSdk;
+      window.firebase = window.firebasemock.MockFirebaseSdk();
       window.Firebase = window.firebasemock.MockFirebase;
       window.FirebaseSimpleLogin = window.firebasemock.MockFirebaseSimpleLogin;
     };
