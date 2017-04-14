@@ -47,11 +47,12 @@ bobRef.set({ name: 'bob' });
 mock.flush();
 
 // The mocks for orderByChild and equalTo will return the entire dataset at the current reference.
-// This causes myFunction to return 2 without any spies being configured
+// This causes myFunction to log the value 2 without any spies being configured
 myFunction();
 mock.flush();
 
 // We can stub out the orderByChild so that it returns the data we need in our source code.
+// This causes myFunction to log the value 1 since our spy is configured to only return the matched data.
 sinon.stub(mockdatabase, 'orderByChild', function() {
   return {
     equalTo: function() {
