@@ -26,17 +26,18 @@ module.exports = function() {
 
 ```js
 // ./test.js
-var proxyquire   = require('proxyquire');
-var firebasemock    = require('firebase-mock');
+var sinon         = require('sinon');
+var proxyquire    = require('proxyquire');
+var firebasemock  = require('firebase-mock');
 
-var mockdatabase = new firebasemock.MockFirebase();
-var mockauth = new firebasemock.MockFirebase();
-var mocksdk = firebasemock.MockFirebaseSdk(function(path) {
+var mockdatabase  = new firebasemock.MockFirebase();
+var mockauth      = new firebasemock.MockFirebase();
+var mocksdk       = firebasemock.MockFirebaseSdk(function(path) {
   return mockdatabase.child(path);
 }, function() {
   return mockauth;
 });
-var myFunction = proxyquire('./myFunction', {
+var myFunction    = proxyquire('./myFunction', {
   firebase: mocksdk
 });
 
@@ -70,4 +71,6 @@ sinon.stub(mockdatabase, 'orderByChild', function() {
     }
   };
 });
+myFunction();
+mock.flush();
 ```
