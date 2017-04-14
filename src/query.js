@@ -4,6 +4,7 @@ var _        = require('lodash');
 var Slice    = require('./slice');
 var utils    = require('./utils');
 var validate = require('./validators');
+var rsvp     = require('rsvp');
 
 function MockQuery (ref) {
   this.ref = ref;
@@ -117,14 +118,19 @@ MockQuery.prototype.off = function (event, callback, context) {
 MockQuery.prototype.once = function (event, callback, context) {
   validate.event(event);
   var self = this;
-  // once is tricky because we want the first match within our range
-  // so we use the on() method above which already does the needed legwork
-  function fn() {
-    self.off(event, fn);
-    // the snap is already sliced in on() so we can just pass it on here
-    callback.apply(context, arguments);
-  }
-  self.on(event, fn);
+  return new rsvp.Promise(function(resolve, reject) {
+    // once is tricky because we want the first match within our range
+    // so we use the on() method above which already does the needed legwork
+    function fn() {
+      self.off(event, fn);
+      // the snap is already sliced in on() so we can just pass it on here
+      if (callback) {
+        callback.apply(context, arguments[0]);
+      }
+      resolve(arguments[0]);
+    }
+    self.on(event, fn, reject);
+  });
 };
 
 MockQuery.prototype.limit = function (intVal) {
@@ -133,6 +139,12 @@ MockQuery.prototype.limit = function (intVal) {
   }
   var q = new MockQuery(this.ref);
   _.extend(q._q, this._q, {limit: intVal});
+  return q;
+};
+
+MockQuery.prototype.equalTo = function () {
+  var q = new MockQuery(this.ref);
+  _.extend(q._q, this._q);
   return q;
 };
 

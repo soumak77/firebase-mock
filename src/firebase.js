@@ -2,6 +2,7 @@
 
 var _        = require('lodash');
 var assert   = require('assert');
+var rsvp     = require('rsvp');
 var autoId   = require('firebase-auto-ids');
 var Query    = require('./query');
 var Snapshot = require('./snapshot');
@@ -226,19 +227,28 @@ MockFirebase.prototype.once = function (event, callback, cancel, context) {
     cancel = _.noop;
   }
   cancel = cancel || _.noop;
-  var err = this._nextErr('once');
-  if (err) {
-    this._defer('once', _.toArray(arguments), function () {
-      cancel.call(context, err);
-    });
-  }
-  else {
-    var fn = _.bind(function (snapshot) {
-      this.off(event, fn, context);
-      callback.call(context, snapshot);
-    }, this);
-    this._on('once', event, fn, cancel, context);
-  }
+  var self = this;
+  return new rsvp.Promise(function(resolve, reject) {
+    var err = self._nextErr('once');
+    if (err) {
+      self._defer('once', _.toArray(arguments), function () {
+        if (cancel) {
+          cancel.call(context, err);
+        }
+        reject(err);
+      });
+    }
+    else {
+      var fn = _.bind(function (snapshot) {
+        self.off(event, fn, context);
+        if (callback) {
+          callback.call(context, snapshot);
+        }
+        resolve(snapshot);
+      }, self);
+      self._on('once', event, fn, cancel, context);
+    }
+  });
 };
 
 MockFirebase.prototype.remove = function (callback) {
@@ -311,12 +321,40 @@ MockFirebase.prototype.transaction = function (valueFn, finishedFn, applyLocally
   return [valueFn, finishedFn, applyLocally];
 };
 
-MockFirebase.prototype./**
+/**
  * Just a stub at this point.
  * @param {int} limit
  */
-limit = function (limit) {
+MockFirebase.prototype.limit = function (limit) {
   return new Query(this).limit(limit);
+};
+
+/**
+ * Just a stub so it can be spied on during testing
+ */
+MockFirebase.prototype.orderByChild = function (child) {
+  return new Query(this);
+};
+
+/**
+ * Just a stub so it can be spied on during testing
+ */
+MockFirebase.prototype.orderByKey = function (key) {
+ return new Query(this);
+};
+
+/**
+ * Just a stub so it can be spied on during testing
+ */
+MockFirebase.prototype.orderByPriority = function (property) {
+ return new Query(this);
+};
+
+/**
+ * Just a stub so it can be spied on during testing
+ */
+MockFirebase.prototype.orderByValue = function (value) {
+ return new Query(this);
 };
 
 MockFirebase.prototype.startAt = function (priority, key) {

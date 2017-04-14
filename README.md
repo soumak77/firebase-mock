@@ -36,6 +36,7 @@ Firebase Mock supports the normal [Firebase API](https://firebase.google.com/doc
 * [Simulating Errors](tutorials/errors.md)
 * [Overriding `window.Firebase`](tutorials/override.md)
 * [Overriding `require('firebase')`](tutorials/proxyquire.md)
+* [Using Spies for Ordering](tutorials/spies.md)
 
 ## Projects using firebase-mock
 * [Angular Base Apps Template](https://github.com/base-apps/angular-firebase-template)

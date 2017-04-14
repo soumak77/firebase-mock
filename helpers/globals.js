@@ -12,7 +12,7 @@
         firebase: window.Firebase,
         login: window.FirebaseSimpleLogin
       };
-      window.firebase = window.firebasemock.MockFirebaseSdk;
+      window.firebase = window.firebasemock.MockFirebaseSdk();
       window.Firebase = window.firebasemock.MockFirebase;
       window.FirebaseSimpleLogin = window.firebasemock.MockFirebaseSimpleLogin;
     };

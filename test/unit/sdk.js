@@ -7,11 +7,39 @@ var Firebase = require('../../').MockFirebase;
 var MockFirebaseSdk = require('../../src/sdk');
 
 describe('MockFirebaseSdk', function () {
+  var firebase;
+
+  describe('Dependency Injection', function() {
+    var database, auth;
+
+    beforeEach(function() {
+      firebase = MockFirebaseSdk(function(path) {
+        return (database = new Firebase(path));
+      }, function() {
+        return (auth = new Firebase());
+      });
+    });
+
+    it('returns DI for database().ref()', function () {
+      expect(firebase.database().ref()).to.eql(database);
+    });
+
+    it('returns DI for database().refFromURL()', function () {
+      expect(firebase.database().refFromURL()).to.eql(database);
+    });
+
+    it('returns DI for auth()', function () {
+      expect(firebase.auth()).to.eql(auth);
+    });
+  });
 
   describe('#database', function() {
+    beforeEach(function() {
+      firebase = MockFirebaseSdk();
+    });
 
     it('returns object with ref properties', function () {
-      var database = MockFirebaseSdk.database();
+      var database = firebase.database();
       expect(database)
         .to.have.property('ref')
         .that.is.an('function');
@@ -23,8 +51,9 @@ describe('MockFirebaseSdk', function () {
     describe('#ref', function() {
       it('returns a MockFirebase reference', function () {
         var path = "123";
-        var ref = MockFirebaseSdk.database().ref(path);
+        var ref = firebase.database().ref(path);
         expect(ref)
+          .to.be.instanceof(Firebase)
           .to.have.property('path')
           .that.is.an('string')
           .that.equals(path);
@@ -34,8 +63,9 @@ describe('MockFirebaseSdk', function () {
     describe('#refFromURL', function() {
       it('returns a MockFirebase reference', function () {
         var url = "123";
-        var ref = MockFirebaseSdk.database().refFromURL(url);
+        var ref = firebase.database().refFromURL(url);
         expect(ref)
+          .to.be.instanceof(Firebase)
           .to.have.property('path')
           .that.is.an('string')
           .that.equals(url);
@@ -44,15 +74,21 @@ describe('MockFirebaseSdk', function () {
   });
 
   describe('#auth', function() {
+    beforeEach(function() {
+      firebase = MockFirebaseSdk();
+    });
+
     it('returns MockFirebase object without ref property', function () {
-      var auth = MockFirebaseSdk.auth();
+      var auth = firebase.auth();
+      expect(auth)
+        .to.be.instanceof(Firebase);
       expect(auth)
         .to.not.have.property('ref');
     });
 
     describe('#GoogleAuthProvider', function() {
       it('sets provider id', function () {
-        var auth = new MockFirebaseSdk.auth.GoogleAuthProvider();
+        var auth = new firebase.auth.GoogleAuthProvider();
         expect(auth)
           .to.have.property('providerId')
           .that.equals('google.com');
@@ -61,7 +97,7 @@ describe('MockFirebaseSdk', function () {
 
     describe('#TwitterAuthProvider', function() {
       it('sets provider id', function () {
-        var auth = new MockFirebaseSdk.auth.TwitterAuthProvider();
+        var auth = new firebase.auth.TwitterAuthProvider();
         expect(auth)
           .to.have.property('providerId')
           .that.equals('twitter.com');
@@ -70,7 +106,7 @@ describe('MockFirebaseSdk', function () {
 
     describe('#FacebookAuthProvider', function() {
       it('sets provider id', function () {
-        var auth = new MockFirebaseSdk.auth.FacebookAuthProvider();
+        var auth = new firebase.auth.FacebookAuthProvider();
         expect(auth)
           .to.have.property('providerId')
           .that.equals('facebook.com');
@@ -79,7 +115,8 @@ describe('MockFirebaseSdk', function () {
 
     describe('#GithubAuthProvider', function() {
       it('sets provider id', function () {
-        var auth = new MockFirebaseSdk.auth.GithubAuthProvider();
+
+        var auth = new firebase.auth.GithubAuthProvider();
         expect(auth)
           .to.have.property('providerId')
           .that.equals('github.com');
@@ -88,8 +125,12 @@ describe('MockFirebaseSdk', function () {
   });
 
   describe('#initializeApp', function() {
+    beforeEach(function() {
+      firebase = MockFirebaseSdk();
+    });
+
     it('returns firebase app', function () {
-      var app = MockFirebaseSdk.initializeApp();
+      var app = firebase.initializeApp();
       expect(app)
         .to.have.property('database')
         .that.is.an('function');
