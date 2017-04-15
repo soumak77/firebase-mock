@@ -157,24 +157,40 @@ MockFirebase.prototype.child = function (childPath) {
 MockFirebase.prototype.set = function (data, callback) {
   var err = this._nextErr('set');
   data = _.cloneDeep(data);
-  this._defer('set', _.toArray(arguments), function() {
-    if (err === null) {
-      this._dataChanged(data);
-    }
-    if (callback) callback(err);
+  var self = this;
+  return new rsvp.Promise(function(resolve, reject) {
+    self._defer('set', _.toArray(arguments), function() {
+      if (err === null) {
+        self._dataChanged(data);
+        resolve(data);
+      } else {
+        if (callback) {
+          callback(err);
+        }
+        reject(err);
+      }
+    });
   });
 };
 
 MockFirebase.prototype.update = function (changes, callback) {
   assert.equal(typeof changes, 'object', 'First argument must be an object when calling "update"');
   var err = this._nextErr('update');
-  this._defer('update', _.toArray(arguments), function () {
-    if (!err) {
-      var base = this.getData();
-      var data = _.assign(_.isObject(base) ? base : {}, changes);
-      this._dataChanged(data);
-    }
-    if (callback) callback(err);
+  var self = this;
+  return new rsvp.Promise(function(resolve, reject) {
+    self._defer('update', _.toArray(arguments), function () {
+      if (!err) {
+        var base = self.getData();
+        var data = _.assign(_.isObject(base) ? base : {}, changes);
+        self._dataChanged(data);
+        resolve(data);
+      } else {
+        if (callback) {
+          callback(err);
+        }
+        reject(err);
+      }
+    });
   });
 };
 
