@@ -28,7 +28,7 @@
   ],
   "homepage": "https://github.com/soumak77/firebase-mock",
   "dependencies": {
-    "MD5": "~1.2.1",
+    "md5": "~2.2.1",
     "firebase-auto-ids": "~1.1.0",
     "lodash": "~2.4.1",
     "rsvp": "^3.3.3"
