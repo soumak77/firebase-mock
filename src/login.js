@@ -1,7 +1,7 @@
 'use strict';
 
 var _   = require('lodash');
-var md5 = require('MD5');
+var md5 = require('md5');
 
 /*******************************************************************************
  * SIMPLE LOGIN
