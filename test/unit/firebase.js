@@ -1,15 +1,13 @@
 'use strict';
 
-var chai     = require('chai');
-var sinon    = require('sinon');
+var chai = require('chai');
+var sinon = require('sinon');
 
-chai.use(require('chai-as-promised'));
 chai.use(require('sinon-chai'));
 
-var expect   = chai.expect;
-var _        = require('lodash');
+var expect = chai.expect;
+var _ = require('lodash');
 var Firebase = require('../../').MockFirebase;
-
 
 
 describe('MockFirebase', function () {
@@ -20,22 +18,6 @@ describe('MockFirebase', function () {
     ref.set(require('./data.json').data);
     ref.flush();
     spy = sinon.spy();
-  });
-
-  describe('set & transition', function(){
-    beforeEach(function () {
-      ref.autoFlush();
-    });
-
-    it('should work', function(){
-      return expect(ref.set({test:{name: 'one'}}).then(function() {
-        return ref.child('/test/count').transaction(function (count) {
-          return count + 1;
-        });
-      }).then(function(res){
-        return res.snapshot.val();
-      })).to.eventually.eql(1);
-    });
   });
 
   describe('Server Timestamps', function () {
@@ -64,7 +46,7 @@ describe('MockFirebase', function () {
       expect(child.getData()).to.equal(new Date().getTime());
     });
 
-    it('parses server timestamps in priorities', function(){
+    it('parses server timestamps in priorities', function () {
       ref.setPriority(Firebase.ServerValue.TIMESTAMP);
       ref.flush();
       expect(ref).to.have.property('priority', new Date().getTime());
@@ -201,7 +183,7 @@ describe('MockFirebase', function () {
         .and.calledWith(err);
     });
 
-    it('can take null as the cancel callback', function(){
+    it('can take null as the cancel callback', function () {
       ref.on('value', spy, null, {});
       ref.forceCancel(new Error());
     });
@@ -304,8 +286,10 @@ describe('MockFirebase', function () {
       ref.autoFlush();
     });
 
-    it('should return a promise', function(){
-      return expect(ref.set({test:'one'})).to.eventually.eql({test : 'one'});
+    it('should return a promise', function () {
+      return ref.set({test: 'one'}).then(function(res){
+        expect(res).to.eql({test: 'one'});
+      });
     });
 
     it('should remove old keys from data', function () {
@@ -522,9 +506,11 @@ describe('MockFirebase', function () {
 
   describe('#remove', function () {
 
-    it('should return a promise', function(){
+    it('should return a promise', function () {
       ref.autoFlush();
-      return expect(ref.child('/test').remove()).to.eventually.eql(null);
+      return ref.child('/test').remove().then(function(res){
+        expect(res).to.equal(null);
+      });
     });
 
     it('fires child_removed for children', function () {
@@ -612,8 +598,8 @@ describe('MockFirebase', function () {
       expect(spy.called).to.equal(false);
     });
 
-    it('returns the callback',function(){
-       expect(ref.on('value', spy)).to.equal(spy);
+    it('returns the callback', function () {
+      expect(ref.on('value', spy)).to.equal(spy);
     });
 
   });
@@ -701,6 +687,17 @@ describe('MockFirebase', function () {
       ref.flush();
     });
 
+    it('should return a promise wrapping a "committed" boolean and a snapshot', function () {
+      ref.autoFlush();
+      return ref.transaction(function (currentValue) {
+        currentValue.transacted = 'yes';
+        return currentValue;
+      }).then(function (res) {
+        expect(res.committed).to.equal(true);
+        expect(res.snapshot.val().transacted).to.equal('yes');
+      });
+    });
+
   });
 
   describe('#push', function () {
@@ -745,8 +742,8 @@ describe('MockFirebase', function () {
 
   });
 
-  describe('#getFlushQueue', function() {
-    it('returns an array equal to number of flush events queued', function() {
+  describe('#getFlushQueue', function () {
+    it('returns an array equal to number of flush events queued', function () {
       ref.set(true);
       ref.set(false);
       var list = ref.getFlushQueue();
@@ -754,7 +751,7 @@ describe('MockFirebase', function () {
       expect(list.length).to.equal(2);
     });
 
-    it('does not change length if more items are added to the queue', function() {
+    it('does not change length if more items are added to the queue', function () {
       ref.set(true);
       ref.set(false);
       var list = ref.getFlushQueue();
@@ -764,19 +761,19 @@ describe('MockFirebase', function () {
       expect(list.length).to.equal(2);
     });
 
-    it('sets the ref attribute correctly', function() {
+    it('sets the ref attribute correctly', function () {
       ref.set(true);
       var data = ref.getFlushQueue()[0].sourceData;
       expect(data.ref).to.equal(ref);
     });
 
-    it('sets the `method` attribute correctly', function() {
+    it('sets the `method` attribute correctly', function () {
       ref.set(true);
       var data = ref.getFlushQueue()[0].sourceData;
       expect(data.method).to.equal('set');
     });
 
-    it('sets the `args` attribute correctly', function() {
+    it('sets the `args` attribute correctly', function () {
       ref.set(true);
       var data = ref.getFlushQueue()[0].sourceData;
       expect(data.args).to.be.an('array');
