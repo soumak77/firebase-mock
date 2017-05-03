@@ -1,14 +1,9 @@
 'use strict';
 
-var chai = require('chai');
-var sinon = require('sinon');
-
-chai.use(require('sinon-chai'));
-
-var expect = chai.expect;
-var _ = require('lodash');
+var sinon    = require('sinon');
+var expect   = require('chai').use(require('sinon-chai')).expect;
+var _        = require('lodash');
 var Firebase = require('../../').MockFirebase;
-
 
 describe('MockFirebase', function () {
 
