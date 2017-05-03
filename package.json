@@ -37,6 +37,7 @@
     "browserify": "^6.3.2",
     "browserify-shim": "^3.8.0",
     "chai": "~1.9.1",
+    "chai-as-promised": "^6.0.0",
     "es5-shim": "~4.0.1",
     "gulp": "^3.8.10",
     "gulp-bump": "~0.1.10",
