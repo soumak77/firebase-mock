@@ -113,9 +113,11 @@ exports.updateToObject = function updateToObject(update) {
     var o = result;
     do {
       var key = parts.shift();
-      var newObject = result[key] || {};
-      o[key] = parts.length > 0 ? newObject : value;
-      o = newObject;
+      if(key) {
+        var newObject = o[key] || {};
+        o[key] = parts.length > 0 ? newObject : value;
+        o = newObject;
+      }
     } while (parts.length);
   }
   return result;

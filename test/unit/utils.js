@@ -67,25 +67,15 @@ describe('utils', function () {
       var update = {prop: 12};
       expect(updateToObject(update)).to.deep.eql({prop: 12});
     });
-    it('should work', function(){
+    it('should ignore leading slash', function(){
       var update = {};
-      update['entities/comments/$projectId/$id'] = null;
-      update['entities/counts/project/$projectId/comments/$id'] = null;
+      update['/entities/comments/c1'] = 'hi';
+      update['entities/comments/c2'] = 'hello';
       expect(updateToObject(update)).to.deep.eql({
         entities: {
           comments: {
-            $projectId: {
-              $id: null
-            }
-          },
-          counts:{
-            project: {
-              $projectId: {
-                comments: {
-                  $id : null
-                }
-              }
-            }
+            c1: 'hi',
+            c2: 'hello'
           }
         }
       });
