@@ -1,8 +1,8 @@
 'use strict';
 
-var sinon    = require('sinon');
-var expect   = require('chai').use(require('sinon-chai')).expect;
-var _        = require('lodash');
+var sinon = require('sinon');
+var expect = require('chai').use(require('sinon-chai')).expect;
+var _ = require('lodash');
 var Firebase = require('../../').MockFirebase;
 
 describe('MockFirebase', function () {
@@ -282,7 +282,7 @@ describe('MockFirebase', function () {
     });
 
     it('should return a promise', function () {
-      return ref.set({test: 'one'}).then(function(res){
+      return ref.set({test: 'one'}).then(function (res) {
         expect(res).to.eql({test: 'one'});
       });
     });
@@ -476,7 +476,20 @@ describe('MockFirebase', function () {
       update['some/prop'] = 12;
       ref.update(update);
       ref.flush();
-      expect(ref.getData().some).to.eql({prop:12});
+      expect(ref.getData().some).to.eql({prop: 12});
+    });
+
+    it('does not change unrelated data', function () {
+      ref.child('some').child('prop').set(1);
+      ref.child('some').child('other').child('prop').set(2);
+      ref.flush();
+
+      var update = {};
+      update['some/prop'] = null;
+      ref.update(update);
+      ref.flush();
+
+      expect(ref.getData().some).to.eql({other: {prop: 2}});
     });
 
     it('handles multiple calls in the same flush', function () {
@@ -521,7 +534,7 @@ describe('MockFirebase', function () {
 
     it('should return a promise', function () {
       ref.autoFlush();
-      return ref.child('/test').remove().then(function(res){
+      return ref.child('/test').remove().then(function (res) {
         expect(res).to.equal(null);
       });
     });
