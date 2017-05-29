@@ -57,6 +57,12 @@ describe('utils', function () {
       update['some/prop'] = 12;
       expect(updateToObject(update)).to.deep.eql({some: {prop: 12}});
     });
+    it('should not overwrite updates to the same branch', function () {
+      var update = {};
+      update['some/prop'] = 12;
+      update['some/other'] = 13;
+      expect(updateToObject(update)).to.deep.eql({some: {prop: 12, other: 13}});
+    });
     it('should not touch properties without slash', function () {
       var update = {prop: 12};
       expect(updateToObject(update)).to.deep.eql({prop: 12});
