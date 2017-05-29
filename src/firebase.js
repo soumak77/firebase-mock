@@ -181,7 +181,7 @@ MockFirebase.prototype.update = function (changes, callback) {
     self._defer('update', _.toArray(arguments), function () {
       if (!err) {
         var base = self.getData();
-        var data = _.assign(_.isObject(base) ? base : {}, utils.updateToObject(changes));
+        var data = _.merge(_.isObject(base) ? base : {}, utils.updateToObject(changes));
         data = utils.removeEmptyProperties(data);
         self._dataChanged(data);
         resolve(data);

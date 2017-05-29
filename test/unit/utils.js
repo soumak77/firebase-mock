@@ -67,6 +67,30 @@ describe('utils', function () {
       var update = {prop: 12};
       expect(updateToObject(update)).to.deep.eql({prop: 12});
     });
+    it('should work', function(){
+      var update = {};
+      update['entities/comments/$projectId/$id'] = null;
+      update['entities/counts/project/$projectId/comments/$id'] = null;
+      expect(updateToObject(update)).to.deep.eql({
+        entities: {
+          comments: {
+            $projectId: {
+              $id: null
+            }
+          },
+          counts:{
+            project: {
+              $projectId: {
+                comments: {
+                  $id : null
+                }
+              }
+            }
+          }
+        }
+      });
+
+    });
   });
 
 });
