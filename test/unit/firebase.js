@@ -471,6 +471,14 @@ describe('MockFirebase', function () {
       expect(ref.getData().other).to.equal(undefined);
     });
 
+    it('can work with nested paths', function () {
+      var update = {};
+      update['some/prop'] = 12;
+      ref.update(update);
+      ref.flush();
+      expect(ref.getData().some).to.eql({prop:12});
+    });
+
     it('handles multiple calls in the same flush', function () {
       ref.update({
         a: 1

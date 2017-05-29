@@ -4,6 +4,7 @@ var sinon = require('sinon');
 var expect = require('chai').use(require('sinon-chai')).expect;
 var _ = require('lodash');
 var removeEmptyProperties = require('../../src/utils').removeEmptyProperties;
+var updateToObject = require('../../src/utils').updateToObject;
 
 describe('utils', function () {
   describe('removeEmptyProperties', function () {
@@ -47,6 +48,18 @@ describe('utils', function () {
     });
     it('should return null, when all properties are null ', function () {
       expect(removeEmptyProperties({a: {b: null}})).to.eql(null);
+    });
+  });
+
+  describe('updateToObject', function () {
+    it('should split the properties by slash', function () {
+      var update = {};
+      update['some/prop'] = 12;
+      expect(updateToObject(update)).to.deep.eql({some: {prop: 12}});
+    });
+    it('should not touch properties without slash', function () {
+      var update = {prop: 12};
+      expect(updateToObject(update)).to.deep.eql({prop: 12});
     });
   });
 
