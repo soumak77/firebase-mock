@@ -461,6 +461,16 @@ describe('MockFirebase', function () {
       expect(ref.getData()).to.have.property('foo', 'bar');
     });
 
+    it('removes empty data', function () {
+      ref.update({
+        foo: 'bar',
+        other: null
+      });
+      ref.flush();
+      expect(ref.getData().foo).to.equal('bar');
+      expect(ref.getData().other).to.equal(undefined);
+    });
+
     it('handles multiple calls in the same flush', function () {
       ref.update({
         a: 1

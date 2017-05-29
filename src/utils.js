@@ -73,3 +73,32 @@ exports.priorityComparator = function priorityComparator (a, b) {
 exports.isServerTimestamp = function isServerTimestamp (data) {
   return _.isObject(data) && data['.sv'] === 'timestamp';
 };
+
+exports.removeEmptyProperties = function removeEmptyProperties(obj) {
+  var t = typeof obj;
+  if (t === 'boolean' || t === 'string' || t === 'number' || t === 'undefined') {
+    return obj;
+  }
+
+  var keys = getKeys(obj);
+  if (keys.length === 0) {
+    return null;
+  } else {
+    for (var s in obj) {
+      var value = removeEmptyProperties(obj[s]);
+      if (value === null) {
+        delete obj[s];
+      }
+    }
+    if(getKeys(obj).length === 0){
+      return null;
+    }
+  }
+  return obj;
+
+  function getKeys(o) {
+    var result = [];
+    for (var s in o) result.push(s);
+    return result;
+  }
+};
