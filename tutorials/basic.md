@@ -17,7 +17,7 @@ In this example, our source code will listen for new people on a reference we pr
 var ref;
 var people = {
   ref: function () {
-    if (!ref) ref = firebase.database().ref();
+    if (!ref) ref = firebase.database().ref().child('people');
     return ref;
   },
   greet: function (person) {
