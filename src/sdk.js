@@ -6,6 +6,9 @@ function MockFirebaseSdk(createDatabase, createAuth) {
     delete auth.ref;
     return auth;
   }
+  MockFirebaseAuth.EmailAuthProvider = function() {
+    this.providerId = "password";
+  };
   MockFirebaseAuth.GoogleAuthProvider = function() {
     this.providerId = "google.com";
   };
