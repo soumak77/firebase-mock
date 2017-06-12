@@ -41,7 +41,7 @@ describe('MockFirebase', function () {
       expect(child.getData()).to.equal(new Date().getTime());
     });
 
-    it('parses server timestamps in priorities', function(){
+    it('parses server timestamps in priorities', function () {
       ref.setPriority(Firebase.ServerValue.TIMESTAMP);
       ref.flush();
       expect(ref).to.have.property('priority', new Date().getTime());
@@ -178,7 +178,7 @@ describe('MockFirebase', function () {
         .and.calledWith(err);
     });
 
-    it('can take null as the cancel callback', function(){
+    it('can take null as the cancel callback', function () {
       ref.on('value', spy, null, {});
       ref.forceCancel(new Error());
     });
@@ -279,6 +279,12 @@ describe('MockFirebase', function () {
 
     beforeEach(function () {
       ref.autoFlush();
+    });
+
+    it('should return a promise', function () {
+      return ref.set({test: 'one'}).then(function(res){
+        expect(res).to.eql({test: 'one'});
+      });
     });
 
     it('should remove old keys from data', function () {
@@ -455,6 +461,24 @@ describe('MockFirebase', function () {
       expect(ref.getData()).to.have.property('foo', 'bar');
     });
 
+    it('removes empty data', function () {
+      ref.update({
+        foo: 'bar',
+        other: null
+      });
+      ref.flush();
+      expect(ref.getData().foo).to.equal('bar');
+      expect(ref.getData().other).to.equal(undefined);
+    });
+
+    it('can work with nested paths', function () {
+      var update = {};
+      update['some/prop'] = 12;
+      ref.update(update);
+      ref.flush();
+      expect(ref.getData().some).to.eql({prop:12});
+    });
+
     it('handles multiple calls in the same flush', function () {
       ref.update({
         a: 1
@@ -494,6 +518,13 @@ describe('MockFirebase', function () {
   });
 
   describe('#remove', function () {
+
+    it('should return a promise', function () {
+      ref.autoFlush();
+      return ref.child('/test').remove().then(function(res){
+        expect(res).to.equal(null);
+      });
+    });
 
     it('fires child_removed for children', function () {
       ref.on('child_removed', spy);
@@ -580,8 +611,8 @@ describe('MockFirebase', function () {
       expect(spy.called).to.equal(false);
     });
 
-    it('returns the callback',function(){
-       expect(ref.on('value', spy)).to.equal(spy);
+    it('returns the callback', function () {
+      expect(ref.on('value', spy)).to.equal(spy);
     });
 
   });
@@ -669,6 +700,17 @@ describe('MockFirebase', function () {
       ref.flush();
     });
 
+    it('should return a promise wrapping a "committed" boolean and a snapshot', function () {
+      ref.autoFlush();
+      return ref.transaction(function (currentValue) {
+        currentValue.transacted = 'yes';
+        return currentValue;
+      }).then(function (res) {
+        expect(res.committed).to.equal(true);
+        expect(res.snapshot.val().transacted).to.equal('yes');
+      });
+    });
+
   });
 
   describe('#push', function () {
@@ -713,8 +755,8 @@ describe('MockFirebase', function () {
 
   });
 
-  describe('#getFlushQueue', function() {
-    it('returns an array equal to number of flush events queued', function() {
+  describe('#getFlushQueue', function () {
+    it('returns an array equal to number of flush events queued', function () {
       ref.set(true);
       ref.set(false);
       var list = ref.getFlushQueue();
@@ -722,7 +764,7 @@ describe('MockFirebase', function () {
       expect(list.length).to.equal(2);
     });
 
-    it('does not change length if more items are added to the queue', function() {
+    it('does not change length if more items are added to the queue', function () {
       ref.set(true);
       ref.set(false);
       var list = ref.getFlushQueue();
@@ -732,19 +774,19 @@ describe('MockFirebase', function () {
       expect(list.length).to.equal(2);
     });
 
-    it('sets the ref attribute correctly', function() {
+    it('sets the ref attribute correctly', function () {
       ref.set(true);
       var data = ref.getFlushQueue()[0].sourceData;
       expect(data.ref).to.equal(ref);
     });
 
-    it('sets the `method` attribute correctly', function() {
+    it('sets the `method` attribute correctly', function () {
       ref.set(true);
       var data = ref.getFlushQueue()[0].sourceData;
       expect(data.method).to.equal('set');
     });
 
-    it('sets the `args` attribute correctly', function() {
+    it('sets the `args` attribute correctly', function () {
       ref.set(true);
       var data = ref.getFlushQueue()[0].sourceData;
       expect(data.args).to.be.an('array');
