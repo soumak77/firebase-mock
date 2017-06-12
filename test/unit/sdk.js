@@ -86,6 +86,15 @@ describe('MockFirebaseSdk', function () {
         .to.not.have.property('ref');
     });
 
+    describe('#EmailAuthProvider', function() {
+      it('sets provider id', function () {
+        var auth = new firebase.auth.EmailAuthProvider();
+        expect(auth)
+          .to.have.property('providerId')
+          .that.equals('password');
+      });
+    });
+
     describe('#GoogleAuthProvider', function() {
       it('sets provider id', function () {
         var auth = new firebase.auth.GoogleAuthProvider();
