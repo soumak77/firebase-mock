@@ -1,4 +1,4 @@
-/** firebase-mock - v1.0.7
+/** firebase-mock - v1.0.8
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -11,303 +11,6 @@ exports.MockFirebaseSdk = require('./sdk');
 exports.MockFirebaseSimpleLogin = require('./login');
 
 },{"./firebase":20,"./login":21,"./sdk":24}],2:[function(require,module,exports){
-(function (Buffer){
-(function(){
-  var crypt = require('crypt'),
-      utf8 = require('charenc').utf8,
-      bin = require('charenc').bin,
-
-  // The core
-  md5 = function (message, options) {
-    // Convert to byte array
-    if (message.constructor == String)
-      if (options && options.encoding === 'binary')
-        message = bin.stringToBytes(message);
-      else
-        message = utf8.stringToBytes(message);
-    else if (typeof Buffer != 'undefined' &&
-        typeof Buffer.isBuffer == 'function' && Buffer.isBuffer(message))
-      message = Array.prototype.slice.call(message, 0);
-    else if (!Array.isArray(message))
-      message = message.toString();
-    // else, assume byte array already
-
-    var m = crypt.bytesToWords(message),
-        l = message.length * 8,
-        a =  1732584193,
-        b = -271733879,
-        c = -1732584194,
-        d =  271733878;
-
-    // Swap endian
-    for (var i = 0; i < m.length; i++) {
-      m[i] = ((m[i] <<  8) | (m[i] >>> 24)) & 0x00FF00FF |
-             ((m[i] << 24) | (m[i] >>>  8)) & 0xFF00FF00;
-    }
-
-    // Padding
-    m[l >>> 5] |= 0x80 << (l % 32);
-    m[(((l + 64) >>> 9) << 4) + 14] = l;
-
-    // Method shortcuts
-    var FF = md5._ff,
-        GG = md5._gg,
-        HH = md5._hh,
-        II = md5._ii;
-
-    for (var i = 0; i < m.length; i += 16) {
-
-      var aa = a,
-          bb = b,
-          cc = c,
-          dd = d;
-
-      a = FF(a, b, c, d, m[i+ 0],  7, -680876936);
-      d = FF(d, a, b, c, m[i+ 1], 12, -389564586);
-      c = FF(c, d, a, b, m[i+ 2], 17,  606105819);
-      b = FF(b, c, d, a, m[i+ 3], 22, -1044525330);
-      a = FF(a, b, c, d, m[i+ 4],  7, -176418897);
-      d = FF(d, a, b, c, m[i+ 5], 12,  1200080426);
-      c = FF(c, d, a, b, m[i+ 6], 17, -1473231341);
-      b = FF(b, c, d, a, m[i+ 7], 22, -45705983);
-      a = FF(a, b, c, d, m[i+ 8],  7,  1770035416);
-      d = FF(d, a, b, c, m[i+ 9], 12, -1958414417);
-      c = FF(c, d, a, b, m[i+10], 17, -42063);
-      b = FF(b, c, d, a, m[i+11], 22, -1990404162);
-      a = FF(a, b, c, d, m[i+12],  7,  1804603682);
-      d = FF(d, a, b, c, m[i+13], 12, -40341101);
-      c = FF(c, d, a, b, m[i+14], 17, -1502002290);
-      b = FF(b, c, d, a, m[i+15], 22,  1236535329);
-
-      a = GG(a, b, c, d, m[i+ 1],  5, -165796510);
-      d = GG(d, a, b, c, m[i+ 6],  9, -1069501632);
-      c = GG(c, d, a, b, m[i+11], 14,  643717713);
-      b = GG(b, c, d, a, m[i+ 0], 20, -373897302);
-      a = GG(a, b, c, d, m[i+ 5],  5, -701558691);
-      d = GG(d, a, b, c, m[i+10],  9,  38016083);
-      c = GG(c, d, a, b, m[i+15], 14, -660478335);
-      b = GG(b, c, d, a, m[i+ 4], 20, -405537848);
-      a = GG(a, b, c, d, m[i+ 9],  5,  568446438);
-      d = GG(d, a, b, c, m[i+14],  9, -1019803690);
-      c = GG(c, d, a, b, m[i+ 3], 14, -187363961);
-      b = GG(b, c, d, a, m[i+ 8], 20,  1163531501);
-      a = GG(a, b, c, d, m[i+13],  5, -1444681467);
-      d = GG(d, a, b, c, m[i+ 2],  9, -51403784);
-      c = GG(c, d, a, b, m[i+ 7], 14,  1735328473);
-      b = GG(b, c, d, a, m[i+12], 20, -1926607734);
-
-      a = HH(a, b, c, d, m[i+ 5],  4, -378558);
-      d = HH(d, a, b, c, m[i+ 8], 11, -2022574463);
-      c = HH(c, d, a, b, m[i+11], 16,  1839030562);
-      b = HH(b, c, d, a, m[i+14], 23, -35309556);
-      a = HH(a, b, c, d, m[i+ 1],  4, -1530992060);
-      d = HH(d, a, b, c, m[i+ 4], 11,  1272893353);
-      c = HH(c, d, a, b, m[i+ 7], 16, -155497632);
-      b = HH(b, c, d, a, m[i+10], 23, -1094730640);
-      a = HH(a, b, c, d, m[i+13],  4,  681279174);
-      d = HH(d, a, b, c, m[i+ 0], 11, -358537222);
-      c = HH(c, d, a, b, m[i+ 3], 16, -722521979);
-      b = HH(b, c, d, a, m[i+ 6], 23,  76029189);
-      a = HH(a, b, c, d, m[i+ 9],  4, -640364487);
-      d = HH(d, a, b, c, m[i+12], 11, -421815835);
-      c = HH(c, d, a, b, m[i+15], 16,  530742520);
-      b = HH(b, c, d, a, m[i+ 2], 23, -995338651);
-
-      a = II(a, b, c, d, m[i+ 0],  6, -198630844);
-      d = II(d, a, b, c, m[i+ 7], 10,  1126891415);
-      c = II(c, d, a, b, m[i+14], 15, -1416354905);
-      b = II(b, c, d, a, m[i+ 5], 21, -57434055);
-      a = II(a, b, c, d, m[i+12],  6,  1700485571);
-      d = II(d, a, b, c, m[i+ 3], 10, -1894986606);
-      c = II(c, d, a, b, m[i+10], 15, -1051523);
-      b = II(b, c, d, a, m[i+ 1], 21, -2054922799);
-      a = II(a, b, c, d, m[i+ 8],  6,  1873313359);
-      d = II(d, a, b, c, m[i+15], 10, -30611744);
-      c = II(c, d, a, b, m[i+ 6], 15, -1560198380);
-      b = II(b, c, d, a, m[i+13], 21,  1309151649);
-      a = II(a, b, c, d, m[i+ 4],  6, -145523070);
-      d = II(d, a, b, c, m[i+11], 10, -1120210379);
-      c = II(c, d, a, b, m[i+ 2], 15,  718787259);
-      b = II(b, c, d, a, m[i+ 9], 21, -343485551);
-
-      a = (a + aa) >>> 0;
-      b = (b + bb) >>> 0;
-      c = (c + cc) >>> 0;
-      d = (d + dd) >>> 0;
-    }
-
-    return crypt.endian([a, b, c, d]);
-  };
-
-  // Auxiliary functions
-  md5._ff  = function (a, b, c, d, x, s, t) {
-    var n = a + (b & c | ~b & d) + (x >>> 0) + t;
-    return ((n << s) | (n >>> (32 - s))) + b;
-  };
-  md5._gg  = function (a, b, c, d, x, s, t) {
-    var n = a + (b & d | c & ~d) + (x >>> 0) + t;
-    return ((n << s) | (n >>> (32 - s))) + b;
-  };
-  md5._hh  = function (a, b, c, d, x, s, t) {
-    var n = a + (b ^ c ^ d) + (x >>> 0) + t;
-    return ((n << s) | (n >>> (32 - s))) + b;
-  };
-  md5._ii  = function (a, b, c, d, x, s, t) {
-    var n = a + (c ^ (b | ~d)) + (x >>> 0) + t;
-    return ((n << s) | (n >>> (32 - s))) + b;
-  };
-
-  // Package private blocksize
-  md5._blocksize = 16;
-  md5._digestsize = 16;
-
-  module.exports = function (message, options) {
-    if(typeof message == 'undefined')
-      return;
-
-    var digestbytes = crypt.wordsToBytes(md5(message, options));
-    return options && options.asBytes ? digestbytes :
-        options && options.asString ? bin.bytesToString(digestbytes) :
-        crypt.bytesToHex(digestbytes);
-  };
-
-})();
-
-}).call(this,require("buffer").Buffer)
-},{"buffer":6,"charenc":3,"crypt":4}],3:[function(require,module,exports){
-var charenc = {
-  // UTF-8 encoding
-  utf8: {
-    // Convert a string to a byte array
-    stringToBytes: function(str) {
-      return charenc.bin.stringToBytes(unescape(encodeURIComponent(str)));
-    },
-
-    // Convert a byte array to a string
-    bytesToString: function(bytes) {
-      return decodeURIComponent(escape(charenc.bin.bytesToString(bytes)));
-    }
-  },
-
-  // Binary encoding
-  bin: {
-    // Convert a string to a byte array
-    stringToBytes: function(str) {
-      for (var bytes = [], i = 0; i < str.length; i++)
-        bytes.push(str.charCodeAt(i) & 0xFF);
-      return bytes;
-    },
-
-    // Convert a byte array to a string
-    bytesToString: function(bytes) {
-      for (var str = [], i = 0; i < bytes.length; i++)
-        str.push(String.fromCharCode(bytes[i]));
-      return str.join('');
-    }
-  }
-};
-
-module.exports = charenc;
-
-},{}],4:[function(require,module,exports){
-(function() {
-  var base64map
-      = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
-
-  crypt = {
-    // Bit-wise rotation left
-    rotl: function(n, b) {
-      return (n << b) | (n >>> (32 - b));
-    },
-
-    // Bit-wise rotation right
-    rotr: function(n, b) {
-      return (n << (32 - b)) | (n >>> b);
-    },
-
-    // Swap big-endian to little-endian and vice versa
-    endian: function(n) {
-      // If number given, swap endian
-      if (n.constructor == Number) {
-        return crypt.rotl(n, 8) & 0x00FF00FF | crypt.rotl(n, 24) & 0xFF00FF00;
-      }
-
-      // Else, assume array and swap all items
-      for (var i = 0; i < n.length; i++)
-        n[i] = crypt.endian(n[i]);
-      return n;
-    },
-
-    // Generate an array of any length of random bytes
-    randomBytes: function(n) {
-      for (var bytes = []; n > 0; n--)
-        bytes.push(Math.floor(Math.random() * 256));
-      return bytes;
-    },
-
-    // Convert a byte array to big-endian 32-bit words
-    bytesToWords: function(bytes) {
-      for (var words = [], i = 0, b = 0; i < bytes.length; i++, b += 8)
-        words[b >>> 5] |= bytes[i] << (24 - b % 32);
-      return words;
-    },
-
-    // Convert big-endian 32-bit words to a byte array
-    wordsToBytes: function(words) {
-      for (var bytes = [], b = 0; b < words.length * 32; b += 8)
-        bytes.push((words[b >>> 5] >>> (24 - b % 32)) & 0xFF);
-      return bytes;
-    },
-
-    // Convert a byte array to a hex string
-    bytesToHex: function(bytes) {
-      for (var hex = [], i = 0; i < bytes.length; i++) {
-        hex.push((bytes[i] >>> 4).toString(16));
-        hex.push((bytes[i] & 0xF).toString(16));
-      }
-      return hex.join('');
-    },
-
-    // Convert a hex string to a byte array
-    hexToBytes: function(hex) {
-      for (var bytes = [], c = 0; c < hex.length; c += 2)
-        bytes.push(parseInt(hex.substr(c, 2), 16));
-      return bytes;
-    },
-
-    // Convert a byte array to a base-64 string
-    bytesToBase64: function(bytes) {
-      for (var base64 = [], i = 0; i < bytes.length; i += 3) {
-        var triplet = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2];
-        for (var j = 0; j < 4; j++)
-          if (i * 8 + j * 6 <= bytes.length * 8)
-            base64.push(base64map.charAt((triplet >>> 6 * (3 - j)) & 0x3F));
-          else
-            base64.push('=');
-      }
-      return base64.join('');
-    },
-
-    // Convert a base-64 string to a byte array
-    base64ToBytes: function(base64) {
-      // Remove non-base-64 characters
-      base64 = base64.replace(/[^A-Z0-9+\/]/ig, '');
-
-      for (var bytes = [], i = 0, imod4 = 0; i < base64.length;
-          imod4 = ++i % 4) {
-        if (imod4 == 0) continue;
-        bytes.push(((base64map.indexOf(base64.charAt(i - 1))
-            & (Math.pow(2, -2 * imod4 + 8) - 1)) << (imod4 * 2))
-            | (base64map.indexOf(base64.charAt(i)) >>> (6 - imod4 * 2)));
-      }
-      return bytes;
-    }
-  };
-
-  module.exports = crypt;
-})();
-
-},{}],5:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
 // THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
@@ -669,7 +372,7 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-},{"util/":14}],6:[function(require,module,exports){
+},{"util/":11}],3:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -1723,7 +1426,7 @@ function decodeUtf8Char (str) {
   }
 }
 
-},{"base64-js":7,"ieee754":8,"is-array":9}],7:[function(require,module,exports){
+},{"base64-js":4,"ieee754":5,"is-array":6}],4:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -1845,7 +1548,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],8:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -1931,7 +1634,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],9:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 
 /**
  * isArray
@@ -1966,7 +1669,7 @@ module.exports = isArray || function (val) {
   return !! val && '[object Array]' == str.call(val);
 };
 
-},{}],10:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2269,7 +1972,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],11:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -2357,7 +2060,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],12:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -2382,14 +2085,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],13:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],14:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -2979,7 +2682,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":13,"_process":11,"inherits":12}],15:[function(require,module,exports){
+},{"./support/isBuffer":10,"_process":8,"inherits":9}],12:[function(require,module,exports){
 'use strict';
 
 var allowedCharacters = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
@@ -3033,7 +2736,7 @@ IdGenerator.prototype.generate = function (now) {
 
 module.exports = IdGenerator;
 
-},{}],16:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 var IdGenerator = require('./generator');
@@ -3046,7 +2749,7 @@ exports = module.exports = function generateAutoId (now) {
 
 exports.Generator = IdGenerator;
 
-},{"./generator":15}],17:[function(require,module,exports){
+},{"./generator":12}],14:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -9836,6 +9539,303 @@ exports.Generator = IdGenerator;
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],15:[function(require,module,exports){
+(function (Buffer){
+(function(){
+  var crypt = require('crypt'),
+      utf8 = require('charenc').utf8,
+      bin = require('charenc').bin,
+
+  // The core
+  md5 = function (message, options) {
+    // Convert to byte array
+    if (message.constructor == String)
+      if (options && options.encoding === 'binary')
+        message = bin.stringToBytes(message);
+      else
+        message = utf8.stringToBytes(message);
+    else if (typeof Buffer != 'undefined' &&
+        typeof Buffer.isBuffer == 'function' && Buffer.isBuffer(message))
+      message = Array.prototype.slice.call(message, 0);
+    else if (!Array.isArray(message))
+      message = message.toString();
+    // else, assume byte array already
+
+    var m = crypt.bytesToWords(message),
+        l = message.length * 8,
+        a =  1732584193,
+        b = -271733879,
+        c = -1732584194,
+        d =  271733878;
+
+    // Swap endian
+    for (var i = 0; i < m.length; i++) {
+      m[i] = ((m[i] <<  8) | (m[i] >>> 24)) & 0x00FF00FF |
+             ((m[i] << 24) | (m[i] >>>  8)) & 0xFF00FF00;
+    }
+
+    // Padding
+    m[l >>> 5] |= 0x80 << (l % 32);
+    m[(((l + 64) >>> 9) << 4) + 14] = l;
+
+    // Method shortcuts
+    var FF = md5._ff,
+        GG = md5._gg,
+        HH = md5._hh,
+        II = md5._ii;
+
+    for (var i = 0; i < m.length; i += 16) {
+
+      var aa = a,
+          bb = b,
+          cc = c,
+          dd = d;
+
+      a = FF(a, b, c, d, m[i+ 0],  7, -680876936);
+      d = FF(d, a, b, c, m[i+ 1], 12, -389564586);
+      c = FF(c, d, a, b, m[i+ 2], 17,  606105819);
+      b = FF(b, c, d, a, m[i+ 3], 22, -1044525330);
+      a = FF(a, b, c, d, m[i+ 4],  7, -176418897);
+      d = FF(d, a, b, c, m[i+ 5], 12,  1200080426);
+      c = FF(c, d, a, b, m[i+ 6], 17, -1473231341);
+      b = FF(b, c, d, a, m[i+ 7], 22, -45705983);
+      a = FF(a, b, c, d, m[i+ 8],  7,  1770035416);
+      d = FF(d, a, b, c, m[i+ 9], 12, -1958414417);
+      c = FF(c, d, a, b, m[i+10], 17, -42063);
+      b = FF(b, c, d, a, m[i+11], 22, -1990404162);
+      a = FF(a, b, c, d, m[i+12],  7,  1804603682);
+      d = FF(d, a, b, c, m[i+13], 12, -40341101);
+      c = FF(c, d, a, b, m[i+14], 17, -1502002290);
+      b = FF(b, c, d, a, m[i+15], 22,  1236535329);
+
+      a = GG(a, b, c, d, m[i+ 1],  5, -165796510);
+      d = GG(d, a, b, c, m[i+ 6],  9, -1069501632);
+      c = GG(c, d, a, b, m[i+11], 14,  643717713);
+      b = GG(b, c, d, a, m[i+ 0], 20, -373897302);
+      a = GG(a, b, c, d, m[i+ 5],  5, -701558691);
+      d = GG(d, a, b, c, m[i+10],  9,  38016083);
+      c = GG(c, d, a, b, m[i+15], 14, -660478335);
+      b = GG(b, c, d, a, m[i+ 4], 20, -405537848);
+      a = GG(a, b, c, d, m[i+ 9],  5,  568446438);
+      d = GG(d, a, b, c, m[i+14],  9, -1019803690);
+      c = GG(c, d, a, b, m[i+ 3], 14, -187363961);
+      b = GG(b, c, d, a, m[i+ 8], 20,  1163531501);
+      a = GG(a, b, c, d, m[i+13],  5, -1444681467);
+      d = GG(d, a, b, c, m[i+ 2],  9, -51403784);
+      c = GG(c, d, a, b, m[i+ 7], 14,  1735328473);
+      b = GG(b, c, d, a, m[i+12], 20, -1926607734);
+
+      a = HH(a, b, c, d, m[i+ 5],  4, -378558);
+      d = HH(d, a, b, c, m[i+ 8], 11, -2022574463);
+      c = HH(c, d, a, b, m[i+11], 16,  1839030562);
+      b = HH(b, c, d, a, m[i+14], 23, -35309556);
+      a = HH(a, b, c, d, m[i+ 1],  4, -1530992060);
+      d = HH(d, a, b, c, m[i+ 4], 11,  1272893353);
+      c = HH(c, d, a, b, m[i+ 7], 16, -155497632);
+      b = HH(b, c, d, a, m[i+10], 23, -1094730640);
+      a = HH(a, b, c, d, m[i+13],  4,  681279174);
+      d = HH(d, a, b, c, m[i+ 0], 11, -358537222);
+      c = HH(c, d, a, b, m[i+ 3], 16, -722521979);
+      b = HH(b, c, d, a, m[i+ 6], 23,  76029189);
+      a = HH(a, b, c, d, m[i+ 9],  4, -640364487);
+      d = HH(d, a, b, c, m[i+12], 11, -421815835);
+      c = HH(c, d, a, b, m[i+15], 16,  530742520);
+      b = HH(b, c, d, a, m[i+ 2], 23, -995338651);
+
+      a = II(a, b, c, d, m[i+ 0],  6, -198630844);
+      d = II(d, a, b, c, m[i+ 7], 10,  1126891415);
+      c = II(c, d, a, b, m[i+14], 15, -1416354905);
+      b = II(b, c, d, a, m[i+ 5], 21, -57434055);
+      a = II(a, b, c, d, m[i+12],  6,  1700485571);
+      d = II(d, a, b, c, m[i+ 3], 10, -1894986606);
+      c = II(c, d, a, b, m[i+10], 15, -1051523);
+      b = II(b, c, d, a, m[i+ 1], 21, -2054922799);
+      a = II(a, b, c, d, m[i+ 8],  6,  1873313359);
+      d = II(d, a, b, c, m[i+15], 10, -30611744);
+      c = II(c, d, a, b, m[i+ 6], 15, -1560198380);
+      b = II(b, c, d, a, m[i+13], 21,  1309151649);
+      a = II(a, b, c, d, m[i+ 4],  6, -145523070);
+      d = II(d, a, b, c, m[i+11], 10, -1120210379);
+      c = II(c, d, a, b, m[i+ 2], 15,  718787259);
+      b = II(b, c, d, a, m[i+ 9], 21, -343485551);
+
+      a = (a + aa) >>> 0;
+      b = (b + bb) >>> 0;
+      c = (c + cc) >>> 0;
+      d = (d + dd) >>> 0;
+    }
+
+    return crypt.endian([a, b, c, d]);
+  };
+
+  // Auxiliary functions
+  md5._ff  = function (a, b, c, d, x, s, t) {
+    var n = a + (b & c | ~b & d) + (x >>> 0) + t;
+    return ((n << s) | (n >>> (32 - s))) + b;
+  };
+  md5._gg  = function (a, b, c, d, x, s, t) {
+    var n = a + (b & d | c & ~d) + (x >>> 0) + t;
+    return ((n << s) | (n >>> (32 - s))) + b;
+  };
+  md5._hh  = function (a, b, c, d, x, s, t) {
+    var n = a + (b ^ c ^ d) + (x >>> 0) + t;
+    return ((n << s) | (n >>> (32 - s))) + b;
+  };
+  md5._ii  = function (a, b, c, d, x, s, t) {
+    var n = a + (c ^ (b | ~d)) + (x >>> 0) + t;
+    return ((n << s) | (n >>> (32 - s))) + b;
+  };
+
+  // Package private blocksize
+  md5._blocksize = 16;
+  md5._digestsize = 16;
+
+  module.exports = function (message, options) {
+    if(typeof message == 'undefined')
+      return;
+
+    var digestbytes = crypt.wordsToBytes(md5(message, options));
+    return options && options.asBytes ? digestbytes :
+        options && options.asString ? bin.bytesToString(digestbytes) :
+        crypt.bytesToHex(digestbytes);
+  };
+
+})();
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":3,"charenc":16,"crypt":17}],16:[function(require,module,exports){
+var charenc = {
+  // UTF-8 encoding
+  utf8: {
+    // Convert a string to a byte array
+    stringToBytes: function(str) {
+      return charenc.bin.stringToBytes(unescape(encodeURIComponent(str)));
+    },
+
+    // Convert a byte array to a string
+    bytesToString: function(bytes) {
+      return decodeURIComponent(escape(charenc.bin.bytesToString(bytes)));
+    }
+  },
+
+  // Binary encoding
+  bin: {
+    // Convert a string to a byte array
+    stringToBytes: function(str) {
+      for (var bytes = [], i = 0; i < str.length; i++)
+        bytes.push(str.charCodeAt(i) & 0xFF);
+      return bytes;
+    },
+
+    // Convert a byte array to a string
+    bytesToString: function(bytes) {
+      for (var str = [], i = 0; i < bytes.length; i++)
+        str.push(String.fromCharCode(bytes[i]));
+      return str.join('');
+    }
+  }
+};
+
+module.exports = charenc;
+
+},{}],17:[function(require,module,exports){
+(function() {
+  var base64map
+      = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
+
+  crypt = {
+    // Bit-wise rotation left
+    rotl: function(n, b) {
+      return (n << b) | (n >>> (32 - b));
+    },
+
+    // Bit-wise rotation right
+    rotr: function(n, b) {
+      return (n << (32 - b)) | (n >>> b);
+    },
+
+    // Swap big-endian to little-endian and vice versa
+    endian: function(n) {
+      // If number given, swap endian
+      if (n.constructor == Number) {
+        return crypt.rotl(n, 8) & 0x00FF00FF | crypt.rotl(n, 24) & 0xFF00FF00;
+      }
+
+      // Else, assume array and swap all items
+      for (var i = 0; i < n.length; i++)
+        n[i] = crypt.endian(n[i]);
+      return n;
+    },
+
+    // Generate an array of any length of random bytes
+    randomBytes: function(n) {
+      for (var bytes = []; n > 0; n--)
+        bytes.push(Math.floor(Math.random() * 256));
+      return bytes;
+    },
+
+    // Convert a byte array to big-endian 32-bit words
+    bytesToWords: function(bytes) {
+      for (var words = [], i = 0, b = 0; i < bytes.length; i++, b += 8)
+        words[b >>> 5] |= bytes[i] << (24 - b % 32);
+      return words;
+    },
+
+    // Convert big-endian 32-bit words to a byte array
+    wordsToBytes: function(words) {
+      for (var bytes = [], b = 0; b < words.length * 32; b += 8)
+        bytes.push((words[b >>> 5] >>> (24 - b % 32)) & 0xFF);
+      return bytes;
+    },
+
+    // Convert a byte array to a hex string
+    bytesToHex: function(bytes) {
+      for (var hex = [], i = 0; i < bytes.length; i++) {
+        hex.push((bytes[i] >>> 4).toString(16));
+        hex.push((bytes[i] & 0xF).toString(16));
+      }
+      return hex.join('');
+    },
+
+    // Convert a hex string to a byte array
+    hexToBytes: function(hex) {
+      for (var bytes = [], c = 0; c < hex.length; c += 2)
+        bytes.push(parseInt(hex.substr(c, 2), 16));
+      return bytes;
+    },
+
+    // Convert a byte array to a base-64 string
+    bytesToBase64: function(bytes) {
+      for (var base64 = [], i = 0; i < bytes.length; i += 3) {
+        var triplet = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2];
+        for (var j = 0; j < 4; j++)
+          if (i * 8 + j * 6 <= bytes.length * 8)
+            base64.push(base64map.charAt((triplet >>> 6 * (3 - j)) & 0x3F));
+          else
+            base64.push('=');
+      }
+      return base64.join('');
+    },
+
+    // Convert a base-64 string to a byte array
+    base64ToBytes: function(base64) {
+      // Remove non-base-64 characters
+      base64 = base64.replace(/[^A-Z0-9+\/]/ig, '');
+
+      for (var bytes = [], i = 0, imod4 = 0; i < base64.length;
+          imod4 = ++i % 4) {
+        if (imod4 == 0) continue;
+        bytes.push(((base64map.indexOf(base64.charAt(i - 1))
+            & (Math.pow(2, -2 * imod4 + 8) - 1)) << (imod4 * 2))
+            | (base64map.indexOf(base64.charAt(i)) >>> (6 - imod4 * 2)));
+      }
+      return bytes;
+    }
+  };
+
+  module.exports = crypt;
+})();
+
 },{}],18:[function(require,module,exports){
 (function (process,global){
 /*!
@@ -12384,7 +12384,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 //# sourceMappingURL=rsvp.map
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":11}],19:[function(require,module,exports){
+},{"_process":8}],19:[function(require,module,exports){
 'use strict';
 
 var _      = require('lodash');
@@ -12758,21 +12758,21 @@ function validateArgument (method, object, position, name, type) {
 
 module.exports = FirebaseAuth;
 
-},{"lodash":17,"rsvp":18,"util":14}],20:[function(require,module,exports){
+},{"lodash":14,"rsvp":18,"util":11}],20:[function(require,module,exports){
 'use strict';
 
-var _        = require('lodash');
-var assert   = require('assert');
-var rsvp     = require('rsvp');
-var autoId   = require('firebase-auto-ids');
-var Query    = require('./query');
+var _ = require('lodash');
+var assert = require('assert');
+var Promise = require('rsvp').Promise;
+var autoId = require('firebase-auto-ids');
+var Query = require('./query');
 var Snapshot = require('./snapshot');
-var Queue    = require('./queue').Queue;
-var utils    = require('./utils');
-var Auth     = require('./auth');
+var Queue = require('./queue').Queue;
+var utils = require('./utils');
+var Auth = require('./auth');
 var validate = require('./validators');
 
-function MockFirebase (path, data, parent, name) {
+function MockFirebase(path, data, parent, name) {
   this.ref = this;
   this.path = path || 'Mock://';
   this.errs = {};
@@ -12817,13 +12817,19 @@ MockFirebase.restoreClock = function () {
   getServerTime = defaultClock;
 };
 
+MockFirebase.defaultAutoId = function () {
+  return autoId(new Date().getTime());
+};
+
+MockFirebase.autoId = MockFirebase.defaultAutoId;
+
 MockFirebase.prototype.flush = function (delay) {
   this.queue.flush(delay);
   return this;
 };
 
 MockFirebase.prototype.autoFlush = function (delay) {
-  if( _.isUndefined(delay)) {
+  if (_.isUndefined(delay)) {
     delay = true;
   }
   if (this.flushDelay !== delay) {
@@ -12838,7 +12844,7 @@ MockFirebase.prototype.autoFlush = function (delay) {
   return this;
 };
 
-MockFirebase.prototype.getFlushQueue = function() {
+MockFirebase.prototype.getFlushQueue = function () {
   return this.queue.getEvents();
 };
 
@@ -12919,8 +12925,8 @@ MockFirebase.prototype.set = function (data, callback) {
   var err = this._nextErr('set');
   data = _.cloneDeep(data);
   var self = this;
-  return new rsvp.Promise(function(resolve, reject) {
-    self._defer('set', _.toArray(arguments), function() {
+  return new Promise(function (resolve, reject) {
+    self._defer('set', _.toArray(arguments), function () {
       if (err === null) {
         self._dataChanged(data);
         resolve(data);
@@ -12938,11 +12944,12 @@ MockFirebase.prototype.update = function (changes, callback) {
   assert.equal(typeof changes, 'object', 'First argument must be an object when calling "update"');
   var err = this._nextErr('update');
   var self = this;
-  return new rsvp.Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     self._defer('update', _.toArray(arguments), function () {
       if (!err) {
         var base = self.getData();
-        var data = _.assign(_.isObject(base) ? base : {}, changes);
+        var data = _.merge(_.isObject(base) ? base : {}, utils.updateToObject(changes));
+        data = utils.removeEmptyProperties(data);
         self._dataChanged(data);
         resolve(data);
       } else {
@@ -13005,7 +13012,7 @@ MockFirebase.prototype.once = function (event, callback, cancel, context) {
   }
   cancel = cancel || _.noop;
   var self = this;
-  return new rsvp.Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     var err = self._nextErr('once');
     if (err) {
       self._defer('once', _.toArray(arguments), function () {
@@ -13030,13 +13037,18 @@ MockFirebase.prototype.once = function (event, callback, cancel, context) {
 
 MockFirebase.prototype.remove = function (callback) {
   var err = this._nextErr('remove');
-  this._defer('remove', _.toArray(arguments), function () {
-    if (err === null) {
-      this._dataChanged(null);
-    }
-    if (callback) callback(err);
+  var self = this;
+  return new Promise(function (resolve, reject) {
+    self._defer('remove', _.toArray(arguments), function () {
+      if (callback) callback(err);
+      if (err === null) {
+        self._dataChanged(null);
+        resolve(null);
+      } else {
+        reject(err);
+      }
+    });
   });
-  return this;
 };
 
 MockFirebase.prototype.on = function (event, callback, cancel, context) {
@@ -13049,7 +13061,7 @@ MockFirebase.prototype.on = function (event, callback, cancel, context) {
 
   var err = this._nextErr('on');
   if (err) {
-    this._defer('on', _.toArray(arguments), function() {
+    this._defer('on', _.toArray(arguments), function () {
       cancel.call(context, err);
     });
   }
@@ -13086,16 +13098,23 @@ MockFirebase.prototype.off = function (event, callback, context) {
 };
 
 MockFirebase.prototype.transaction = function (valueFn, finishedFn, applyLocally) {
-  this._defer('transaction', _.toArray(arguments), function () {
-    var err = this._nextErr('transaction');
-    var res = valueFn(this.getData());
-    var newData = _.isUndefined(res) || err? this.getData() : res;
-    this._dataChanged(newData);
-    if (typeof finishedFn === 'function') {
-      finishedFn(err, err === null && !_.isUndefined(res), new Snapshot(this, newData, this.priority));
-    }
+  var err = this._nextErr('transaction');
+  var res = valueFn(this.getData());
+  var newData = _.isUndefined(res) || err ? this.getData() : res;
+  var self = this;
+  return new Promise(function (resolve, reject) {
+    self._defer('transaction', _.toArray(arguments), function () {
+      this._dataChanged(newData);
+      if (typeof finishedFn === 'function') {
+        finishedFn(err, err === null && !_.isUndefined(res), new Snapshot(this, newData, self.priority));
+      }
+      if (err === null) {
+        resolve({committed: true, snapshot: new Snapshot(this, newData, self.priority)});
+      } else {
+        reject(err);
+      }
+    });
   });
-  return [valueFn, finishedFn, applyLocally];
 };
 
 /**
@@ -13117,21 +13136,21 @@ MockFirebase.prototype.orderByChild = function (child) {
  * Just a stub so it can be spied on during testing
  */
 MockFirebase.prototype.orderByKey = function (key) {
- return new Query(this);
+  return new Query(this);
 };
 
 /**
  * Just a stub so it can be spied on during testing
  */
 MockFirebase.prototype.orderByPriority = function (property) {
- return new Query(this);
+  return new Query(this);
 };
 
 /**
  * Just a stub so it can be spied on during testing
  */
 MockFirebase.prototype.orderByValue = function (value) {
- return new Query(this);
+  return new Query(this);
 };
 
 MockFirebase.prototype.startAt = function (priority, key) {
@@ -13146,7 +13165,7 @@ MockFirebase.prototype._childChanged = function (ref) {
   var events = [];
   var childKey = ref.key;
   var data = ref.getData();
-  if( data === null ) {
+  if (data === null) {
     this._removeChild(childKey, events);
   }
   else {
@@ -13163,30 +13182,30 @@ MockFirebase.prototype._dataChanged = function (unparsedData) {
     data = getServerTime();
   }
 
-  if( pri !== this.priority ) {
+  if (pri !== this.priority) {
     this._priChanged(pri);
   }
-  if( !_.isEqual(data, this.data) ) {
+  if (!_.isEqual(data, this.data)) {
     var oldKeys = _.keys(this.data).sort();
     var newKeys = _.keys(data).sort();
     var keysToRemove = _.difference(oldKeys, newKeys);
     var keysToChange = _.difference(newKeys, keysToRemove);
     var events = [];
 
-    keysToRemove.forEach(function(key) {
+    keysToRemove.forEach(function (key) {
       this._removeChild(key, events);
     }, this);
 
-    if(!_.isObject(data)) {
+    if (!_.isObject(data)) {
       events.push(false);
       this.data = data;
     }
     else {
-      keysToChange.forEach(function(key) {
+      keysToChange.forEach(function (key) {
         var childData = unparsedData[key];
-          if (utils.isServerTimestamp(childData)) {
-            childData = getServerTime();
-          }
+        if (utils.isServerTimestamp(childData)) {
+          childData = getServerTime();
+        }
         this._updateOrAdd(key, childData, events);
       }, this);
     }
@@ -13205,30 +13224,32 @@ MockFirebase.prototype._priChanged = function (newPriority) {
     newPriority = getServerTime();
   }
   this.priority = newPriority;
-  if( this.parentRef ) {
+  if (this.parentRef) {
     this.parentRef._resort(this.key);
   }
 };
 
 MockFirebase.prototype._getPri = function (key) {
-  return _.has(this.children, key)? this.children[key].priority : null;
+  return _.has(this.children, key) ? this.children[key].priority : null;
 };
 
 MockFirebase.prototype._resort = function (childKeyMoved) {
   this.sortedDataKeys.sort(_.bind(this.childComparator, this));
   // resort the data object to match our keys so value events return ordered content
   var oldData = _.assign({}, this.data);
-  _.each(oldData, function(v,k) { delete this.data[k]; }, this);
-  _.each(this.sortedDataKeys, function(k) {
+  _.each(oldData, function (v, k) {
+    delete this.data[k];
+  }, this);
+  _.each(this.sortedDataKeys, function (k) {
     this.data[k] = oldData[k];
   }, this);
-  if( !_.isUndefined(childKeyMoved) && _.has(this.data, childKeyMoved) ) {
+  if (!_.isUndefined(childKeyMoved) && _.has(this.data, childKeyMoved)) {
     this._trigger('child_moved', this.data[childKeyMoved], this._getPri(childKeyMoved), childKeyMoved);
   }
 };
 
 MockFirebase.prototype._addKey = function (newKey) {
-  if(_.indexOf(this.sortedDataKeys, newKey) === -1) {
+  if (_.indexOf(this.sortedDataKeys, newKey) === -1) {
     this.sortedDataKeys.push(newKey);
     this._resort();
   }
@@ -13236,7 +13257,7 @@ MockFirebase.prototype._addKey = function (newKey) {
 
 MockFirebase.prototype._dropKey = function (key) {
   var i = _.indexOf(this.sortedDataKeys, key);
-  if( i > -1 ) {
+  if (i > -1) {
     this.sortedDataKeys.splice(i, 1);
   }
 };
@@ -13257,11 +13278,11 @@ MockFirebase.prototype._defer = function (sourceMethod, sourceArgs, callback) {
 };
 
 MockFirebase.prototype._trigger = function (event, data, pri, key) {
-  var ref = event==='value'? this : this.child(key);
+  var ref = event === 'value' ? this : this.child(key);
   var snap = new Snapshot(ref, data, pri);
-  _.each(this._events[event], function(parts) {
+  _.each(this._events[event], function (parts) {
     var fn = parts[0], context = parts[1];
-    if(_.contains(['child_added', 'child_moved'], event)) {
+    if (_.contains(['child_added', 'child_moved'], event)) {
       fn.call(context, snap, this._getPrevChild(key));
     }
     else {
@@ -13272,7 +13293,7 @@ MockFirebase.prototype._trigger = function (event, data, pri, key) {
 
 MockFirebase.prototype._triggerAll = function (events) {
   if (!events.length) return;
-  events.forEach(function(event) {
+  events.forEach(function (event) {
     if (event !== false) this._trigger.apply(this, event);
   }, this);
   this._trigger('value', this.data, this.priority);
@@ -13283,7 +13304,7 @@ MockFirebase.prototype._triggerAll = function (events) {
 
 MockFirebase.prototype._updateOrAdd = function (key, data, events) {
   var exists = _.isObject(this.data) && this.data.hasOwnProperty(key);
-  if( !exists ) {
+  if (!exists) {
     return this._addChild(key, data, events);
   }
   else {
@@ -13303,14 +13324,14 @@ MockFirebase.prototype._addChild = function (key, data, events) {
 };
 
 MockFirebase.prototype._removeChild = function (key, events) {
-  if(this._hasChild(key)) {
+  if (this._hasChild(key)) {
     this._dropKey(key);
     var data = this.data[key];
     delete this.data[key];
-    if(_.isEmpty(this.data)) {
+    if (_.isEmpty(this.data)) {
       this.data = null;
     }
-    if(_.has(this.children, key)) {
+    if (_.has(this.children, key)) {
       this.children[key]._dataChanged(null);
     }
     if (events) events.push(['child_removed', data, null, key]);
@@ -13319,7 +13340,7 @@ MockFirebase.prototype._removeChild = function (key, events) {
 
 MockFirebase.prototype._updateChild = function (key, data, events) {
   var cdata = utils.cleanData(data);
-  if(_.isObject(this.data) && _.has(this.data,key) && !_.isEqual(this.data[key], cdata)) {
+  if (_.isObject(this.data) && _.has(this.data, key) && !_.isEqual(this.data[key], cdata)) {
     this.data[key] = cdata;
     var c = this.child(key);
     c._dataChanged(data);
@@ -13328,13 +13349,13 @@ MockFirebase.prototype._updateChild = function (key, data, events) {
 };
 
 MockFirebase.prototype._newAutoId = function () {
-  return (this._lastAutoId = autoId(new Date().getTime()));
+  return (this._lastAutoId = MockFirebase.autoId());
 };
 
 MockFirebase.prototype._nextErr = function (type) {
   var err = this.errs[type];
   delete this.errs[type];
-  return err||null;
+  return err || null;
 };
 
 MockFirebase.prototype._hasChild = function (key) {
@@ -13342,20 +13363,20 @@ MockFirebase.prototype._hasChild = function (key) {
 };
 
 MockFirebase.prototype._childData = function (key) {
-  return this._hasChild(key)? this.data[key] : null;
+  return this._hasChild(key) ? this.data[key] : null;
 };
 
 MockFirebase.prototype._getPrevChild = function (key) {
 //      this._resort();
   var keys = this.sortedDataKeys;
   var i = _.indexOf(keys, key);
-  if( i === -1 ) {
+  if (i === -1) {
     keys = keys.slice();
     keys.push(key);
     keys.sort(_.bind(this.childComparator, this));
     i = _.indexOf(keys, key);
   }
-  return i === 0? null : keys[i-1];
+  return i === 0 ? null : keys[i - 1];
 };
 
 MockFirebase.prototype._on = function (deferName, event, callback, cancel, context) {
@@ -13390,25 +13411,25 @@ MockFirebase.prototype.childComparator = function (a, b) {
   var aPri = this._getPri(a);
   var bPri = this._getPri(b);
   var x = utils.priorityComparator(aPri, bPri);
-  if( x === 0 ) {
-    if( a !== b ) {
-      x = a < b? -1 : 1;
+  if (x === 0) {
+    if (a !== b) {
+      x = a < b ? -1 : 1;
     }
   }
   return x;
 };
 
 function extractName(path) {
-  return ((path || '').match(/\/([^.$\[\]#\/]+)$/)||[null, null])[1];
+  return ((path || '').match(/\/([^.$\[\]#\/]+)$/) || [null, null])[1];
 }
 
 module.exports = MockFirebase;
 
-},{"./auth":19,"./query":22,"./queue":23,"./snapshot":26,"./utils":27,"./validators":28,"assert":5,"firebase-auto-ids":16,"lodash":17,"rsvp":18}],21:[function(require,module,exports){
+},{"./auth":19,"./query":22,"./queue":23,"./snapshot":26,"./utils":27,"./validators":28,"assert":2,"firebase-auto-ids":13,"lodash":14,"rsvp":18}],21:[function(require,module,exports){
 'use strict';
 
 var _   = require('lodash');
-var md5 = require('MD5');
+var md5 = require('md5');
 
 /*******************************************************************************
  * SIMPLE LOGIN
@@ -13712,7 +13733,7 @@ function createDefaultUser (provider) {
 
 module.exports = MockFirebaseSimpleLogin;
 
-},{"MD5":2,"lodash":17}],22:[function(require,module,exports){
+},{"lodash":14,"md5":15}],22:[function(require,module,exports){
 'use strict';
 
 var _        = require('lodash');
@@ -13888,7 +13909,7 @@ function assertQuery (method, pri, key) {
 
 module.exports = MockQuery;
 
-},{"./slice":25,"./utils":27,"./validators":28,"lodash":17,"rsvp":18}],23:[function(require,module,exports){
+},{"./slice":25,"./utils":27,"./validators":28,"lodash":14,"rsvp":18}],23:[function(require,module,exports){
 'use strict';
 
 var _            = require('lodash');
@@ -13964,7 +13985,7 @@ FlushEvent.prototype.cancel = function () {
 exports.Queue = FlushQueue;
 exports.Event = FlushEvent;
 
-},{"events":10,"lodash":17,"util":14}],24:[function(require,module,exports){
+},{"events":7,"lodash":14,"util":11}],24:[function(require,module,exports){
 var MockFirebase = require('./firebase');
 
 function MockFirebaseSdk(createDatabase, createAuth) {
@@ -13973,6 +13994,9 @@ function MockFirebaseSdk(createDatabase, createAuth) {
     delete auth.ref;
     return auth;
   }
+  MockFirebaseAuth.EmailAuthProvider = function() {
+    this.providerId = "password";
+  };
   MockFirebaseAuth.GoogleAuthProvider = function() {
     this.providerId = "google.com";
   };
@@ -14200,7 +14224,7 @@ Slice.prototype._build = function(ref, rawData) {
 
 module.exports = Slice;
 
-},{"./snapshot":26,"./utils":27,"lodash":17}],26:[function(require,module,exports){
+},{"./snapshot":26,"./utils":27,"lodash":14}],26:[function(require,module,exports){
 'use strict';
 
 var _ = require('lodash');
@@ -14285,38 +14309,40 @@ function isValue (value) {
 
 module.exports = MockDataSnapshot;
 
-},{"lodash":17}],27:[function(require,module,exports){
+},{"lodash":14}],27:[function(require,module,exports){
 'use strict';
 
 var Snapshot = require('./snapshot');
-var _        = require('lodash');
+var _ = require('lodash');
 
 exports.makeRefSnap = function makeRefSnap(ref) {
   return new Snapshot(ref, ref.getData(), ref.priority);
 };
 
-exports.mergePaths = function mergePaths (base, add) {
-  return base.replace(/\/$/, '')+'/'+add.replace(/^\//, '');
+exports.mergePaths = function mergePaths(base, add) {
+  return base.replace(/\/$/, '') + '/' + add.replace(/^\//, '');
 };
 
 exports.cleanData = function cleanData(data) {
   var newData = _.clone(data);
-  if(_.isObject(newData)) {
-    if(_.has(newData, '.value')) {
+  if (_.isObject(newData)) {
+    if (_.has(newData, '.value')) {
       newData = _.clone(newData['.value']);
     }
-    if(_.has(newData, '.priority')) {
+    if (_.has(newData, '.priority')) {
       delete newData['.priority'];
     }
 //      _.each(newData, function(v,k) {
 //        newData[k] = cleanData(v);
 //      });
-    if(_.isEmpty(newData)) { newData = null; }
+    if (_.isEmpty(newData)) {
+      newData = null;
+    }
   }
   return newData;
 };
 
-exports.getMeta = function getMeta (data, key, defaultVal) {
+exports.getMeta = function getMeta(data, key, defaultVal) {
   var val = defaultVal;
   var metaKey = '.' + key;
   if (_.isObject(data) && _.has(data, metaKey)) {
@@ -14326,28 +14352,28 @@ exports.getMeta = function getMeta (data, key, defaultVal) {
   return val;
 };
 
-exports.assertKey = function assertKey (method, key, argNum) {
+exports.assertKey = function assertKey(method, key, argNum) {
   if (!argNum) argNum = 'first';
   if (typeof(key) !== 'string' || key.match(/[.#$\/\[\]]/)) {
-    throw new Error(method + ' failed: '+ argNum+' was an invalid key "'+(key+'')+'. Firebase keys must be non-empty strings and can\'t contain ".", "#", "$", "/", "[", or "]"');
+    throw new Error(method + ' failed: ' + argNum + ' was an invalid key "' + (key + '') + '. Firebase keys must be non-empty strings and can\'t contain ".", "#", "$", "/", "[", or "]"');
   }
 };
 
-exports.priAndKeyComparator = function priAndKeyComparator (testPri, testKey, valPri, valKey) {
+exports.priAndKeyComparator = function priAndKeyComparator(testPri, testKey, valPri, valKey) {
   var x = 0;
   if (!_.isUndefined(testPri)) {
     x = exports.priorityComparator(testPri, valPri);
   }
   if (x === 0 && !_.isUndefined(testKey) && testKey !== valKey) {
-    x = testKey < valKey? -1 : 1;
+    x = testKey < valKey ? -1 : 1;
   }
   return x;
 };
 
-exports.priorityComparator = function priorityComparator (a, b) {
+exports.priorityComparator = function priorityComparator(a, b) {
   if (a !== b) {
     if (a === null || b === null) {
-      return a === null? -1 : 1;
+      return a === null ? -1 : 1;
     }
     if (typeof a !== typeof b) {
       return typeof a === 'number' ? -1 : 1;
@@ -14358,11 +14384,57 @@ exports.priorityComparator = function priorityComparator (a, b) {
   return 0;
 };
 
-exports.isServerTimestamp = function isServerTimestamp (data) {
+exports.isServerTimestamp = function isServerTimestamp(data) {
   return _.isObject(data) && data['.sv'] === 'timestamp';
 };
 
-},{"./snapshot":26,"lodash":17}],28:[function(require,module,exports){
+exports.removeEmptyProperties = function removeEmptyProperties(obj) {
+  var t = typeof obj;
+  if (t === 'boolean' || t === 'string' || t === 'number' || t === 'undefined') {
+    return obj;
+  }
+
+  var keys = getKeys(obj);
+  if (keys.length === 0) {
+    return null;
+  } else {
+    for (var s in obj) {
+      var value = removeEmptyProperties(obj[s]);
+      if (value === null) {
+        delete obj[s];
+      }
+    }
+    if (getKeys(obj).length === 0) {
+      return null;
+    }
+  }
+  return obj;
+
+  function getKeys(o) {
+    var result = [];
+    for (var s in o) result.push(s);
+    return result;
+  }
+};
+
+exports.updateToObject = function updateToObject(update) {
+  var result = {};
+  for (var s in update) {
+    var parts = s.split('/');
+    var value = update[s];
+    var o = result;
+    do {
+      var key = parts.shift();
+      if(key) {
+        var newObject = o[key] || {};
+        o[key] = parts.length > 0 ? newObject : value;
+        o = newObject;
+      }
+    } while (parts.length);
+  }
+  return result;
+};
+},{"./snapshot":26,"lodash":14}],28:[function(require,module,exports){
 'use strict';
 
 var assert = require('assert');
@@ -14375,7 +14447,7 @@ exports.event = function (name) {
   }).join(', ')));
 };
 
-},{"assert":5,"util":14}]},{},[1])(1)
+},{"assert":2,"util":11}]},{},[1])(1)
 });;(function (window) {
   'use strict';
   if (typeof window !== 'undefined' && window.firebasemock) {
