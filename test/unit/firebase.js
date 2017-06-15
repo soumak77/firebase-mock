@@ -1,8 +1,13 @@
 'use strict';
 
-var sinon = require('sinon');
-var expect = require('chai').use(require('sinon-chai')).expect;
-var _ = require('lodash');
+var chai     = require('chai');
+var sinon    = require('sinon');
+
+chai.use(require('chai-as-promised'));
+chai.use(require('sinon-chai'));
+
+var expect   = chai.expect;
+var _        = require('lodash');
 var Firebase = require('../../').MockFirebase;
 
 describe('MockFirebase', function () {
@@ -13,6 +18,22 @@ describe('MockFirebase', function () {
     ref.set(require('./data.json').data);
     ref.flush();
     spy = sinon.spy();
+  });
+
+  describe('set & transition', function(){
+    beforeEach(function () {
+      ref.autoFlush();
+    });
+
+    it('should work', function(){
+      return expect(ref.set({test:{name: 'one'}}).then(function() {
+        return ref.child('/test/count').transaction(function (count) {
+          return count + 1;
+        });
+      }).then(function(res){
+        return res.snapshot.val();
+      })).to.eventually.eql(1);
+    });
   });
 
   describe('Server Timestamps', function () {
@@ -281,10 +302,8 @@ describe('MockFirebase', function () {
       ref.autoFlush();
     });
 
-    it('should return a promise', function () {
-      return ref.set({test: 'one'}).then(function (res) {
-        expect(res).to.eql({test: 'one'});
-      });
+    it('should return a promise', function(){
+      return expect(ref.set({test:'one'})).to.eventually.eql({test : 'one'});
     });
 
     it('should remove old keys from data', function () {
@@ -532,11 +551,9 @@ describe('MockFirebase', function () {
 
   describe('#remove', function () {
 
-    it('should return a promise', function () {
+    it('should return a promise', function(){
       ref.autoFlush();
-      return ref.child('/test').remove().then(function (res) {
-        expect(res).to.equal(null);
-      });
+      return expect(ref.child('/test').remove()).to.eventually.eql(null);
     });
 
     it('fires child_removed for children', function () {
