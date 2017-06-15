@@ -1,13 +1,13 @@
 'use strict';
 
-var chai     = require('chai');
-var sinon    = require('sinon');
+var chai = require('chai');
+var sinon = require('sinon');
 
 chai.use(require('chai-as-promised'));
 chai.use(require('sinon-chai'));
 
-var expect   = chai.expect;
-var _        = require('lodash');
+var expect = chai.expect;
+var _ = require('lodash');
 var Firebase = require('../../').MockFirebase;
 
 describe('MockFirebase', function () {
@@ -20,17 +20,17 @@ describe('MockFirebase', function () {
     spy = sinon.spy();
   });
 
-  describe('set & transition', function(){
+  describe('set & transition', function () {
     beforeEach(function () {
       ref.autoFlush();
     });
 
-    it('should work', function(){
-      return expect(ref.set({test:{name: 'one'}}).then(function() {
+    it('should work', function () {
+      return expect(ref.set({test: {name: 'one'}}).then(function () {
         return ref.child('/test/count').transaction(function (count) {
           return count + 1;
         });
-      }).then(function(res){
+      }).then(function (res) {
         return res.snapshot.val();
       })).to.eventually.eql(1);
     });
@@ -302,8 +302,8 @@ describe('MockFirebase', function () {
       ref.autoFlush();
     });
 
-    it('should return a promise', function(){
-      return expect(ref.set({test:'one'})).to.eventually.eql({test : 'one'});
+    it('should return a promise', function () {
+      return expect(ref.set({test: 'one'})).to.eventually.eql({test: 'one'});
     });
 
     it('should remove old keys from data', function () {
@@ -551,7 +551,7 @@ describe('MockFirebase', function () {
 
   describe('#remove', function () {
 
-    it('should return a promise', function(){
+    it('should return a promise', function () {
       ref.autoFlush();
       return expect(ref.child('/test').remove()).to.eventually.eql(null);
     });
@@ -823,5 +823,33 @@ describe('MockFirebase', function () {
     });
   });
 
+  describe('Firebase.autoId', function () {
+    afterEach(function(){
+      Firebase.autoId = Firebase.defaultAutoId;
+    });
 
+    it('fails to add nested data by auto id', function () {
+      var id = ref._newAutoId();
+      sinon.stub(ref, '_newAutoId').returns(id);
+      ref.child('some/prop').push({
+        foo: 'bar'
+      });
+      ref.flush();
+      expect(ref.child('some/prop').child(id).getData()).to.equal(null);
+    });
+
+    it('succeeds to add nested data by auto id, when Firebase.autoId is replaced', function () {
+      var id = 'x1234';
+      Firebase.autoId = function () {
+        return id;
+      };
+      ref.child('some/prop').push({
+        foo: 'bar'
+      });
+      ref.flush();
+      expect(ref.child('some/prop').child(id).getData()).to.deep.equal({
+        foo: 'bar'
+      });
+    });
+  });
 });
