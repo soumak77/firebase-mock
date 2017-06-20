@@ -30,6 +30,6 @@ var mocksdk = firebasemock.MockFirebaseSdk(function(path) {
 var mySrc = proxyquire('./mySrc', {
   firebase: mocksdk
 });
-mock.flush();
+mockdatabase.flush();
 // data is logged
 ```
