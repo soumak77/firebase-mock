@@ -425,8 +425,9 @@ MockFirebase.prototype._dataChanged = function (unparsedData) {
     this._priChanged(pri);
   }
   if (!_.isEqual(data, this.data)) {
-    var oldKeys = _.keys(this.data).sort();
-    var newKeys = _.keys(data).sort();
+    // _.keys() in Lodash 3 automatically coerces non-object to object
+    var oldKeys = _.isObject(this.data) ? _.keys(this.data).sort() : [];
+    var newKeys = _.isObject(data) ? _.keys(data).sort() : [];
     var keysToRemove = _.difference(oldKeys, newKeys);
     var keysToChange = _.difference(newKeys, keysToRemove);
     var events = [];
@@ -450,7 +451,8 @@ MockFirebase.prototype._dataChanged = function (unparsedData) {
     }
 
     // update order of my child keys
-    this._resort();
+    if (_.isObject(this.data))
+      this._resort();
 
     // trigger parent notifications after all children have
     // been processed
