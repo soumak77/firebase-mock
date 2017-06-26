@@ -1,4 +1,4 @@
-/** firebase-mock - v1.0.9
+/** firebase-mock - v1.0.10
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -17411,7 +17411,21 @@ MockFirebase.prototype.transaction = function (valueFn, finishedFn, applyLocally
  * @param {int} limit
  */
 MockFirebase.prototype.limit = function (limit) {
-  return new Query(this).limit(limit);
+  return new Query(this).limitToLast(limit);
+};
+
+/**
+ * Just a stub so it can be spied on during testing
+ */
+MockFirebase.prototype.limitToFirst = function (limit) {
+  return new Query(this).limitToFirst(limit);
+};
+
+/**
+ * Just a stub so it can be spied on during testing
+ */
+MockFirebase.prototype.limitToLast = function (limit) {
+  return new Query(this).limitToLast(limit);
 };
 
 /**
@@ -18162,12 +18176,27 @@ MockQuery.prototype.once = function (event, callback, context) {
   });
 };
 
-MockQuery.prototype.limit = function (intVal) {
+MockQuery.prototype.limitToFirst = function (intVal) {
   if( typeof intVal !== 'number' ) {
-    throw new Error('Query.limit: First argument must be a positive integer.');
+    throw new Error('Query.limitToFirst: First argument must be a positive integer.');
   }
   var q = new MockQuery(this.ref);
-  _.extend(q._q, this._q, {limit: intVal});
+  _.extend(q._q, this._q, {
+    limit: intVal,
+    limitorder: 'first'
+  });
+  return q;
+};
+
+MockQuery.prototype.limitToLast = function (intVal) {
+  if( typeof intVal !== 'number' ) {
+    throw new Error('Query.limitToLast: First argument must be a positive integer.');
+  }
+  var q = new MockQuery(this.ref);
+  _.extend(q._q, this._q, {
+    limit: intVal,
+    limitorder: 'last'
+  });
   return q;
 };
 
@@ -18488,15 +18517,30 @@ Slice.prototype._makeProps = function (queueProps, ref, numRecords) {
   out.min = this._findPos(out.startPri, out.startKey, ref, true);
   out.max = this._findPos(out.endPri, out.endKey, ref);
   if( !_.isUndefined(queueProps.limit) ) {
-    if( out.min > -1 ) {
-      out.max = out.min + queueProps.limit;
-    }
-    else if( out.max > -1 ) {
-      out.min = out.max - queueProps.limit;
-    }
-    else if( queueProps.limit < numRecords ) {
-      out.max = numRecords-1;
-      out.min = Math.max(0, numRecords - queueProps.limit);
+    if (queueProps.limitorder !== 'first') {
+      // limitToLast
+      if( out.min > -1 ) {
+        out.max = out.min + queueProps.limit;
+      }
+      else if( out.max > -1 ) {
+        out.min = out.max - queueProps.limit;
+      }
+      else if( queueProps.limit < numRecords ) {
+        out.max = numRecords-1;
+        out.min = Math.max(0, numRecords - queueProps.limit);
+      }
+    } else {
+      // limitToFirst
+      if( out.min > -1 ) {
+        out.max = out.min + queueProps.limit;
+      }
+      else if( out.max > -1 ) {
+        out.min = out.max - queueProps.limit;
+      }
+      else if( queueProps.limit < numRecords ) {
+        out.min = 0;
+        out.max = queueProps.limit - 1;
+      }
     }
   }
   return out;

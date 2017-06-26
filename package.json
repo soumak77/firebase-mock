@@ -1,6 +1,6 @@
 {
   "name": "firebase-mock",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Firebase mock library for writing unit tests",
   "main": "./src",
   "scripts": {
