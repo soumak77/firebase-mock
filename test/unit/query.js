@@ -19,7 +19,7 @@ describe('MockQuery', function () {
   describe('#ref', function() {
 
     it('returns the ref used to create the query', function() {
-      expect(ref.limit(2).startAt('a').ref).to.equal(ref);
+      expect(ref.limitToLast(2).startAt('a').ref).to.equal(ref);
     });
 
   });
@@ -86,7 +86,7 @@ describe('MockQuery', function () {
     describe('value', function() {
       it('should provide value immediately', function() {
         var spy = sinon.spy();
-        ref.limit(2).on('value', spy);
+        ref.limitToLast(2).on('value', spy);
         ref.flush();
         expect(spy.called).to.equal(true);
       });
@@ -95,7 +95,7 @@ describe('MockQuery', function () {
         var spy = sinon.spy(function(snap) {
           expect(snap.val()).equals(null);
         });
-        ref.limit(2).startAt('foo').endAt('foo').on('value', spy);
+        ref.limitToLast(2).startAt('foo').endAt('foo').on('value', spy);
         ref.flush();
         expect(spy.called).to.equal(true);
       });
@@ -111,7 +111,7 @@ describe('MockQuery', function () {
 
       it('should update on change', function() {
         var spy = sinon.spy();
-        ref.startAt(3, 'num_3').limit(2).on('value', spy);
+        ref.startAt(3, 'num_3').limitToLast(2).on('value', spy);
         ref.flush();
         expect(spy).callCount(1);
         ref.child('num_3').set({foo: 'bar'});
@@ -121,7 +121,7 @@ describe('MockQuery', function () {
 
       it('should not update on change outside range', function() {
         var spy = sinon.spy();
-        ref.limit(1).on('value', spy);
+        ref.limitToLast(1).on('value', spy);
         ref.flush();
         expect(spy).callCount(1);
         ref.child('num_3').set('apple');
@@ -132,7 +132,7 @@ describe('MockQuery', function () {
       it('can take the context as the 3rd argument', function () {
         var spy = sinon.spy();
         var context = {};
-        ref.limit(1).on('value', spy, context);
+        ref.limitToLast(1).on('value', spy, context);
         ref.flush();
         expect(spy).to.have.been.calledOn(context);
       });
@@ -146,21 +146,21 @@ describe('MockQuery', function () {
 
       it('should be triggered if value is null', function() {
         var spy = sinon.spy();
-        ref.child('notavalidkey').limit(3).once('value', spy);
+        ref.child('notavalidkey').limitToLast(3).once('value', spy);
         ref.flush();
         expect(spy).callCount(1);
       });
 
       it('should be triggered if value is not null', function() {
         var spy = sinon.spy();
-        ref.limit(3).once('value', spy);
+        ref.limitToLast(3).once('value', spy);
         ref.flush();
         expect(spy).callCount(1);
       });
 
       it('should not get triggered twice', function() {
         var spy = sinon.spy();
-        ref.limit(3).once('value', spy);
+        ref.limitToLast(3).once('value', spy);
         ref.flush();
         ref.child('addfortest').set({hello: 'world'});
         ref.flush();
@@ -173,7 +173,7 @@ describe('MockQuery', function () {
 
       it('should trigger all keys in initial range', function() {
         var spy = sinon.spy();
-        var query = ref.limit(4);
+        var query = ref.limitToLast(4);
         var data = query.slice().data;
         query.on('child_added', spy);
         query.flush();
@@ -187,7 +187,7 @@ describe('MockQuery', function () {
 
       it('should not notify for add outside range');
 
-      it('should trigger a child_removed if using limit');
+      it('should trigger a child_removed if using limitToLast');
 
       it('should work if connected from instead a once "value"', function() {
         var ref = new Firebase('testing://');
@@ -236,7 +236,7 @@ describe('MockQuery', function () {
 
       it('should not trigger for a child out of range');
 
-      it('should trigger a child_added for replacement if using limit');
+      it('should trigger a child_added for replacement if using limitToLast');
     });
 
     describe('child_moved', function() {
@@ -252,12 +252,56 @@ describe('MockQuery', function () {
     it('should not notify on callbacks');
   });
 
-  describe('limit', function() {
+  describe('limitToFirst', function() {
     it('should throw Error if non-integer argument');
 
-    it('should return correct number of results');
+    it('should return correct number of results', function() {
+      var spy = sinon.spy();
+      var query = ref.limitToFirst(2);
+      query.on('child_added', spy);
+      query.flush();
 
-    it('should work if does not match any results');
+      expect(spy).callCount(2);
+      _.each(['null_a', 'null_b'], function(k, i) {
+        expect(spy.getCall(i).args[0].key).equals(k);
+      });
+    });
+
+    it('should work if does not match any results', function() {
+      var spy = sinon.spy();
+      var query = ref.child('fakechild').limitToFirst(2);
+      query.on('child_added', spy);
+      query.flush();
+      expect(spy).callCount(0);
+    });
+
+    it('should be relevant to endAt()'); //todo not implemented
+
+    it('should be relevant to startAt()'); //todo not implemented
+  });
+
+  describe('limitToLast', function() {
+    it('should throw Error if non-integer argument');
+
+    it('should return correct number of results', function() {
+      var spy = sinon.spy();
+      var query = ref.limitToLast(2);
+      query.on('child_added', spy);
+      query.flush();
+
+      expect(spy).callCount(2);
+      _.each(['char_b', 'char_c'], function(k, i) {
+        expect(spy.getCall(i).args[0].key).equals(k);
+      });
+    });
+
+    it('should work if does not match any results', function() {
+      var spy = sinon.spy();
+      var query = ref.child('fakechild').limitToLast(2);
+      query.on('child_added', spy);
+      query.flush();
+      expect(spy).callCount(0);
+    });
 
     it('should be relevant to endAt()'); //todo not implemented
 

@@ -361,7 +361,21 @@ MockFirebase.prototype.transaction = function (valueFn, finishedFn, applyLocally
  * @param {int} limit
  */
 MockFirebase.prototype.limit = function (limit) {
-  return new Query(this).limit(limit);
+  return new Query(this).limitToLast(limit);
+};
+
+/**
+ * Just a stub so it can be spied on during testing
+ */
+MockFirebase.prototype.limitToFirst = function (limit) {
+  return new Query(this).limitToFirst(limit);
+};
+
+/**
+ * Just a stub so it can be spied on during testing
+ */
+MockFirebase.prototype.limitToLast = function (limit) {
+  return new Query(this).limitToLast(limit);
 };
 
 /**

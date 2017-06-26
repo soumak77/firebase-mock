@@ -155,15 +155,30 @@ Slice.prototype._makeProps = function (queueProps, ref, numRecords) {
   out.min = this._findPos(out.startPri, out.startKey, ref, true);
   out.max = this._findPos(out.endPri, out.endKey, ref);
   if( !_.isUndefined(queueProps.limit) ) {
-    if( out.min > -1 ) {
-      out.max = out.min + queueProps.limit;
-    }
-    else if( out.max > -1 ) {
-      out.min = out.max - queueProps.limit;
-    }
-    else if( queueProps.limit < numRecords ) {
-      out.max = numRecords-1;
-      out.min = Math.max(0, numRecords - queueProps.limit);
+    if (queueProps.limitorder !== 'first') {
+      // limitToLast
+      if( out.min > -1 ) {
+        out.max = out.min + queueProps.limit;
+      }
+      else if( out.max > -1 ) {
+        out.min = out.max - queueProps.limit;
+      }
+      else if( queueProps.limit < numRecords ) {
+        out.max = numRecords-1;
+        out.min = Math.max(0, numRecords - queueProps.limit);
+      }
+    } else {
+      // limitToFirst
+      if( out.min > -1 ) {
+        out.max = out.min + queueProps.limit;
+      }
+      else if( out.max > -1 ) {
+        out.min = out.max - queueProps.limit;
+      }
+      else if( queueProps.limit < numRecords ) {
+        out.min = 0;
+        out.max = queueProps.limit - 1;
+      }
     }
   }
   return out;

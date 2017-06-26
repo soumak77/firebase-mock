@@ -135,12 +135,27 @@ MockQuery.prototype.once = function (event, callback, context) {
   });
 };
 
-MockQuery.prototype.limit = function (intVal) {
+MockQuery.prototype.limitToFirst = function (intVal) {
   if( typeof intVal !== 'number' ) {
-    throw new Error('Query.limit: First argument must be a positive integer.');
+    throw new Error('Query.limitToFirst: First argument must be a positive integer.');
   }
   var q = new MockQuery(this.ref);
-  _.extend(q._q, this._q, {limit: intVal});
+  _.extend(q._q, this._q, {
+    limit: intVal,
+    limitorder: 'first'
+  });
+  return q;
+};
+
+MockQuery.prototype.limitToLast = function (intVal) {
+  if( typeof intVal !== 'number' ) {
+    throw new Error('Query.limitToLast: First argument must be a positive integer.');
+  }
+  var q = new MockQuery(this.ref);
+  _.extend(q._q, this._q, {
+    limit: intVal,
+    limitorder: 'last'
+  });
   return q;
 };
 
