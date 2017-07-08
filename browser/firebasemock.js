@@ -1,4 +1,4 @@
-/** firebase-mock - v1.1.0
+/** firebase-mock - v1.1.1
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -16897,7 +16897,7 @@ FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
     if (!err) {
       var key = credentials.email;
       users[key] = {
-        uid: this._nextUid(),
+        uid: credentials.uid || this._nextUid(),
         email: key,
         password: credentials.password
       };
