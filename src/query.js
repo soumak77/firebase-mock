@@ -58,7 +58,7 @@ MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
   var lastSlice = this.slice();
   var map;
   function handleRefEvent (snap, prevChild) {
-    var slice = new Slice(self, event === 'value' ? snap : utils.makeRefSnap(snap.ref.parent()));
+    var slice = new Slice(self, event === 'value' ? snap : utils.makeRefSnap(snap.ref.parent));
     switch (event) {
       case 'value':
         if (isFirst || !lastSlice.equals(slice)) {

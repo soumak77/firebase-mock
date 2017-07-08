@@ -283,7 +283,7 @@ describe('MockFirebase', function () {
   describe('#parent', function () {
 
     it('gets a parent ref', function () {
-      expect(ref.child('a').parent().getData()).not.not.equal(null);
+      expect(ref.child('a').parent.getData()).not.not.equal(null);
     });
 
   });

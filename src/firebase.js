@@ -27,7 +27,7 @@ function MockFirebase(path, data, parent, name) {
     child_changed: [],
     child_moved: []
   };
-  this.parentRef = parent || null;
+  this.parent = parent || null;
   this.children = {};
   if (parent) parent.children[this.key] = this;
   this.sortedDataKeys = [];
@@ -76,8 +76,8 @@ MockFirebase.prototype.autoFlush = function (delay) {
     _.each(this.children, function (child) {
       child.autoFlush(delay);
     });
-    if (this.parentRef) {
-      this.parentRef.autoFlush(delay);
+    if (this.parent) {
+      this.parent.autoFlush(delay);
     }
   }
   return this;
@@ -220,14 +220,10 @@ MockFirebase.prototype.name = function () {
   return this.key;
 };
 
-MockFirebase.prototype.parent = function () {
-  return this.parentRef;
-};
-
 MockFirebase.prototype.root = function () {
   var next = this;
-  while (next.parentRef) {
-    next = next.parentRef;
+  while (next.parent) {
+    next = next.parent;
   }
   return next;
 };
@@ -479,8 +475,8 @@ MockFirebase.prototype._priChanged = function (newPriority) {
     newPriority = getServerTime();
   }
   this.priority = newPriority;
-  if (this.parentRef) {
-    this.parentRef._resort(this.key);
+  if (this.parent) {
+    this.parent._resort(this.key);
   }
 };
 
@@ -552,8 +548,8 @@ MockFirebase.prototype._triggerAll = function (events) {
     if (event !== false) this._trigger.apply(this, event);
   }, this);
   this._trigger('value', this.data, this.priority);
-  if (this.parentRef) {
-    this.parentRef._childChanged(this);
+  if (this.parent) {
+    this.parent._childChanged(this);
   }
 };
 
