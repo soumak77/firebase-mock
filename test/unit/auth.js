@@ -1,9 +1,15 @@
 'use strict';
 
-var sinon    = require('sinon');
-var expect   = require('chai').use(require('sinon-chai')).expect;
+var chai = require('chai');
+var sinon = require('sinon');
+
+chai.use(require('chai-as-promised'));
+chai.use(require('sinon-chai'));
+
+var expect = chai.expect;
 var _        = require('lodash');
 var Firebase = require('../../').MockFirebase;
+var Promise   = require('rsvp').Promise;
 
 describe('Auth', function () {
 
@@ -60,18 +66,40 @@ describe('Auth', function () {
 
   });
 
-  describe('#getEmailUser', function () {
+  describe('#getUserByEmail', function () {
 
     it('gets a copy of the user by email', function () {
       var user = {
-        uid: 'bd'
+        uid: 'bd',
+        email: 'ben@example.com'
       };
-      ref._auth.users['ben@example.com'] = user;
-      expect(ref.getEmailUser('ben@example.com')).to.deep.equal(user);
+      ref._auth.users[user.email] = user;
+      var found = ref.getUserByEmail('ben@example.com');
+      expect(found).to.eventually.become(user);
     });
 
     it('only searches own properties', function () {
-      expect(ref.getEmailUser('toString')).to.equal(null);
+      var found = ref.getUserByEmail('toString');
+      return expect(found).to.be.rejected;
+    });
+
+  });
+
+  describe('#getUser', function () {
+
+    it('gets a copy of the user by uid', function () {
+      var user = {
+        uid: 'bd',
+        email: 'ben@example.com'
+      };
+      ref._auth.users[user.email] = user;
+      var found = ref.getUser('bd');
+      expect(found).to.eventually.become(user);
+    });
+
+    it('only searches own properties', function () {
+      var found = ref.getUser('toString');
+      return expect(found).to.be.rejected;
     });
 
   });
@@ -349,10 +377,10 @@ describe('Auth', function () {
         password: 'kato'
       }, _.noop);
       ref.flush();
-      expect(ref.getEmailUser('kato@google.com'))
-        .to.have.property('password', 'kato');
-      expect(ref.getEmailUser('kato@kato.com'))
-        .to.equal(null);
+      return Promise.all([
+        expect(ref.getUserByEmail('kato@google.com')).to.eventually.have.property('password', 'kato'),
+        expect(ref.getUserByEmail('kato@kato.com')).to.be.rejected
+      ]);
     });
 
     it('fails if credentials is not an object', function () {
@@ -437,8 +465,7 @@ describe('Auth', function () {
         newPassword: 'kato!'
       }, _.noop);
       ref.flush();
-      expect(ref.getEmailUser('kato@kato.com'))
-        .to.have.property('password', 'kato!');
+      return expect(ref.getUserByEmail('kato@kato.com')).to.eventually.have.property('password', 'kato!');
     });
 
     it('fails if credentials is not an object', function () {
@@ -519,23 +546,24 @@ describe('Auth', function () {
 
   describe('#removeUser', function () {
 
-    it('removes the account', function () {
+    it('removes the account', function (done) {
       ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, _.noop);
       ref.flush();
-      expect(ref.getEmailUser('kato@kato.com')).to.deep.equal({
+      expect(ref.getUserByEmail('kato@kato.com')).to.become({
         uid: 'simplelogin:1',
         email: 'kato@kato.com',
         password: 'kato'
+      }).and.notify(function() {
+        ref.removeUser({
+          email: 'kato@kato.com',
+          password: 'kato'
+        }, _.noop);
+        ref.flush();
+        expect(ref.getUserByEmail('kato@kato.com')).to.be.rejected.and.notify(done);
       });
-      ref.removeUser({
-        email: 'kato@kato.com',
-        password: 'kato'
-      }, _.noop);
-      ref.flush();
-      expect(ref.getEmailUser('kato@kato.com')).to.equal(null);
     });
 
     it('fails if credentials is not an object', function () {

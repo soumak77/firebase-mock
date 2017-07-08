@@ -2,14 +2,14 @@
 
 var _      = require('lodash');
 var format = require('util').format;
-var rsvp   = require('rsvp');
+var Promise   = require('rsvp').Promise;
 
 function FirebaseAuth () {
   this.currentUser = null;
   this._auth = {
     listeners: [],
     completionListeners: [],
-    users: [],
+    users: {},
     uidCounter: 1
   };
 }
@@ -44,9 +44,24 @@ FirebaseAuth.prototype.onAuthStateChanged = function (callback) {
   }
 };
 
-FirebaseAuth.prototype.getEmailUser = function (email) {
+FirebaseAuth.prototype.getUserByEmail = function (email) {
   var users = this._auth.users;
-  return users.hasOwnProperty(email) ? _.clone(users[email]) : null;
+  if (users.hasOwnProperty(email)) {
+    return Promise.resolve(_.clone(users[email]));
+  } else {
+    return Promise.reject();
+  }
+};
+
+FirebaseAuth.prototype.getUser = function (uid) {
+  var user = _.find(this._auth.users, function(user) {
+    return user.uid == uid;
+  });
+  if (user) {
+    return Promise.resolve(_.clone(user));
+  } else {
+    return Promise.reject();
+  }
 };
 
 // number of arguments
@@ -110,7 +125,7 @@ Object.keys(signinMethods)
     FirebaseAuth.prototype[method] = function () {
       var self = this;
       var user = getUser.apply(this, arguments);
-      var promise = new rsvp.Promise(function(resolve, reject) {
+      var promise = new Promise(function(resolve, reject) {
         self._authEvent(method, function(err) {
           if (err) reject(err);
           self.currentUser = user;
@@ -193,7 +208,7 @@ FirebaseAuth.prototype.unauth = function () {
 
 FirebaseAuth.prototype.signOut = function () {
   var self = this, updateuser = this.currentUser !== null;
-  var promise = new rsvp.Promise(function(resolve, reject) {
+  var promise = new Promise(function(resolve, reject) {
     self._authEvent('signOut', function(err) {
       if (err) reject(err);
       self.currentUser = null;

@@ -29,12 +29,14 @@ users.create({
   password: 'examplePass'
 });
 users.flush();
-console.assert(users.getEmailUser('ben@example.com'), 'ben was created');
+users.getUserByEmail('ben@example.com').then(function(user) {
+  console.assert(user, 'ben was created');
+});
 ```
 
 ## Manually Changing Authentication State
 
-MockFirebase provides a special `changeAuthState` method on references to aid in unit testing code that reacts to new user data. `changeAuthState` allows us to simulate a variety of authentication scenarios such as a new user logging in or a user logging out. 
+MockFirebase provides a special `changeAuthState` method on references to aid in unit testing code that reacts to new user data. `changeAuthState` allows us to simulate a variety of authentication scenarios such as a new user logging in or a user logging out.
 
 In this example, we want to redirect to an admin dashboard when a user is an administrator. To accomplish this, we'll use custom authentication data.
 

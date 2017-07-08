@@ -13,20 +13,21 @@ Only `MockFirebase` methods are included here. For details on normal Firebase AP
   - [`getFlushQueue()`](#getflushqueue---array)
 - [Auth](#auth)
   - [`changeAuthState(user)`](#changeauthstateauthdata---undefined)
-  - [`getEmailUser(email)`](#getemailuseremail---objectnull)
+  - [`getUserByEmail(email)`](#getemailuseremail---objectnull)
+  - [`getUser(uid)`](#getemailuseremail---objectnull)
 - [Server Timestamps](#server-timestamps)
   - [`setClock(fn)`](#firebasesetclockfn---undefined)
   - [`restoreClock()`](#firebasesetclockfn---undefined)
 
 ## Core
 
-Core methods of `MockFirebase` references for manipulating data and asynchronous behavior. 
+Core methods of `MockFirebase` references for manipulating data and asynchronous behavior.
 
 ##### `flush([delay])` -> `ref`
 
-Flushes the queue of deferred data and authentication operations. If a `delay` is passed, the flush operation will be triggered after the specified number of milliseconds. 
+Flushes the queue of deferred data and authentication operations. If a `delay` is passed, the flush operation will be triggered after the specified number of milliseconds.
 
-In MockFirebase, data operations can be executed synchronously. When calling any Firebase API method that reads or writes data (e.g. `set(data)` or `on('value')`), MockFirebase will queue the operation. You can call multiple data methods in a row before flushing. MockFirebase will execute them in the order they were called when `flush` is called. If you trigger an operation inside of another (e.g. writing data somewhere when you detect a data change using `on`), all changes will be performed during the same `flush`. 
+In MockFirebase, data operations can be executed synchronously. When calling any Firebase API method that reads or writes data (e.g. `set(data)` or `on('value')`), MockFirebase will queue the operation. You can call multiple data methods in a row before flushing. MockFirebase will execute them in the order they were called when `flush` is called. If you trigger an operation inside of another (e.g. writing data somewhere when you detect a data change using `on`), all changes will be performed during the same `flush`.
 
 `flush` will throw an exception if the queue of deferred operations is empty.
 
@@ -51,9 +52,9 @@ Configures the Firebase reference to automatically flush data and authentication
 
 ##### `failNext(method, err)` -> `undefined`
 
-When `method` is next invoked, trigger the `onComplete` callback with the specified `err`. This is useful for simulating validation, authorization, or any other errors. The callback will be triggered with the next `flush`. 
+When `method` is next invoked, trigger the `onComplete` callback with the specified `err`. This is useful for simulating validation, authorization, or any other errors. The callback will be triggered with the next `flush`.
 
-`err` must be a proper `Error` object and not a string or any other primitive. 
+`err` must be a proper `Error` object and not a string or any other primitive.
 
 Example:
 
@@ -73,7 +74,7 @@ console.assert(err === error, 'err passed to callback');
 
 ##### `forceCancel(err [, event] [, callback] [, context]` -> `undefined`
 
-Simulate a security error by cancelling listeners (callbacks registered with `on`) at the path with the specified `err`. If an optional `event`, `callback`, and `context` are provided, only listeners that match will be cancelled. `forceCancel` will also invoke `off` for the matched listeners so they will be no longer notified of any future changes. Cancellation is triggered immediately and not with a `flush` call. 
+Simulate a security error by cancelling listeners (callbacks registered with `on`) at the path with the specified `err`. If an optional `event`, `callback`, and `context` are provided, only listeners that match will be cancelled. `forceCancel` will also invoke `off` for the matched listeners so they will be no longer notified of any future changes. Cancellation is triggered immediately and not with a `flush` call.
 
 Example:
 
@@ -81,7 +82,7 @@ Example:
 var error = new Error();
 function onValue (snapshot) {}
 function onCancel (_err_) {
-  err = _err_; 
+  err = _err_;
 }
 ref.on('value', onValue, onCancel);
 ref.flush();
@@ -105,7 +106,7 @@ Returns an array of the keys at the path as they are ordered in Firebase.
 
 ##### `fakeEvent(event [, key] [, data] [, previousChild] [, priority])` -> `ref`
 
-Triggers a fake event that is not connected to an actual change to Firebase data. A child `key` is required unless the event is a `'value'` event. 
+Triggers a fake event that is not connected to an actual change to Firebase data. A child `key` is required unless the event is a `'value'` event.
 
 Example:
 
@@ -170,7 +171,7 @@ Authentication methods for simulating changes to the auth state of a Firebase re
 
 ##### `changeAuthState(authData)` -> `undefined`
 
-Changes the active authentication credentials to the `authData` object. Before changing the authentication state, `changeAuthState` checks whether the `authData` object is deeply equal to the current authentication data. `onAuth` listeners will only be triggered if the data is not deeply equal. To simulate no user being authenticated, pass `null` for `authData`. This operation is queued until the next `flush`. 
+Changes the active authentication credentials to the `authData` object. Before changing the authentication state, `changeAuthState` checks whether the `authData` object is deeply equal to the current authentication data. `onAuth` listeners will only be triggered if the data is not deeply equal. To simulate no user being authenticated, pass `null` for `authData`. This operation is queued until the next `flush`.
 
 `authData` should adhere to the [documented schema](https://www.firebase.com/docs/web/api/firebase/onauth.html).
 
@@ -192,13 +193,17 @@ console.assert(ref.getAuth().auth.myAuthProperty, 'authData has custom property'
 
 <hr>
 
-##### `getEmailUser(email)` -> `Object|null`
+##### `getUserByEmail(email)` -> `Promise<Object>`
 
-Finds a user previously created with [`createUser`](https://www.firebase.com/docs/web/api/firebase/createuser.html). If no user was created with the specified `email`, `null` is returned instead.
+Finds a user previously created with [`createUser`](https://www.firebase.com/docs/web/api/firebase/createuser.html). If no user was created with the specified `email`, the promise is rejected.
+
+##### `getUser(uid)` -> `Promise<Object>`
+
+Finds a user previously created with [`createUser`](https://www.firebase.com/docs/web/api/firebase/createuser.html). If no user was created with the specified `email`, the promise is rejected.
 
 ## Server Timestamps
 
-MockFirebase allow you to simulate the behavior of [server timestamps](https://www.firebase.com/docs/web/api/servervalue/timestamp.html) when using a real Firebase instance. Unless you use `Firebase.setClock`, `Firebase.ServerValue.TIMESTAMP` will be transformed to the current date (`Date.now()`) when your data change is flushed. 
+MockFirebase allow you to simulate the behavior of [server timestamps](https://www.firebase.com/docs/web/api/servervalue/timestamp.html) when using a real Firebase instance. Unless you use `Firebase.setClock`, `Firebase.ServerValue.TIMESTAMP` will be transformed to the current date (`Date.now()`) when your data change is flushed.
 
 ##### `Firebase.setClock(fn)` -> `undefined`
 
