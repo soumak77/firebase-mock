@@ -383,6 +383,25 @@ describe('Auth', function () {
 
   });
 
+  describe('#createUserWithEmailAndPassword', function () {
+    it('creates a new user', function () {
+      var promise = ref.createUserWithEmailAndPassword('new1@new1.com', 'new1');
+      ref.flush();
+      return Promise.all([
+        expect(promise).to.eventually.have.property('uid', 'simplelogin:1'),
+        expect(promise).to.eventually.have.property('email', 'new1@new1.com')
+      ]);
+    });
+
+    it('fails if failNext is set', function () {
+      var err = new Error();
+      ref.failNext('createUserWithEmailAndPassword', err);
+      var promise = ref.createUserWithEmailAndPassword('hello', 'world');
+      ref.flush();
+      expect(promise).to.be.rejectedWith(err);
+    });
+  });
+
   describe('#changeEmail', function () {
 
     beforeEach(function () {
