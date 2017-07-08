@@ -1,4 +1,4 @@
-/** firebase-mock - v1.1.3
+/** firebase-mock - v1.1.4
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -16890,16 +16890,27 @@ FirebaseAuth.prototype.signOut = function () {
   return promise;
 };
 
+FirebaseAuth.prototype.createUserWithEmailAndPassword = function (email, password) {
+  return this._createUser('createUserWithEmailAndPassword', {
+    email: email,
+    password: password
+  });
+};
+
 FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
   validateCredentials('createUser', credentials, [
     'email',
     'password'
   ]);
-  var err = this._nextErr('createUser');
+  return this._createUser('createUser', credentials, onComplete);
+};
+
+FirebaseAuth.prototype._createUser = function (method, credentials, onComplete) {
+  var err = this._nextErr(method);
   var users = this._auth.users;
   var self = this;
   return new Promise(function (resolve, reject) {
-    self._defer('createUser', _.toArray(arguments), function () {
+    self._defer(method, _.toArray(arguments), function () {
       var user = null;
       err = err || self._validateNewEmail(credentials);
       if (!err) {
@@ -16910,7 +16921,8 @@ FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
           password: credentials.password
         };
         user = {
-          uid: users[key].uid
+          uid: users[key].uid,
+          email: key
         };
         if (onComplete) {
           onComplete(err, user);
