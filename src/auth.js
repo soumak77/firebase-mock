@@ -235,21 +235,32 @@ FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
   ]);
   var err = this._nextErr('createUser');
   var users = this._auth.users;
-  this._defer('createUser', _.toArray(arguments), function () {
-    var user = null;
-    err = err || this._validateNewEmail(credentials);
-    if (!err) {
-      var key = credentials.email;
-      users[key] = {
-        uid: credentials.uid || this._nextUid(),
-        email: key,
-        password: credentials.password
-      };
-      user = {
-        uid: users[key].uid
-      };
-    }
-    onComplete(err, user);
+  var self = this;
+  return new Promise(function (resolve, reject) {
+    self._defer('createUser', _.toArray(arguments), function () {
+      var user = null;
+      err = err || self._validateNewEmail(credentials);
+      if (!err) {
+        var key = credentials.email;
+        users[key] = {
+          uid: credentials.uid || self._nextUid(),
+          email: key,
+          password: credentials.password
+        };
+        user = {
+          uid: users[key].uid
+        };
+        if (onComplete) {
+          onComplete(err, user);
+        }
+        resolve(user);
+      } else {
+        if (onComplete) {
+          onComplete(err, null);
+        }
+        reject(err);
+      }
+    });
   });
 };
 

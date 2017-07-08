@@ -298,6 +298,18 @@ describe('Auth', function () {
       });
     });
 
+    it('creates a new user and returns promise', function (done) {
+      var promise = ref.createUser({
+        email: 'new1@new1.com',
+        password: 'new1'
+      });
+      ref.flush();
+      promise.then(function(user) {
+        expect(user).to.have.property('uid', 'simplelogin:1');
+        done();
+      });
+    });
+
     it('increments the id for each user', function () {
       ref.createUser({
         email: 'new1@new1.com',
