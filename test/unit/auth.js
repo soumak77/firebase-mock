@@ -312,6 +312,16 @@ describe('Auth', function () {
       expect(spy.secondCall.args[1].uid).to.equal('simplelogin:2');
     });
 
+    it('creates a new user with preset uid', function () {
+      ref.createUser({
+        email: 'new1@new1.com',
+        password: 'new1',
+        uid: 'uid1'
+      }, spy);
+      ref.flush();
+      expect(spy.firstCall.args[1].uid).to.equal('uid1');
+    });
+
     it('fails if credentials is not an object', function () {
       expect(ref.createUser.bind(ref, 29)).to.throw('must be a valid object');
     });
