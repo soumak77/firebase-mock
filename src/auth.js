@@ -49,7 +49,10 @@ FirebaseAuth.prototype.getUserByEmail = function (email) {
   if (users.hasOwnProperty(email)) {
     return Promise.resolve(_.clone(users[email]));
   } else {
-    return Promise.reject();
+    return Promise.reject({
+      code: 'auth/user-not-found',
+      message: 'There is no existing user record corresponding to the provided identifier.'
+    });
   }
 };
 
@@ -60,7 +63,10 @@ FirebaseAuth.prototype.getUser = function (uid) {
   if (user) {
     return Promise.resolve(_.clone(user));
   } else {
-    return Promise.reject();
+    return Promise.reject({
+      code: 'auth/user-not-found',
+      message: 'There is no existing user record corresponding to the provided identifier.'
+    });
   }
 };
 
