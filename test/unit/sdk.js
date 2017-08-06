@@ -93,11 +93,25 @@ describe('MockFirebaseSdk', function () {
           .to.have.property('providerId')
           .that.equals('password');
       });
+
+      it('should get credential', function () {
+        var auth = firebase.auth.EmailAuthProvider.credential('token');
+        expect(auth)
+          .to.have.property('providerId')
+          .that.equals('password');
+      });
     });
 
     describe('#GoogleAuthProvider', function() {
       it('sets provider id', function () {
         var auth = new firebase.auth.GoogleAuthProvider();
+        expect(auth)
+          .to.have.property('providerId')
+          .that.equals('google.com');
+      });
+
+      it('should get credential', function () {
+        var auth = firebase.auth.GoogleAuthProvider.credential('token');
         expect(auth)
           .to.have.property('providerId')
           .that.equals('google.com');
@@ -111,11 +125,25 @@ describe('MockFirebaseSdk', function () {
           .to.have.property('providerId')
           .that.equals('twitter.com');
       });
+
+      it('should get credential', function () {
+        var auth = firebase.auth.TwitterAuthProvider.credential('token');
+        expect(auth)
+          .to.have.property('providerId')
+          .that.equals('twitter.com');
+      });
     });
 
     describe('#FacebookAuthProvider', function() {
       it('sets provider id', function () {
         var auth = new firebase.auth.FacebookAuthProvider();
+        expect(auth)
+          .to.have.property('providerId')
+          .that.equals('facebook.com');
+      });
+
+      it('should get credential', function () {
+        var auth = firebase.auth.FacebookAuthProvider.credential('token');
         expect(auth)
           .to.have.property('providerId')
           .that.equals('facebook.com');
@@ -130,6 +158,13 @@ describe('MockFirebaseSdk', function () {
           .to.have.property('providerId')
           .that.equals('github.com');
       });
+    });
+
+    it('should get credential', function () {
+      var auth = firebase.auth.GithubAuthProvider.credential('token');
+      expect(auth)
+        .to.have.property('providerId')
+        .that.equals('github.com');
     });
   });
 

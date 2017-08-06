@@ -1,26 +1,60 @@
 var MockFirebase = require('./firebase');
 
+var EmailAuthProvider = function() {
+  this.providerId = EmailAuthProvider.PROVIDER_ID;
+};
+EmailAuthProvider.PROVIDER_ID = "password";
+EmailAuthProvider.credential = function() {
+  return new AuthCredential(EmailAuthProvider.PROVIDER_ID);
+};
+
+var GoogleAuthProvider = function() {
+  this.providerId = GoogleAuthProvider.PROVIDER_ID;
+};
+GoogleAuthProvider.PROVIDER_ID = "google.com";
+GoogleAuthProvider.credential = function() {
+  return new AuthCredential(GoogleAuthProvider.PROVIDER_ID);
+};
+
+var TwitterAuthProvider = function() {
+  this.providerId = TwitterAuthProvider.PROVIDER_ID;
+};
+TwitterAuthProvider.PROVIDER_ID = "twitter.com";
+TwitterAuthProvider.credential = function() {
+  return new AuthCredential(TwitterAuthProvider.PROVIDER_ID);
+};
+
+var FacebookAuthProvider = function() {
+  this.providerId = FacebookAuthProvider.PROVIDER_ID;
+};
+FacebookAuthProvider.PROVIDER_ID = "facebook.com";
+FacebookAuthProvider.credential = function() {
+  return new AuthCredential(FacebookAuthProvider.PROVIDER_ID);
+};
+
+var GithubAuthProvider = function() {
+  this.providerId = GithubAuthProvider.PROVIDER_ID;
+};
+GithubAuthProvider.PROVIDER_ID = "github.com";
+GithubAuthProvider.credential = function() {
+  return new AuthCredential(GithubAuthProvider.PROVIDER_ID);
+};
+
+var AuthCredential = function(provider) {
+  this.providerId = provider;
+};
+
 function MockFirebaseSdk(createDatabase, createAuth) {
   function MockFirebaseAuth() {
     var auth = createAuth ? createAuth() : new MockFirebase();
     delete auth.ref;
     return auth;
   }
-  MockFirebaseAuth.EmailAuthProvider = function() {
-    this.providerId = "password";
-  };
-  MockFirebaseAuth.GoogleAuthProvider = function() {
-    this.providerId = "google.com";
-  };
-  MockFirebaseAuth.TwitterAuthProvider = function() {
-    this.providerId = "twitter.com";
-  };
-  MockFirebaseAuth.FacebookAuthProvider = function() {
-    this.providerId = "facebook.com";
-  };
-  MockFirebaseAuth.GithubAuthProvider = function() {
-    this.providerId = "github.com";
-  };
+  MockFirebaseAuth.EmailAuthProvider = EmailAuthProvider;
+  MockFirebaseAuth.GoogleAuthProvider = GoogleAuthProvider;
+  MockFirebaseAuth.TwitterAuthProvider = TwitterAuthProvider;
+  MockFirebaseAuth.FacebookAuthProvider = FacebookAuthProvider;
+  MockFirebaseAuth.GithubAuthProvider = GithubAuthProvider;
 
   function MockFirebaseDatabase() {
     return {
