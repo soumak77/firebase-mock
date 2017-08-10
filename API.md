@@ -1,6 +1,6 @@
 # API Reference
 
-Only `MockFirebase` methods are included here. For details on normal Firebase API methods, consult the [Firebase Web API documentation](https://www.firebase.com/docs/web/api/).
+Only `MockFirebase` methods are included here. For details on normal Firebase API methods, consult the [Firebase Web API documentation](https://firebase.google.com/docs/reference/js/).
 
 - [Core](#core)
   - [`flush([delay])`](#flushdelay---ref)
