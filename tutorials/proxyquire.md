@@ -23,7 +23,7 @@ var firebasemock    = require('firebase-mock');
 var mockdatabase = new firebasemock.MockFirebase();
 var mockauth = new firebasemock.MockFirebase();
 var mocksdk = firebasemock.MockFirebaseSdk(function(path) {
-  return mockdatabase.child(path);
+  return path ? mockdatabase.child(path) : mockdatabase;
 }, function() {
   return mockauth;
 });
