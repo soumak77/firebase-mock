@@ -40,13 +40,13 @@ describe('MockFirebase', function () {
     it('renders array-like data as an array', function () {
       var examples = [
         {input: {0: 'a', 1: 'b', 2: 'c', 3: 'd', 4: 'e'}, output: ['a', 'b', 'c', 'd', 'e']},
-        {input: {0: 'a', 2: 'c', 3: 'd', 4: 'e'}, output: ['a', null, 'c', 'd', 'e']},
-        {input: {0: 'a', 2: 'c', 4: 'e'}, output: ['a', null, 'c', null, 'e']},
+        {input: {0: 'a', 2: 'c', 3: 'd', 4: 'e'}, output: ['a', undefined, 'c', 'd', 'e']},
+        {input: {0: 'a', 2: 'c', 4: 'e'}, output: ['a', undefined, 'c', undefined, 'e']},
         {input: {0: 'a', 4: 'e'}, output: {'0': 'a', '4': 'e'}},
         {input: {0: 'a'}, output: ['a']},
-        {input: {1: 'a'}, output: [null, 'a']},
+        {input: {1: 'a'}, output: [undefined, 'a']},
         {input: {'-1': 'a'}, output: {'-1': 'a'}},
-        {input: {0: 'a', 2: 'c', 5: 'e'}, output: ['a', null, 'c', null, null, 'e']},
+        {input: {0: 'a', 2: 'c', 5: 'e'}, output: ['a', undefined, 'c', undefined, undefined, 'e']},
         {input: {0: 'a', 2: 'c', 6: 'e'}, output: {'0': 'a', '2': 'c', '6': 'e'}},
         {input: {10: 'a', 11: 'b', 12: 'c'}, output: {'10': 'a', '11': 'b', '12': 'c'}},
         {input: {0: 'a', 1: {0: 'x', 1: 'y'} }, output: ['a', ['x', 'y']]}

@@ -685,7 +685,7 @@ function render(datum) {
       }, 0);
 
       if (keys.length * 2 > max) {
-        var array = _.fill(Array(max), null);
+        var array = Array(max);
 
         _.forIn(datum, function (value, key) {
           array[Number(key)] = value;
