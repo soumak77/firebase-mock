@@ -108,7 +108,7 @@ MockFirebase.prototype.forceCancel = function (error, event, callback, context) 
 };
 
 MockFirebase.prototype.getData = function () {
-  return _.cloneDeep(this.data);
+  return _.cloneDeep(this.data, render);
 };
 
 MockFirebase.prototype.getKeys = function () {
@@ -672,6 +672,31 @@ MockFirebase.prototype.childComparator = function (a, b) {
 
 function extractName(path) {
   return ((path || '').match(/\/([^.$\[\]#\/]+)$/) || [null, null])[1];
+}
+
+function render(datum) {
+  if (datum && _.isObject(datum)) {
+    var keys = _.keys(datum);
+
+    if (_.every(keys, RegExp.prototype.test.bind(/^\d+$/))) {
+      var max = keys.reduce(function (max, key) {
+        var n = Number(key);
+        return n > max ? n : max;
+      }, 0);
+
+      if (keys.length * 2 > max) {
+        var array = Array(max);
+
+        _.forIn(datum, function (value, key) {
+          array[Number(key)] = value;
+        });
+
+        return array;
+      }
+    }
+  }
+
+  return _.clone(datum);
 }
 
 module.exports = MockFirebase;
