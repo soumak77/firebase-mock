@@ -156,7 +156,7 @@ MockFirestore.prototype.doc = function (path) {
 MockFirestore.prototype.get = function () {
   var self = this;
   return new Promise(function (resolve, reject) {
-    self.once('value').then(snap => {
+    self.once('value').then(function(snap) {
       resolve({
         exists: snap.exists(),
         data: function() { return snap.val(); }

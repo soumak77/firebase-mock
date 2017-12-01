@@ -78,5 +78,19 @@
       ".priority": "c",
       "aLetter": "c"
     }
+  },
+  "collections": {
+    "a": {
+      "name": "a"
+    },
+    "b": {
+      "name": "b"
+    },
+    "c": {
+      "name": "c"
+    }
+  },
+  "doc": {
+    "title": "title"
   }
 }

@@ -58,7 +58,7 @@
     "karma-phantomjs-launcher": "^1.0.2",
     "karma-sinon": "~1.0.3",
     "phantomjs-prebuilt": "^2.1.13",
-    "semver": "~3.0.1",
+    "semver": "^5.4.1",
     "sinon": "~1.10.3",
     "sinon-chai": "~2.11.0",
     "vinyl-buffer": "1.0.0",
