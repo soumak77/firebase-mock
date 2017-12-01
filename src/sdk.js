@@ -1,4 +1,5 @@
 var MockFirebase = require('./firebase');
+var MockFirestore = require('./firestore');
 
 var EmailAuthProvider = function() {
   this.providerId = EmailAuthProvider.PROVIDER_ID;
@@ -44,7 +45,7 @@ var AuthCredential = function(provider) {
   this.providerId = provider;
 };
 
-function MockFirebaseSdk(createDatabase, createAuth) {
+function MockFirebaseSdk(createDatabase, createAuth, createFirestore) {
   function MockFirebaseAuth() {
     var auth = createAuth ? createAuth() : new MockFirebase();
     delete auth.ref;
@@ -67,13 +68,19 @@ function MockFirebaseSdk(createDatabase, createAuth) {
     };
   }
 
+  function MockFirebaseFirestore() {
+    return createFirestore ? createFirestore() : new MockFirestore();
+  }
+
   return {
     database: MockFirebaseDatabase,
     auth: MockFirebaseAuth,
+    firestore: MockFirebaseFirestore,
     initializeApp: function() {
       return {
         database: MockFirebaseDatabase,
         auth: MockFirebaseAuth,
+        firestore: MockFirebaseFirestore,
         messaging: function() {},
         storage: function() {}
       };
