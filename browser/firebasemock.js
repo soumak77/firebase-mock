@@ -1,4 +1,4 @@
-/** firebase-mock - v1.1.7
+/** firebase-mock - v1.1.8
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -17941,7 +17941,7 @@ MockFirestore.prototype.doc = function (path) {
 MockFirestore.prototype.get = function () {
   var self = this;
   return new Promise(function (resolve, reject) {
-    self.once('value').then(snap => {
+    self.once('value').then(function(snap) {
       resolve({
         exists: snap.exists(),
         data: function() { return snap.val(); }
