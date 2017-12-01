@@ -76,6 +76,7 @@ function MockFirebaseSdk(createDatabase, createAuth, createFirestore) {
     database: MockFirebaseDatabase,
     auth: MockFirebaseAuth,
     firestore: MockFirebaseFirestore,
+    FieldValue: MockFirestore.FieldValue,
     initializeApp: function() {
       return {
         database: MockFirebaseDatabase,

@@ -33,6 +33,16 @@ describe('MockFirebaseSdk', function () {
     });
   });
 
+  describe('#FieldValue', function() {
+    beforeEach(function() {
+      firebase = MockFirebaseSdk();
+    });
+
+    it('delete', function () {
+      expect(firebase.FieldValue.delete()).to.equal(null);
+    });
+  });
+
   describe('#database', function() {
     beforeEach(function() {
       firebase = MockFirebaseSdk();
