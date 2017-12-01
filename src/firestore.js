@@ -42,6 +42,11 @@ MockFirestore.defaultAutoId = function () {
 };
 
 MockFirestore.autoId = MockFirestore.defaultAutoId;
+MockFirestore.FieldValue = {
+  delete: function() {
+    return null;
+  }
+};
 
 MockFirestore.prototype.flush = function (delay) {
   this.queue.flush(delay);
