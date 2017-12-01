@@ -75,20 +75,15 @@ describe('MockFirestore', function () {
   });
 
   describe('#get', function () {
-    it('gets value of doc', function (done) {
+    it('gets value of doc', function () {
       var result = db.doc('doc').get();
       db.flush();
-      result.then(function(doc) {
-        expect(doc.data().title).to.equal('title');
-        done();
-      }).catch(function(error) {
-        done(error);
-      });
+      expect(result).to.eventually.have.property('title').equal('title');
     });
   });
 
   describe('#set', function () {
-    it('gets value of doc', function (done) {
+    it('gets value of doc', function () {
       var doc = db.doc('doc');
       doc.set({
         title2: 'title2'
@@ -96,8 +91,22 @@ describe('MockFirestore', function () {
       db.flush();
       var result = doc.get();
       db.flush();
-      result.then(function(doc) {
-        expect(doc.data().title2).to.equal('title2');
+      expect(result).to.eventually.have.property('title2').equal('title2');
+    });
+  });
+
+  describe('#batch', function () {
+    it('gets value of doc', function (done) {
+      var batch = db.batch();
+      batch.update(db.doc('doc'), {
+        name: 'abc'
+      });
+      batch.set(db.doc('doc2'), {
+        number: '123'
+      });
+      batch.delete(db.collection('collections'));
+      batch.commit().then(function() {
+        expect(db.collection('collections').get()).to.eventually.have.property('exists').equal(false);
         done();
       }).catch(function(error) {
         done(error);
