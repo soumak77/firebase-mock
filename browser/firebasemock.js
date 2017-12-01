@@ -1,4 +1,4 @@
-/** firebase-mock - v1.1.9
+/** firebase-mock - v1.1.10
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -17827,6 +17827,11 @@ MockFirestore.defaultAutoId = function () {
 };
 
 MockFirestore.autoId = MockFirestore.defaultAutoId;
+MockFirestore.FieldValue = {
+  delete: function() {
+    return null;
+  }
+};
 
 MockFirestore.prototype.flush = function (delay) {
   this.queue.flush(delay);
