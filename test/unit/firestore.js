@@ -72,11 +72,35 @@ describe('MockFirestore', function () {
     it('caches children', function () {
       expect(db.collection('collections')).to.equal(db.collection('collections'));
     });
+
+    it('cannot call collection() on collection', function() {
+      expect(function() {
+        db.collection('collections').collection('123');
+      }).to.throw();
+    });
+
+    it('allow calling doc() on collection', function() {
+      expect(function() {
+        db.collection('collections').doc('123');
+      }).to.not.throw();
+    });
   });
 
   describe('#doc', function () {
     it('caches children', function () {
       expect(db.doc('doc')).to.equal(db.doc('doc'));
+    });
+
+    it('cannot call doc() on document', function() {
+      expect(function() {
+        db.doc('doc').doc('123');
+      }).to.throw();
+    });
+
+    it('allow calling collection() on document', function() {
+      expect(function() {
+        db.doc('doc').collection('123');
+      }).to.not.throw();
     });
   });
 
