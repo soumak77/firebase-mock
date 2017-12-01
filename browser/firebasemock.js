@@ -1,4 +1,4 @@
-/** firebase-mock - v1.1.11
+/** firebase-mock - v1.1.12
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -17797,6 +17797,7 @@ var Auth = require('./auth');
 var validate = require('./validators');
 
 function MockFirestore(path, data, parent, name) {
+  this.isDocument = null;
   this.ref = this;
   this.path = path || 'Mock://';
   this.errs = {};
@@ -17938,11 +17939,21 @@ MockFirestore.prototype.batch = function (path) {
 };
 
 MockFirestore.prototype.collection = function (path) {
-  return this.child(path);
+  if (this.isDocument !== null) {
+    assert.equal(this.isDocument, true, 'Cannot call collection() on collection');
+  }
+  var child = this.child(path);
+  child.isDocument = false;
+  return child;
 };
 
 MockFirestore.prototype.doc = function (path) {
-  return this.child(path);
+  if (this.isDocument !== null) {
+    assert.equal(this.isDocument, false, 'Cannot call doc() on doc');
+  }
+  var child = this.child(path);
+  child.isDocument = true;
+  return child;
 };
 
 MockFirestore.prototype.get = function () {
