@@ -33,16 +33,6 @@ describe('MockFirebaseSdk', function () {
     });
   });
 
-  describe('#FieldValue', function() {
-    beforeEach(function() {
-      firebase = MockFirebaseSdk();
-    });
-
-    it('delete', function () {
-      expect(firebase.FieldValue.delete()).to.equal(null);
-    });
-  });
-
   describe('#database', function() {
     beforeEach(function() {
       firebase = MockFirebaseSdk();
@@ -80,6 +70,26 @@ describe('MockFirebaseSdk', function () {
           .that.is.an('string')
           .that.equals(url);
       });
+    });
+  });
+
+  describe('#firestore', function() {
+    beforeEach(function() {
+      firebase = MockFirebaseSdk();
+    });
+
+    it('returns object with doc and collection functions', function () {
+      var database = firebase.firestore();
+      expect(database)
+        .to.have.property('doc')
+        .that.is.an('function');
+      expect(database)
+        .to.have.property('collection')
+        .that.is.an('function');
+    });
+
+    it('FieldValue.delete', function () {
+      expect(firebase.firestore.FieldValue.delete()).to.equal(null);
     });
   });
 
