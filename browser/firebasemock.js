@@ -1,4 +1,4 @@
-/** firebase-mock - v1.1.8
+/** firebase-mock - v1.1.9
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -17822,25 +17822,6 @@ function MockFirestore(path, data, parent, name) {
   _.extend(this, Auth.prototype, new Auth());
 }
 
-MockFirestore.ServerValue = {
-  TIMESTAMP: {
-    '.sv': 'timestamp'
-  }
-};
-
-var getServerTime, defaultClock;
-getServerTime = defaultClock = function () {
-  return new Date().getTime();
-};
-
-MockFirestore.setClock = function (fn) {
-  getServerTime = fn;
-};
-
-MockFirestore.restoreClock = function () {
-  getServerTime = defaultClock;
-};
-
 MockFirestore.defaultAutoId = function () {
   return autoId(new Date().getTime());
 };
@@ -17930,6 +17911,27 @@ MockFirestore.prototype.toString = function () {
   return this.path;
 };
 
+MockFirestore.prototype.batch = function (path) {
+  var self = this;
+  return {
+    set: function(doc, data) {
+      doc.set(data);
+    },
+    update: function(doc, data) {
+      doc.update(data);
+    },
+    delete: function(doc) {
+      doc.remove();
+    },
+    commit: function() {
+      if (self.queue.events.length > 0) {
+        self.flush();
+      }
+      return Promise.resolve();
+    }
+  };
+};
+
 MockFirestore.prototype.collection = function (path) {
   return this.child(path);
 };
@@ -18004,44 +18006,6 @@ MockFirestore.prototype.update = function (changes, callback) {
       }
     });
   });
-};
-
-MockFirestore.prototype.setPriority = function (newPriority, callback) {
-  var err = this._nextErr('setPriority');
-  this._defer('setPriority', _.toArray(arguments), function () {
-    this._priChanged(newPriority);
-    if (callback) callback(err);
-  });
-};
-
-MockFirestore.prototype.setWithPriority = function (data, pri, callback) {
-  this.setPriority(pri);
-  this.set(data, callback);
-};
-
-/* istanbul ignore next */
-MockFirestore.prototype.name = function () {
-  console.warn('ref.name() is deprecated. Use ref.key');
-  return this.key;
-};
-
-MockFirestore.prototype.root = function () {
-  var next = this;
-  while (next.parent) {
-    next = next.parent;
-  }
-  return next;
-};
-
-MockFirestore.prototype.push = function (data, callback) {
-  var child = this.child(this._newAutoId());
-  var err = this._nextErr('push');
-  if (err) child.failNext('set', err);
-  if (arguments.length && data !== null) {
-    // currently, callback only invoked if child exists
-    child.set(data, callback);
-  }
-  return child;
 };
 
 MockFirestore.prototype.once = function (event, callback, cancel, context) {
@@ -18157,64 +18121,6 @@ MockFirestore.prototype.transaction = function (valueFn, finishedFn, applyLocall
   });
 };
 
-/**
- * Just a stub at this point.
- * @param {int} limit
- */
-MockFirestore.prototype.limit = function (limit) {
-  return new Query(this).limitToLast(limit);
-};
-
-/**
- * Just a stub so it can be spied on during testing
- */
-MockFirestore.prototype.limitToFirst = function (limit) {
-  return new Query(this).limitToFirst(limit);
-};
-
-/**
- * Just a stub so it can be spied on during testing
- */
-MockFirestore.prototype.limitToLast = function (limit) {
-  return new Query(this).limitToLast(limit);
-};
-
-/**
- * Just a stub so it can be spied on during testing
- */
-MockFirestore.prototype.orderByChild = function (child) {
-  return new Query(this);
-};
-
-/**
- * Just a stub so it can be spied on during testing
- */
-MockFirestore.prototype.orderByKey = function (key) {
-  return new Query(this);
-};
-
-/**
- * Just a stub so it can be spied on during testing
- */
-MockFirestore.prototype.orderByPriority = function (property) {
-  return new Query(this);
-};
-
-/**
- * Just a stub so it can be spied on during testing
- */
-MockFirestore.prototype.orderByValue = function (value) {
-  return new Query(this);
-};
-
-MockFirestore.prototype.startAt = function (priority, key) {
-  return new Query(this).startAt(priority, key);
-};
-
-MockFirestore.prototype.endAt = function (priority, key) {
-  return new Query(this).endAt(priority, key);
-};
-
 MockFirestore.prototype._childChanged = function (ref) {
   var events = [];
   var childKey = ref.key;
@@ -18231,10 +18137,6 @@ MockFirestore.prototype._childChanged = function (ref) {
 MockFirestore.prototype._dataChanged = function (unparsedData) {
   var pri = utils.getMeta(unparsedData, 'priority', this.priority);
   var data = utils.cleanData(unparsedData);
-
-  if (utils.isServerTimestamp(data)) {
-    data = getServerTime();
-  }
 
   if (pri !== this.priority) {
     this._priChanged(pri);
@@ -18258,9 +18160,6 @@ MockFirestore.prototype._dataChanged = function (unparsedData) {
     else {
       keysToChange.forEach(function (key) {
         var childData = unparsedData[key];
-        if (utils.isServerTimestamp(childData)) {
-          childData = getServerTime();
-        }
         this._updateOrAdd(key, childData, events);
       }, this);
     }
@@ -18276,9 +18175,6 @@ MockFirestore.prototype._dataChanged = function (unparsedData) {
 };
 
 MockFirestore.prototype._priChanged = function (newPriority) {
-  if (utils.isServerTimestamp(newPriority)) {
-    newPriority = getServerTime();
-  }
   this.priority = newPriority;
   if (this.parent) {
     this.parent._resort(this.key);
