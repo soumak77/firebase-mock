@@ -1,4 +1,4 @@
-/** firebase-mock - v1.1.10
+/** firebase-mock - v1.1.11
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -19063,6 +19063,7 @@ function MockFirebaseSdk(createDatabase, createAuth, createFirestore) {
     database: MockFirebaseDatabase,
     auth: MockFirebaseAuth,
     firestore: MockFirebaseFirestore,
+    FieldValue: MockFirestore.FieldValue,
     initializeApp: function() {
       return {
         database: MockFirebaseDatabase,
