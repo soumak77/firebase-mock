@@ -1,4 +1,4 @@
-/** firebase-mock - v1.1.15
+/** firebase-mock - v1.1.16
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -18102,10 +18102,10 @@ MockFirestore.prototype.once = function (event, callback, cancel, context) {
 };
 
 MockFirestore.prototype.delete = function (callback) {
-  var err = this._nextErr('remove');
+  var err = this._nextErr('delete');
   var self = this;
   return new Promise(function (resolve, reject) {
-    self._defer('remove', _.toArray(arguments), function () {
+    self._defer('delete', _.toArray(arguments), function () {
       if (callback) callback(err);
       if (err === null) {
         self._dataChanged(null);
