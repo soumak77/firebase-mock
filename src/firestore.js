@@ -5,7 +5,7 @@ var assert = require('assert');
 var Promise = require('rsvp').Promise;
 var autoId = require('firebase-auto-ids');
 var Query = require('./query');
-var Snapshot = require('./snapshot');
+var Snapshot = require('./firestore-snapshot');
 var Queue = require('./queue').Queue;
 var utils = require('./utils');
 var Auth = require('./auth');
@@ -175,10 +175,7 @@ MockFirestore.prototype.get = function () {
   var self = this;
   return new Promise(function (resolve, reject) {
     self.once('value').then(function(snap) {
-      resolve({
-        exists: snap.exists(),
-        data: function() { return snap.val(); }
-      });
+      resolve(snap);
     }).catch(reject);
   });
 };
