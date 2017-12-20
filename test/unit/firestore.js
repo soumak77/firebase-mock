@@ -125,6 +125,25 @@ describe('MockFirestore', function () {
     });
   });
 
+  describe('#delete', function () {
+    it('delete doc', function () {
+      var result;
+      var doc = db.doc('doc');
+      doc.set({
+        title2: 'title2'
+      });
+      db.flush();
+      result = doc.get();
+      db.flush();
+      expect(result).to.eventually.have.property('title2').equal('title2');
+      doc.delete();
+      db.flush();
+      result = doc.get();
+      db.flush();
+      expect(result).to.eventually.equal(null);
+    });
+  });
+
   describe('#batch', function () {
     it('gets value of doc', function (done) {
       var batch = db.batch();

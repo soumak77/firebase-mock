@@ -142,7 +142,7 @@ MockFirestore.prototype.batch = function (path) {
       doc.update(data);
     },
     delete: function(doc) {
-      doc.remove();
+      doc.delete();
     },
     commit: function() {
       if (self.queue.events.length > 0) {
@@ -267,7 +267,7 @@ MockFirestore.prototype.once = function (event, callback, cancel, context) {
   });
 };
 
-MockFirestore.prototype.remove = function (callback) {
+MockFirestore.prototype.delete = function (callback) {
   var err = this._nextErr('remove');
   var self = this;
   return new Promise(function (resolve, reject) {
