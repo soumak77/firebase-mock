@@ -10,7 +10,6 @@ DeltaSnapshot(app: firebase.app.App, adminApp: firebase.app.App, data: any, delt
 var functions = require('firebase-functions');
 var sinon    = require('sinon');
 var expect   = require('chai').use(require('sinon-chai')).expect;
-var _        = require('lodash');
 var firebasemock = require('../../');
 var mockauth        = new firebasemock.MockFirebase();
 var mockdatabase   = new firebasemock.MockFirebase();
