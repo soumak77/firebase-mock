@@ -32,7 +32,7 @@ Firebase Mock supports the normal [Firebase API](https://firebase.google.com/doc
 ## Tutorials
 
 ### Authentication
-* [Authentication](tutorials/rtdb/authentication.md)
+* [Authentication](tutorials/auth/authentication.md)
 
 ### Realtime Database
 * [Basic](tutorials/rtdb/basic.md)
@@ -42,7 +42,7 @@ Firebase Mock supports the normal [Firebase API](https://firebase.google.com/doc
 * [Using Spies for Ordering](tutorials/rtdb/spies.md)
 
 ### Firestore
-* [Cloud Events](tutorials/cloudevents.md)
+* [Cloud Events](tutorials/firestore/cloudevents.md)
 
 ## Projects using firebase-mock
 * [Angular Base Apps Template](https://github.com/base-apps/angular-firebase-template)
