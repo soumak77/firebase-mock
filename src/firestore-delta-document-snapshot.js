@@ -30,7 +30,7 @@ MockFirestoreDeltaDocumentSnapshot.prototype.get = function (path) {
 MockFirestoreDeltaDocumentSnapshot.create = function(app, data, delta, path) {
   var id = path.split('/').pop();
   var ref = app.firestore().doc(path);
-  var previous = new MockFirestoreDeltaDocumentSnapshot(id, data, null, ref);
+  var previous = data === null ? null : new MockFirestoreDeltaDocumentSnapshot(id, data, null, ref);
   return new MockFirestoreDeltaDocumentSnapshot(id, applyDelta(data, delta), previous, ref);
 };
 
