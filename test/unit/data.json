@@ -81,13 +81,28 @@
   },
   "collections": {
     "a": {
-      "name": "a"
+      "name": "a",
+      "name_type": "string"
     },
     "b": {
-      "name": "b"
+      "name": "b",
+      "name_type": "string"
     },
     "c": {
-      "name": "c"
+      "name": "c",
+      "name_type": "string"
+    },
+    "1": {
+      "name": 1,
+      "name_type": "number"
+    },
+    "2": {
+      "name": 2,
+      "name_type": "number"
+    },
+    "3": {
+      "name": 3,
+      "name_type": "number"
     }
   },
   "doc": {

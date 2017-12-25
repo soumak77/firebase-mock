@@ -2,6 +2,7 @@
 
 var chai = require('chai');
 var sinon = require('sinon');
+var Promise = require('rsvp').Promise;
 
 chai.use(require('chai-as-promised'));
 chai.use(require('sinon-chai'));
@@ -15,9 +16,6 @@ describe('MockFirestore', function () {
   var db, spy;
   beforeEach(function () {
     db = new Firestore();
-    db.collection('collections').set(require('./data.json').collections);
-    db.doc('doc').set(require('./data.json').doc);
-    db.flush();
     spy = sinon.spy();
   });
 
@@ -46,15 +44,12 @@ describe('MockFirestore', function () {
       expect(db.flushDelay).to.equal(10);
     });
 
-    it('sets the delay on all children', function () {
-      db.child('key');
+    it('sets the delay on all collections and documents', function () {
+      db.doc('doc');
+      db.collection('collection');
       db.autoFlush(10);
-      expect(db.child('key').flushDelay).to.equal(10);
-    });
-
-    it('sets the delay on a parent', function () {
-      db.child('key').autoFlush(10);
-      expect(db.flushDelay).to.equal(10);
+      expect(db.doc('doc').flushDelay).to.equal(10);
+      expect(db.collection('collection').flushDelay).to.equal(10);
     });
 
     it('returns itself', function () {
@@ -62,85 +57,55 @@ describe('MockFirestore', function () {
     });
   });
 
-  describe('#failNext', function () {
-    it('must be called with an Error', function () {
-      expect(db.failNext.bind(db)).to.throw('"Error"');
-    });
-  });
-
   describe('#collection', function () {
+    it('allow calling collection()', function() {
+      expect(function() {
+        db.collection('collections');
+      }).to.not.throw();
+    });
+
+    it('allow calling collection() with complex path', function() {
+      expect(function() {
+        db.collection('collections/doc/collections');
+      }).to.not.throw();
+    });
+
     it('caches children', function () {
       expect(db.collection('collections')).to.equal(db.collection('collections'));
     });
 
-    it('cannot call collection() on collection', function() {
-      expect(function() {
-        db.collection('collections').collection('123');
-      }).to.throw();
+    it('caches deep children', function () {
+      expect(db.collection('collections').doc('doc').collection('collections2')).to.equal(db.collection('collections').doc('doc').collection('collections2'));
     });
 
-    it('allow calling doc() on collection', function() {
-      expect(function() {
-        db.collection('collections').doc('123');
-      }).to.not.throw();
+    it('caches deep children with paths', function () {
+      expect(db.collection('collections/doc/collections2')).to.equal(db.collection('collections').doc('doc').collection('collections2'));
     });
   });
 
   describe('#doc', function () {
+    it('allow calling doc()', function() {
+      expect(function() {
+        db.doc('doc');
+      }).to.not.throw();
+    });
+
+    it('allow calling doc() with complex path', function() {
+      expect(function() {
+        db.doc('doc/collections/doc');
+      }).to.not.throw();
+    });
+
     it('caches children', function () {
       expect(db.doc('doc')).to.equal(db.doc('doc'));
     });
 
-    it('cannot call doc() on document', function() {
-      expect(function() {
-        db.doc('doc').doc('123');
-      }).to.throw();
+    it('caches deep children', function () {
+      expect(db.doc('doc').collection('collections').doc('doc2')).to.equal(db.doc('doc').collection('collections').doc('doc2'));
     });
 
-    it('allow calling collection() on document', function() {
-      expect(function() {
-        db.doc('doc').collection('123');
-      }).to.not.throw();
-    });
-  });
-
-  describe('#get', function () {
-    it('gets value of doc', function () {
-      var result = db.doc('doc').get();
-      db.flush();
-      expect(result).to.eventually.have.property('title').equal('title');
-    });
-  });
-
-  describe('#set', function () {
-    it('sets value of doc', function () {
-      var doc = db.doc('doc');
-      doc.set({
-        title2: 'title2'
-      });
-      db.flush();
-      var result = doc.get();
-      db.flush();
-      expect(result).to.eventually.have.property('title2').equal('title2');
-    });
-  });
-
-  describe('#delete', function () {
-    it('delete doc', function () {
-      var result;
-      var doc = db.doc('doc');
-      doc.set({
-        title2: 'title2'
-      });
-      db.flush();
-      result = doc.get();
-      db.flush();
-      expect(result).to.eventually.have.property('title2').equal('title2');
-      doc.delete();
-      db.flush();
-      result = doc.get();
-      db.flush();
-      expect(result).to.eventually.equal(null);
+    it('caches deep children with paths', function () {
+      expect(db.doc('doc/collections/doc2')).to.equal(db.doc('doc').collection('collections').doc('doc2'));
     });
   });
 
@@ -153,7 +118,7 @@ describe('MockFirestore', function () {
       batch.set(db.doc('doc2'), {
         number: '123'
       });
-      batch.delete(db.collection('collections'));
+      batch.delete(db.collection('collections').doc('a'));
       batch.commit().then(function() {
         expect(db.collection('collections').get()).to.eventually.have.property('exists').equal(false);
         done();
