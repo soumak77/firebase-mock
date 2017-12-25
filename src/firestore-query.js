@@ -4,7 +4,6 @@ var _ = require('lodash');
 var assert = require('assert');
 var Promise = require('rsvp').Promise;
 var autoId = require('firebase-auto-ids');
-var DocumentSnapshot = require('./firestore-document-snapshot');
 var QuerySnapshot = require('./firestore-query-snapshot');
 var Queue = require('./queue').Queue;
 var utils = require('./utils');

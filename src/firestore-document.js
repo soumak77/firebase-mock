@@ -5,7 +5,6 @@ var assert = require('assert');
 var Promise = require('rsvp').Promise;
 var autoId = require('firebase-auto-ids');
 var DocumentSnapshot = require('./firestore-document-snapshot');
-var QuerySnapshot = require('./firestore-query-snapshot');
 var Queue = require('./queue').Queue;
 var utils = require('./utils');
 var validate = require('./validators');
@@ -88,7 +87,7 @@ MockFirestoreDocument.prototype.get = function () {
   return new Promise(function (resolve, reject) {
     self._defer('get', _.toArray(arguments), function () {
       if (err === null) {
-        resolve(new DocumentSnapshot(this.getData()));
+        resolve(new DocumentSnapshot(this.id, this.getData()));
       } else {
         reject(err);
       }

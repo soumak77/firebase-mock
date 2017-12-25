@@ -119,7 +119,7 @@ gulp.task('lint', function () {
     .pipe(plugins.jshint.reporter('fail'));
 });
 
-var pkgs = ['./package.json', './bower.json'];
+var pkgs = ['./package-lock.json', './package.json', './bower.json'];
 gulp.task('bump', function () {
   return gulp.src(pkgs)
     .pipe(plugins.bump({

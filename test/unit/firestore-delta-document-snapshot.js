@@ -2,10 +2,10 @@
 
 var expect   = require('chai').use(require('sinon-chai')).expect;
 var sinon    = require('sinon');
-var Snapshot = require('../../src/firestore-document-snapshot');
+var DeltaSnapshot = require('../../src/firestore-delta-document-snapshot');
 var Firestore = require('../../').MockFirestore;
 
-describe('DocumentSnapshot', function () {
+describe('DocumentDeltaSnapshot', function () {
 
   var db;
   beforeEach(function () {
@@ -14,11 +14,11 @@ describe('DocumentSnapshot', function () {
 
   describe('#exists', function () {
     it('returns false if no data', function () {
-      expect(new Snapshot('id').exists).to.equal(false);
+      expect(new DeltaSnapshot('id').exists).to.equal(false);
     });
 
     it('returns true if data available', function () {
-      expect(new Snapshot('id', {
+      expect(new DeltaSnapshot('id', {
         hello: 123
       }).exists).to.equal(true);
     });
@@ -26,14 +26,14 @@ describe('DocumentSnapshot', function () {
 
   describe('#data', function () {
     it('returns null if no data', function () {
-      expect(new Snapshot('id').data()).to.equal(null);
+      expect(new DeltaSnapshot('id').data()).to.equal(null);
     });
 
     it('returns data if data provided', function () {
       var data = {
         hello: 123
       };
-      expect(new Snapshot('id', data).data()).to.deep.equal(data);
+      expect(new DeltaSnapshot('id', data).data()).to.deep.equal(data);
     });
   });
 
@@ -42,7 +42,7 @@ describe('DocumentSnapshot', function () {
       var data = {
         hello: 123
       };
-      expect(new Snapshot('id', data).get('hello')).to.equal(123);
+      expect(new DeltaSnapshot('id', data).get('hello')).to.equal(123);
     });
   });
 });

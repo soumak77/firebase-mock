@@ -13,8 +13,8 @@ function MockFirestoreQuerySnapshot (data) {
 }
 
 MockFirestoreQuerySnapshot.prototype.forEach = function (callback, context) {
-  _.each(this.data, function (value) {
-    callback.call(context, new DocumentSnapshot(value));
+  _.each(this.data, function (value, key) {
+    callback.call(context, new DocumentSnapshot(key, value));
   }, this);
 };
 
