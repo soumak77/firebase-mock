@@ -38,6 +38,32 @@ MockFirestoreCollection.prototype.toString = function () {
   return this.path;
 };
 
+MockFirestoreCollection.defaultAutoId = function () {
+  return autoId(new Date().getTime());
+};
+
+MockFirestoreCollection.autoId = MockFirestoreCollection.defaultAutoId;
+
+MockFirestoreCollection.prototype.add = function (data) {
+  var err = this._nextErr('add');
+  data = utils.cleanFirestoreData(data);
+  var self = this;
+  return new Promise(function (resolve, reject) {
+    self._defer('add', _.toArray(arguments), function () {
+      if (err === null) {
+        var id = MockFirestoreCollection.autoId();
+        self.data[id] = data;
+        var ref = self.doc(id);
+        ref.set(data).then(function() {
+          resolve(ref);
+        }).catch(reject);
+      } else {
+        reject(err);
+      }
+    });
+  });
+};
+
 MockFirestoreCollection.prototype.doc = function (path) {
   assert(path, 'A child path is required');
   var parts = _.compact(path.split('/'));
@@ -62,7 +88,7 @@ MockFirestoreCollection.prototype._childData = function (key) {
 };
 
 MockFirestoreCollection.prototype._dataChanged = function (unparsedData) {
-  this.data = utils.cleanData(unparsedData);
+  this.data = utils.cleanFirestoreData(unparsedData);
 };
 
 function extractName(path) {

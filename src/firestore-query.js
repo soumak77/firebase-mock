@@ -30,7 +30,7 @@ function MockFirestoreQuery(path, data, parent, name) {
   this.orderedProperties = [];
   this.orderedDirections = [];
   this.limited = 0;
-  this.data = utils.cleanData(_.cloneDeep(data) || null);
+  this.data = utils.cleanFirestoreData(_.cloneDeep(data) || null);
 }
 
 MockFirestoreQuery.prototype.flush = function (delay) {
@@ -75,25 +75,24 @@ MockFirestoreQuery.prototype.get = function () {
       var limit = 0;
 
       if (err === null) {
-        if (_.size(this.data) !== 0) {
-          if (this.orderedProperties.length === 0) {
-            _.forEach(this.data, function(data, key) {
+        if (_.size(self.data) !== 0) {
+          if (self.orderedProperties.length === 0) {
+            _.forEach(self.data, function(data, key) {
               if (self.limited <= 0 || limit < self.limited) {
                 results[key] = _.cloneDeep(data);
                 limit++;
               }
             });
-            resolve(new QuerySnapshot(results));
           } else {
             var queryable = [];
-            _.forEach(this.data, function(data, key) {
+            _.forEach(self.data, function(data, key) {
               queryable.push({
                 data: data,
                 key: key
               });
             });
 
-            queryable = _.sortByOrder(queryable, _.map(this.orderedProperties, function(p) { return 'data.' + p; }), this.orderedDirections);
+            queryable = _.sortByOrder(queryable, _.map(self.orderedProperties, function(p) { return 'data.' + p; }), self.orderedDirections);
 
             queryable.forEach(function(q) {
               if (self.limited <= 0 || limit < self.limited) {
@@ -101,14 +100,12 @@ MockFirestoreQuery.prototype.get = function () {
                 limit++;
               }
             });
-
-            resolve(new QuerySnapshot(results));
           }
+
+          resolve(new QuerySnapshot(results));
         } else {
           resolve(new QuerySnapshot());
         }
-
-        resolve(new QuerySnapshot(this.getData()));
       } else {
         reject(err);
       }

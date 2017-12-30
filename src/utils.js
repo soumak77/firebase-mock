@@ -30,6 +30,16 @@ exports.cleanData = function cleanData(data) {
   return newData;
 };
 
+exports.cleanFirestoreData = function cleanFirestoreData(data) {
+  var newData = _.clone(data);
+  if (_.isObject(newData)) {
+    if (_.isEmpty(newData)) {
+      newData = null;
+    }
+  }
+  return newData;
+};
+
 exports.getMeta = function getMeta(data, key, defaultVal) {
   var val = defaultVal;
   var metaKey = '.' + key;

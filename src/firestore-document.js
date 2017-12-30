@@ -30,7 +30,6 @@ function MockFirestoreDocument(path, data, parent, name, CollectionReference) {
   if (parent) parent.children[this.id] = this;
   this.data = null;
   this._dataChanged(_.cloneDeep(data) || null);
-  this._lastAutoId = null;
 }
 
 MockFirestoreDocument.prototype.flush = function (delay) {
@@ -87,24 +86,13 @@ MockFirestoreDocument.prototype.get = function () {
   return new Promise(function (resolve, reject) {
     self._defer('get', _.toArray(arguments), function () {
       if (err === null) {
-        resolve(new DocumentSnapshot(this.id, this.getData()));
+      console.log("get", self.getData());
+        resolve(new DocumentSnapshot(self.id, self.getData()));
       } else {
         reject(err);
       }
     });
   });
-};
-
-MockFirestoreDocument.prototype._hasChild = function (key) {
-  return _.isObject(this.data) && _.has(this.data, key);
-};
-
-MockFirestoreDocument.prototype._childData = function (key) {
-  return this._hasChild(key) ? this.data[key] : null;
-};
-
-MockFirestoreDocument.prototype._dataChanged = function (unparsedData) {
-  this.data = utils.cleanData(unparsedData);
 };
 
 MockFirestoreDocument.prototype.set = function (data, callback) {
@@ -114,8 +102,9 @@ MockFirestoreDocument.prototype.set = function (data, callback) {
   return new Promise(function (resolve, reject) {
     self._defer('set', _.toArray(arguments), function () {
       if (err === null) {
-        this._dataChanged(data);
-        resolve(data);
+      console.log("set", data);
+        self._dataChanged(data);
+        resolve();
       } else {
         if (callback) {
           callback(err);
@@ -136,7 +125,7 @@ MockFirestoreDocument.prototype.update = function (changes, callback) {
         var base = self.getData();
         var data = _.merge(_.isObject(base) ? base : {}, utils.updateToObject(changes));
         data = utils.removeEmptyProperties(data);
-        this._dataChanged(data);
+        self._dataChanged(data);
         resolve(data);
       } else {
         if (callback) {
@@ -155,13 +144,25 @@ MockFirestoreDocument.prototype.delete = function (callback) {
     self._defer('delete', _.toArray(arguments), function () {
       if (callback) callback(err);
       if (err === null) {
-        this._dataChanged(null);
+        self._dataChanged(null);
         resolve(null);
       } else {
         reject(err);
       }
     });
   });
+};
+
+MockFirestoreDocument.prototype._hasChild = function (key) {
+  return _.isObject(this.data) && _.has(this.data, key);
+};
+
+MockFirestoreDocument.prototype._childData = function (key) {
+  return this._hasChild(key) ? this.data[key] : null;
+};
+
+MockFirestoreDocument.prototype._dataChanged = function (unparsedData) {
+  this.data = utils.cleanFirestoreData(unparsedData);
 };
 
 MockFirestoreDocument.prototype._defer = function (sourceMethod, sourceArgs, callback) {
