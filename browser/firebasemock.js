@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.4
+/** firebase-mock - v2.0.5
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -17828,6 +17828,32 @@ MockFirestoreCollection.prototype.toString = function () {
   return this.path;
 };
 
+MockFirestoreCollection.defaultAutoId = function () {
+  return autoId(new Date().getTime());
+};
+
+MockFirestoreCollection.autoId = MockFirestoreCollection.defaultAutoId;
+
+MockFirestoreCollection.prototype.add = function (data) {
+  var err = this._nextErr('add');
+  data = utils.cleanFirestoreData(data);
+  var self = this;
+  return new Promise(function (resolve, reject) {
+    self._defer('add', _.toArray(arguments), function () {
+      if (err === null) {
+        var id = MockFirestoreCollection.autoId();
+        self.data[id] = data;
+        var ref = self.doc(id);
+        ref.set(data).then(function() {
+          resolve(ref);
+        }).catch(reject);
+      } else {
+        reject(err);
+      }
+    });
+  });
+};
+
 MockFirestoreCollection.prototype.doc = function (path) {
   assert(path, 'A child path is required');
   var parts = _.compact(path.split('/'));
@@ -17852,7 +17878,7 @@ MockFirestoreCollection.prototype._childData = function (key) {
 };
 
 MockFirestoreCollection.prototype._dataChanged = function (unparsedData) {
-  this.data = utils.cleanData(unparsedData);
+  this.data = utils.cleanFirestoreData(unparsedData);
 };
 
 function extractName(path) {
@@ -17975,7 +18001,6 @@ function MockFirestoreDocument(path, data, parent, name, CollectionReference) {
   if (parent) parent.children[this.id] = this;
   this.data = null;
   this._dataChanged(_.cloneDeep(data) || null);
-  this._lastAutoId = null;
 }
 
 MockFirestoreDocument.prototype.flush = function (delay) {
@@ -18032,24 +18057,13 @@ MockFirestoreDocument.prototype.get = function () {
   return new Promise(function (resolve, reject) {
     self._defer('get', _.toArray(arguments), function () {
       if (err === null) {
-        resolve(new DocumentSnapshot(this.id, this.getData()));
+      console.log("get", self.getData());
+        resolve(new DocumentSnapshot(self.id, self.getData()));
       } else {
         reject(err);
       }
     });
   });
-};
-
-MockFirestoreDocument.prototype._hasChild = function (key) {
-  return _.isObject(this.data) && _.has(this.data, key);
-};
-
-MockFirestoreDocument.prototype._childData = function (key) {
-  return this._hasChild(key) ? this.data[key] : null;
-};
-
-MockFirestoreDocument.prototype._dataChanged = function (unparsedData) {
-  this.data = utils.cleanData(unparsedData);
 };
 
 MockFirestoreDocument.prototype.set = function (data, callback) {
@@ -18059,8 +18073,9 @@ MockFirestoreDocument.prototype.set = function (data, callback) {
   return new Promise(function (resolve, reject) {
     self._defer('set', _.toArray(arguments), function () {
       if (err === null) {
-        this._dataChanged(data);
-        resolve(data);
+      console.log("set", data);
+        self._dataChanged(data);
+        resolve();
       } else {
         if (callback) {
           callback(err);
@@ -18081,7 +18096,7 @@ MockFirestoreDocument.prototype.update = function (changes, callback) {
         var base = self.getData();
         var data = _.merge(_.isObject(base) ? base : {}, utils.updateToObject(changes));
         data = utils.removeEmptyProperties(data);
-        this._dataChanged(data);
+        self._dataChanged(data);
         resolve(data);
       } else {
         if (callback) {
@@ -18100,13 +18115,25 @@ MockFirestoreDocument.prototype.delete = function (callback) {
     self._defer('delete', _.toArray(arguments), function () {
       if (callback) callback(err);
       if (err === null) {
-        this._dataChanged(null);
+        self._dataChanged(null);
         resolve(null);
       } else {
         reject(err);
       }
     });
   });
+};
+
+MockFirestoreDocument.prototype._hasChild = function (key) {
+  return _.isObject(this.data) && _.has(this.data, key);
+};
+
+MockFirestoreDocument.prototype._childData = function (key) {
+  return this._hasChild(key) ? this.data[key] : null;
+};
+
+MockFirestoreDocument.prototype._dataChanged = function (unparsedData) {
+  this.data = utils.cleanFirestoreData(unparsedData);
 };
 
 MockFirestoreDocument.prototype._defer = function (sourceMethod, sourceArgs, callback) {
@@ -18143,9 +18170,9 @@ var _ = require('lodash');
 var DocumentSnapshot = require('./firestore-document-snapshot');
 
 function MockFirestoreQuerySnapshot (data) {
-  this.data = _.cloneDeep(data);
+  this.data = _.cloneDeep(data) || {};
   if (_.isObject(this.data) && _.isEmpty(this.data)) {
-    this.data = [];
+    this.data = {};
   }
   this.size = _.size(this.data);
   this.empty = this.size === 0;
@@ -18154,7 +18181,7 @@ function MockFirestoreQuerySnapshot (data) {
 MockFirestoreQuerySnapshot.prototype.forEach = function (callback, context) {
   _.each(this.data, function (value, key) {
     callback.call(context, new DocumentSnapshot(key, value));
-  }, this);
+  });
 };
 
 module.exports = MockFirestoreQuerySnapshot;
@@ -18192,7 +18219,7 @@ function MockFirestoreQuery(path, data, parent, name) {
   this.orderedProperties = [];
   this.orderedDirections = [];
   this.limited = 0;
-  this.data = utils.cleanData(_.cloneDeep(data) || null);
+  this.data = utils.cleanFirestoreData(_.cloneDeep(data) || null);
 }
 
 MockFirestoreQuery.prototype.flush = function (delay) {
@@ -18237,25 +18264,24 @@ MockFirestoreQuery.prototype.get = function () {
       var limit = 0;
 
       if (err === null) {
-        if (_.size(this.data) !== 0) {
-          if (this.orderedProperties.length === 0) {
-            _.forEach(this.data, function(data, key) {
+        if (_.size(self.data) !== 0) {
+          if (self.orderedProperties.length === 0) {
+            _.forEach(self.data, function(data, key) {
               if (self.limited <= 0 || limit < self.limited) {
                 results[key] = _.cloneDeep(data);
                 limit++;
               }
             });
-            resolve(new QuerySnapshot(results));
           } else {
             var queryable = [];
-            _.forEach(this.data, function(data, key) {
+            _.forEach(self.data, function(data, key) {
               queryable.push({
                 data: data,
                 key: key
               });
             });
 
-            queryable = _.sortByOrder(queryable, _.map(this.orderedProperties, function(p) { return 'data.' + p; }), this.orderedDirections);
+            queryable = _.sortByOrder(queryable, _.map(self.orderedProperties, function(p) { return 'data.' + p; }), self.orderedDirections);
 
             queryable.forEach(function(q) {
               if (self.limited <= 0 || limit < self.limited) {
@@ -18263,14 +18289,12 @@ MockFirestoreQuery.prototype.get = function () {
                 limit++;
               }
             });
-
-            resolve(new QuerySnapshot(results));
           }
+
+          resolve(new QuerySnapshot(results));
         } else {
           resolve(new QuerySnapshot());
         }
-
-        resolve(new QuerySnapshot(this.getData()));
       } else {
         reject(err);
       }
@@ -18354,8 +18378,6 @@ var _ = require('lodash');
 var assert = require('assert');
 var Promise = require('rsvp').Promise;
 var autoId = require('firebase-auto-ids');
-var DocumentSnapshot = require('./firestore-document-snapshot');
-var QuerySnapshot = require('./firestore-query-snapshot');
 var CollectionReference = require('./firestore-collection');
 var DocumentReference = require('./firestore-document');
 var Queue = require('./queue').Queue;
@@ -18534,7 +18556,7 @@ function extractName(path) {
 
 module.exports = MockFirestore;
 
-},{"./firestore-collection":18,"./firestore-document":21,"./firestore-document-snapshot":20,"./firestore-query-snapshot":22,"./queue":27,"./utils":31,"./validators":32,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],25:[function(require,module,exports){
+},{"./firestore-collection":18,"./firestore-document":21,"./queue":27,"./utils":31,"./validators":32,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],25:[function(require,module,exports){
 'use strict';
 
 var _   = require('lodash');
@@ -19525,6 +19547,16 @@ exports.cleanData = function cleanData(data) {
   return newData;
 };
 
+exports.cleanFirestoreData = function cleanFirestoreData(data) {
+  var newData = _.clone(data);
+  if (_.isObject(newData)) {
+    if (_.isEmpty(newData)) {
+      newData = null;
+    }
+  }
+  return newData;
+};
+
 exports.getMeta = function getMeta(data, key, defaultVal) {
   var val = defaultVal;
   var metaKey = '.' + key;
@@ -19617,6 +19649,7 @@ exports.updateToObject = function updateToObject(update) {
   }
   return result;
 };
+
 },{"./snapshot":30,"lodash":13}],32:[function(require,module,exports){
 'use strict';
 
