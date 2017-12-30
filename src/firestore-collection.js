@@ -66,7 +66,7 @@ MockFirestoreCollection.prototype.add = function (data) {
 };
 
 MockFirestoreCollection.prototype.doc = function (path) {
-  assert(path, 'A child path is required');
+  path = path || MockFirestoreCollection.autoId();
   var parts = _.compact(path.split('/'));
   var childKey = parts.shift();
   var child = this.children[childKey];

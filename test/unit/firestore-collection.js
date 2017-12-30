@@ -66,6 +66,11 @@ describe('MockFirestoreCollection', function () {
         collection.doc('doc');
       }).to.not.throw();
     });
+
+    it('allow calling doc() with empty path to generate id', function() {
+      var doc = collection.doc();
+      expect(doc.id).to.be.a('string');
+    });
   });
 
   describe('#add', function () {
