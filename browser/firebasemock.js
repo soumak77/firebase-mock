@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.7
+/** firebase-mock - v2.0.8
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -18058,7 +18058,6 @@ MockFirestoreDocument.prototype.get = function () {
   return new Promise(function (resolve, reject) {
     self._defer('get', _.toArray(arguments), function () {
       if (err === null) {
-      console.log("get", self.getData());
         resolve(new DocumentSnapshot(self.id, self.getData()));
       } else {
         reject(err);
@@ -18074,7 +18073,6 @@ MockFirestoreDocument.prototype.set = function (data, callback) {
   return new Promise(function (resolve, reject) {
     self._defer('set', _.toArray(arguments), function () {
       if (err === null) {
-      console.log("set", data);
         self._dataChanged(data);
         resolve();
       } else {
