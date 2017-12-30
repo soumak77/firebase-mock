@@ -52,6 +52,7 @@ MockFirestoreCollection.prototype.add = function (data) {
     self._defer('add', _.toArray(arguments), function () {
       if (err === null) {
         var id = MockFirestoreCollection.autoId();
+        self.data = self.data || {};
         self.data[id] = data;
         var ref = self.doc(id);
         ref.set(data).then(function() {

@@ -77,7 +77,22 @@ describe('MockFirestoreCollection', function () {
       }).to.not.throw();
     });
 
-    it('adds data to collection', function(done) {
+    it('allow adding data to empty collection', function(done) {
+      db.autoFlush();
+      db.collection('temp').add({
+        prop: 1
+      }).then(function(ref) {
+        ref.get().then(function(doc) {
+          expect(doc.id).to.equal(ref.id);
+          expect(doc.data()).to.deep.equal({
+            prop: 1
+          });
+          done();
+        }).catch(done);
+      }).catch(done);
+    });
+
+    it('allow adding data to existing collection', function(done) {
       db.autoFlush();
       collection.add({
         prop: 1
