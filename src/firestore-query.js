@@ -27,6 +27,9 @@ function MockFirestoreQuery(path, data, parent, name) {
   };
   this.parent = parent || null;
   this.children = {};
+  this.orderedProperties = [];
+  this.orderedDirections = [];
+  this.limited = 0;
   this.data = utils.cleanData(_.cloneDeep(data) || null);
 }
 
@@ -41,7 +44,7 @@ MockFirestoreQuery.prototype.autoFlush = function (delay) {
   }
   if (this.flushDelay !== delay) {
     this.flushDelay = delay;
-    _.each(this.children, function (child) {
+    _.forEach(this.children, function (child) {
       child.autoFlush(delay);
     });
     if (this.parent) {
@@ -68,7 +71,43 @@ MockFirestoreQuery.prototype.get = function () {
   var self = this;
   return new Promise(function (resolve, reject) {
     self._defer('get', _.toArray(arguments), function () {
+      var results = {};
+      var limit = 0;
+
       if (err === null) {
+        if (_.size(this.data) !== 0) {
+          if (this.orderedProperties.length === 0) {
+            _.forEach(this.data, function(data, key) {
+              if (self.limited <= 0 || limit < self.limited) {
+                results[key] = _.cloneDeep(data);
+                limit++;
+              }
+            });
+            resolve(new QuerySnapshot(results));
+          } else {
+            var queryable = [];
+            _.forEach(this.data, function(data, key) {
+              queryable.push({
+                data: data,
+                key: key
+              });
+            });
+
+            queryable = _.sortByOrder(queryable, _.map(this.orderedProperties, function(p) { return 'data.' + p; }), this.orderedDirections);
+
+            queryable.forEach(function(q) {
+              if (self.limited <= 0 || limit < self.limited) {
+                results[q.key] = _.cloneDeep(q.data);
+                limit++;
+              }
+            });
+
+            resolve(new QuerySnapshot(results));
+          }
+        } else {
+          resolve(new QuerySnapshot());
+        }
+
         resolve(new QuerySnapshot(this.getData()));
       } else {
         reject(err);
@@ -87,7 +126,7 @@ MockFirestoreQuery.prototype.where = function (property, operator, value) {
   } else {
     if (_.size(this.data) !== 0) {
       var results = {};
-      _.each(this.data, function(data, key) {
+      _.forEach(this.data, function(data, key) {
         switch (operator) {
           case '==':
             if (data[property] === value) {
@@ -104,6 +143,19 @@ MockFirestoreQuery.prototype.where = function (property, operator, value) {
       return new MockFirestoreQuery(this.path, null, this.parent, this.myName);
     }
   }
+};
+
+MockFirestoreQuery.prototype.orderBy = function (property, direction) {
+  var query = new MockFirestoreQuery(this.path, this.getData(), this.parent, this.myName);
+  query.orderedProperties.push(property);
+  query.orderedDirections.push(direction || 'asc');
+  return query;
+};
+
+MockFirestoreQuery.prototype.limit = function (limit) {
+  var query = new MockFirestoreQuery(this.path, this.getData(), this.parent, this.myName);
+  query.limited = limit;
+  return query;
 };
 
 MockFirestoreQuery.prototype._defer = function (sourceMethod, sourceArgs, callback) {

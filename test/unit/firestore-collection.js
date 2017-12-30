@@ -134,4 +134,62 @@ describe('MockFirestoreCollection', function () {
       ]);
     });
   });
+
+  describe('#orderBy', function () {
+    it('allow calling orderBy() on collection', function() {
+      expect(function() {
+        db.collection('docs').orderBy('prop');
+      }).to.not.throw();
+    });
+
+    it('allow calling orderBy() multiple times', function() {
+      expect(function() {
+        db.collection('docs').orderBy('prop').orderBy('prop2');
+      }).to.not.throw();
+    });
+
+    it('returns documents is desired order', function(done) {
+      var results1 = collection.orderBy('name').get();
+      var results2 = collection.orderBy('name', 'desc').get();
+      db.flush();
+
+      Promise.all([results1, results2]).then(function(snaps) {
+        var names = [];
+        snaps[0].forEach(function(doc) {
+          names.push(doc.data().name);
+        });
+        expect(names).to.deep.equal([1, 2, 3, 'a', 'b', 'c']);
+
+        names = [];
+        snaps[1].forEach(function(doc) {
+          names.push(doc.data().name);
+        });
+        expect(names).to.deep.equal([1, 2, 3, 'c', 'b', 'a']);
+        done();
+      }).catch(done);
+    });
+  });
+
+  describe('#limit', function () {
+    it('allow calling limit() on collection', function() {
+      expect(function() {
+        db.collection('docs').limit(3);
+      }).to.not.throw();
+    });
+
+    it('returns limited amount of documents', function() {
+      var results1 = collection.limit(3).get();
+      var results2 = collection.limit(1).get();
+      var results3 = collection.limit(6).get();
+      var results4 = collection.limit(10).get();
+      db.flush();
+
+      return Promise.all([
+        expect(results1).to.eventually.have.property('size').to.equal(3),
+        expect(results2).to.eventually.have.property('size').to.equal(1),
+        expect(results3).to.eventually.have.property('size').to.equal(6),
+        expect(results4).to.eventually.have.property('size').to.equal(6)
+      ]);
+    });
+  });
 });
