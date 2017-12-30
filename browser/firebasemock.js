@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.6
+/** firebase-mock - v2.0.7
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -17856,7 +17856,7 @@ MockFirestoreCollection.prototype.add = function (data) {
 };
 
 MockFirestoreCollection.prototype.doc = function (path) {
-  assert(path, 'A child path is required');
+  path = path || MockFirestoreCollection.autoId();
   var parts = _.compact(path.split('/'));
   var childKey = parts.shift();
   var child = this.children[childKey];
