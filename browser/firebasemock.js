@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.5
+/** firebase-mock - v2.0.6
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -17842,6 +17842,7 @@ MockFirestoreCollection.prototype.add = function (data) {
     self._defer('add', _.toArray(arguments), function () {
       if (err === null) {
         var id = MockFirestoreCollection.autoId();
+        self.data = self.data || {};
         self.data[id] = data;
         var ref = self.doc(id);
         ref.set(data).then(function() {
