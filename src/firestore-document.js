@@ -18,13 +18,6 @@ function MockFirestoreDocument(path, data, parent, name, CollectionReference) {
   this.id = parent ? name : extractName(path);
   this.flushDelay = parent ? parent.flushDelay : false;
   this.queue = parent ? parent.queue : new Queue();
-  this._events = {
-    value: [],
-    child_added: [],
-    child_removed: [],
-    child_changed: [],
-    child_moved: []
-  };
   this.parent = parent || null;
   this.children = {};
   if (parent) parent.children[this.id] = this;
@@ -161,6 +154,10 @@ MockFirestoreDocument.prototype._childData = function (key) {
 
 MockFirestoreDocument.prototype._dataChanged = function (unparsedData) {
   this.data = utils.cleanFirestoreData(unparsedData);
+  if (this.parent) {
+    if (!this.parent.data) this.parent.data = {};
+    this.parent.data[this.id] = this.data;
+  }
 };
 
 MockFirestoreDocument.prototype._defer = function (sourceMethod, sourceArgs, callback) {

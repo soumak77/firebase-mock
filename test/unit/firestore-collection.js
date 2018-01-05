@@ -81,9 +81,36 @@ describe('MockFirestoreCollection', function () {
       var keys = Object.keys(require('./data.json').collections);
       collection.get().then(function(snaps) {
         expect(snaps.size).to.equal(6);
-
         snaps.forEach(function(doc) {
           expect(keys).to.contain(doc.id);
+        });
+        done();
+      }).catch(done);
+    });
+
+    it('retrieves data added to collection', function(done) {
+      db.autoFlush();
+      db.collection('group').add({
+        name: 'test'
+      });
+      db.collection('group').get().then(function(snaps) {
+        expect(snaps.size).to.equal(1);
+        snaps.forEach(function(doc) {
+          expect(doc.data().name).to.equal('test');
+        });
+        done();
+      }).catch(done);
+    });
+
+    it('retrieves data set as document', function(done) {
+      db.autoFlush();
+      db.collection('group').doc('123').set({
+        name: 'test'
+      });
+      db.collection('group').get().then(function(snaps) {
+        expect(snaps.size).to.equal(1);
+        snaps.forEach(function(doc) {
+          expect(doc.data().name).to.equal('test');
         });
         done();
       }).catch(done);

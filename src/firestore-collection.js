@@ -21,15 +21,9 @@ function MockFirestoreCollection(path, data, parent, name, DocumentReference) {
   this.id = parent ? name : extractName(path);
   this.flushDelay = parent ? parent.flushDelay : false;
   this.queue = parent ? parent.queue : new Queue();
-  this._events = {
-    value: [],
-    child_added: [],
-    child_removed: [],
-    child_changed: [],
-    child_moved: []
-  };
   this.parent = parent || null;
   this.children = {};
+  if (parent) parent.children[this.id] = this;
   this._setData(data);
 }
 
