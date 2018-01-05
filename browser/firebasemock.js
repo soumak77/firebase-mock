@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.11
+/** firebase-mock - v2.0.12
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -18390,18 +18390,10 @@ function MockFirestore(path, data, parent, name) {
   this.id = parent ? name : extractName(path);
   this.flushDelay = parent ? parent.flushDelay : false;
   this.queue = parent ? parent.queue : new Queue();
-  this._events = {
-    value: [],
-    child_added: [],
-    child_removed: [],
-    child_changed: [],
-    child_moved: []
-  };
   this.parent = parent || null;
   this.children = {};
   if (parent) parent.children[this.key] = this;
   this.data = _.cloneDeep(data) || null;
-  this._lastAutoId = null;
 }
 
 MockFirestore.defaultAutoId = function () {
@@ -18448,7 +18440,19 @@ MockFirestore.prototype.toString = function () {
   return this.path;
 };
 
-MockFirestore.prototype.batch = function (path) {
+MockFirestore.prototype.runTransaction = function(transFunc) {
+  var batch = this.batch();
+  batch.get = function(doc) {
+    return doc.get();
+  };
+  return new Promise(function(resolve, reject) {
+    transFunc(batch).then(function() {
+      batch.commit().then(resolve).catch(reject);
+    }).catch(reject);
+  });
+};
+
+MockFirestore.prototype.batch = function () {
   var self = this;
   return {
     set: function(doc, data) {
