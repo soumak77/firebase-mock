@@ -155,8 +155,17 @@ MockFirestoreDocument.prototype._childData = function (key) {
 MockFirestoreDocument.prototype._dataChanged = function (unparsedData) {
   this.data = utils.cleanFirestoreData(unparsedData);
   if (this.parent) {
-    if (!this.parent.data) this.parent.data = {};
-    this.parent.data[this.id] = this.data;
+    if (this.data) {
+      this.parent.data = this.parent.data || {};
+      this.parent.data[this.id] = this.data;
+    } else {
+      if (this.parent.data) {
+        delete this.parent.data[this.id];
+      }
+      if (utils.cleanFirestoreData(this.parent.data) === null) {
+        this.parent.data = null;
+      }
+    }
   }
 };
 
