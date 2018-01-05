@@ -30,8 +30,7 @@ function MockFirestoreCollection(path, data, parent, name, DocumentReference) {
   };
   this.parent = parent || null;
   this.children = {};
-  this.data = null;
-  this._dataChanged(_.cloneDeep(data) || null);
+  this._setData(data);
 }
 
 MockFirestoreCollection.prototype.toString = function () {
@@ -86,10 +85,6 @@ MockFirestoreCollection.prototype._hasChild = function (key) {
 
 MockFirestoreCollection.prototype._childData = function (key) {
   return this._hasChild(key) ? this.data[key] : null;
-};
-
-MockFirestoreCollection.prototype._dataChanged = function (unparsedData) {
-  this.data = utils.cleanFirestoreData(unparsedData);
 };
 
 function extractName(path) {

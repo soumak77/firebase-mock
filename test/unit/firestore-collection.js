@@ -60,6 +60,36 @@ describe('MockFirestoreCollection', function () {
     });
   });
 
+  describe('#get', function () {
+    it('allow calling get()', function() {
+      expect(function() {
+        collection.doc('get');
+      }).to.not.throw();
+    });
+
+    it('retrieves all no data for non-existing collection', function(done) {
+      db.autoFlush();
+      db.collection('123').get().then(function(snaps) {
+        expect(snaps.size).to.equal(0);
+        expect(snaps.empty).to.equal(true);
+        done();
+      }).catch(done);
+    });
+
+    it('retrieves all data for existing collection', function(done) {
+      db.autoFlush();
+      var keys = Object.keys(require('./data.json').collections);
+      collection.get().then(function(snaps) {
+        expect(snaps.size).to.equal(6);
+
+        snaps.forEach(function(doc) {
+          expect(keys).to.contain(doc.id);
+        });
+        done();
+      }).catch(done);
+    });
+  });
+
   describe('#doc', function () {
     it('allow calling doc()', function() {
       expect(function() {

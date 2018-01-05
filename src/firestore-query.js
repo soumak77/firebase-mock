@@ -30,7 +30,7 @@ function MockFirestoreQuery(path, data, parent, name) {
   this.orderedProperties = [];
   this.orderedDirections = [];
   this.limited = 0;
-  this.data = utils.cleanFirestoreData(_.cloneDeep(data) || null);
+  this._setData(data);
 }
 
 MockFirestoreQuery.prototype.flush = function (delay) {
@@ -56,6 +56,10 @@ MockFirestoreQuery.prototype.autoFlush = function (delay) {
 
 MockFirestoreQuery.prototype.getFlushQueue = function () {
   return this.queue.getEvents();
+};
+
+MockFirestoreQuery.prototype._setData = function (data) {
+  this.data = utils.cleanFirestoreData(_.cloneDeep(data) || null);
 };
 
 MockFirestoreQuery.prototype.getData = function () {
