@@ -109,22 +109,63 @@ describe('MockFirestore', function () {
     });
   });
 
+  describe('#runTransaction', function () {
+    it('transaction updates data', function (done) {
+      db.autoFlush();
+      db.doc('doc').set({
+        name: 123
+      });
+
+      db.doc('doc').get().then(function(doc) {
+        expect(doc.get('name')).to.equal(123);
+        db.runTransaction(function(transaction) {
+          return transaction.get(db.doc('doc')).then(function(doc) {
+            transaction.update(db.doc('doc'), {
+              name: 'abc'
+            });
+          });
+        }).then(function() {
+          db.doc('doc').get().then(function(doc2) {
+            expect(doc2.get('name')).to.equal('abc');
+            done();
+          }).catch(done);
+        }).catch(done);
+      }).catch(done);
+    });
+  });
+
   describe('#batch', function () {
-    it('gets value of doc', function (done) {
-      var batch = db.batch();
-      batch.update(db.doc('doc'), {
-        name: 'abc'
+    it('batch runs commands after commit', function (done) {
+      db.collection('collections').doc('a').set({
+        name: 123
       });
-      batch.set(db.doc('doc2'), {
-        number: '123'
-      });
-      batch.delete(db.collection('collections').doc('a'));
-      batch.commit().then(function() {
-        expect(db.collection('collections').get()).to.eventually.have.property('exists').equal(false);
-        done();
-      }).catch(function(error) {
-        done(error);
-      });
+      db.flush();
+
+      Promise.all([
+        expect(db.doc('doc2').get()).to.eventually.have.property('exists').equal(false),
+        expect(db.collection('collections').doc('a').get()).to.eventually.have.property('exists').equal(true)
+      ]).then(function() {
+        var batch = db.batch();
+        batch.update(db.doc('doc'), {
+          name: 'abc'
+        });
+        batch.set(db.doc('doc2'), {
+          number: '123'
+        });
+        batch.delete(db.collection('collections').doc('a'));
+        batch.commit().then(function() {
+          Promise.all([
+            expect(db.doc('doc2').get()).to.eventually.have.property('exists').equal(true),
+            expect(db.collection('collections').doc('a').get()).to.eventually.have.property('exists').equal(false)
+          ]).then(function() {
+            done();
+          }).catch(done);
+
+          db.flush();
+        }).catch(done);
+      }).catch(done);
+
+      db.flush();
     });
   });
 });
