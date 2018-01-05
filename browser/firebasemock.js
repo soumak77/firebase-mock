@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.8
+/** firebase-mock - v2.0.9
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -17820,8 +17820,7 @@ function MockFirestoreCollection(path, data, parent, name, DocumentReference) {
   };
   this.parent = parent || null;
   this.children = {};
-  this.data = null;
-  this._dataChanged(_.cloneDeep(data) || null);
+  this._setData(data);
 }
 
 MockFirestoreCollection.prototype.toString = function () {
@@ -17876,10 +17875,6 @@ MockFirestoreCollection.prototype._hasChild = function (key) {
 
 MockFirestoreCollection.prototype._childData = function (key) {
   return this._hasChild(key) ? this.data[key] : null;
-};
-
-MockFirestoreCollection.prototype._dataChanged = function (unparsedData) {
-  this.data = utils.cleanFirestoreData(unparsedData);
 };
 
 function extractName(path) {
@@ -18218,7 +18213,7 @@ function MockFirestoreQuery(path, data, parent, name) {
   this.orderedProperties = [];
   this.orderedDirections = [];
   this.limited = 0;
-  this.data = utils.cleanFirestoreData(_.cloneDeep(data) || null);
+  this._setData(data);
 }
 
 MockFirestoreQuery.prototype.flush = function (delay) {
@@ -18244,6 +18239,10 @@ MockFirestoreQuery.prototype.autoFlush = function (delay) {
 
 MockFirestoreQuery.prototype.getFlushQueue = function () {
   return this.queue.getEvents();
+};
+
+MockFirestoreQuery.prototype._setData = function (data) {
+  this.data = utils.cleanFirestoreData(_.cloneDeep(data) || null);
 };
 
 MockFirestoreQuery.prototype.getData = function () {
