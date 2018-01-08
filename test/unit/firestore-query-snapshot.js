@@ -58,4 +58,19 @@ describe('QuerySnapshot', function () {
       expect(new Snapshot(null).size).to.equal(0);
     });
   });
+
+  describe('#docs', function () {
+    it('returns the data as an array of snapshots', function () {
+      var snapshot = new Snapshot([{
+        foo: 'bar',
+        bar: 'baz'
+      },{
+        foo: 'bar2',
+        bar: 'baz2'
+      }]);
+      var docs = snapshot.docs;
+      expect(docs.length).to.equal(2);
+      expect(snapshot.size).to.equal(2);
+    });
+  });
 });

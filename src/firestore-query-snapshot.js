@@ -10,6 +10,10 @@ function MockFirestoreQuerySnapshot (data) {
   }
   this.size = _.size(this.data);
   this.empty = this.size === 0;
+
+  this.docs = _.map(this.data, function (value, key) {
+    new DocumentSnapshot(key, value);
+  });
 }
 
 MockFirestoreQuerySnapshot.prototype.forEach = function (callback, context) {
