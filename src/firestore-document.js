@@ -14,7 +14,6 @@ function MockFirestoreDocument(path, data, parent, name, CollectionReference) {
   this.path = path || 'Mock://';
   this.CollectionReference = CollectionReference;
   this.errs = {};
-  this.priority = null;
   this.id = parent ? name : extractName(path);
   this.flushDelay = parent ? parent.flushDelay : false;
   this.queue = parent ? parent.queue : new Queue();
@@ -79,7 +78,7 @@ MockFirestoreDocument.prototype.get = function () {
   return new Promise(function (resolve, reject) {
     self._defer('get', _.toArray(arguments), function () {
       if (err === null) {
-        resolve(new DocumentSnapshot(self.id, self.getData()));
+        resolve(new DocumentSnapshot(self.id, self.ref, self.getData()));
       } else {
         reject(err);
       }

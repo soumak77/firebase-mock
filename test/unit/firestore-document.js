@@ -76,6 +76,12 @@ describe('MockFirestoreDocument', function () {
 
       db.flush();
     });
+
+    it('results contain ref for doc', function () {
+      var ref = db.doc('doc');
+
+      expect(ref.get()).to.eventually.have.property('ref').equal(ref);
+    });
   });
 
   describe('#set', function () {

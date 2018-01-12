@@ -4,23 +4,16 @@ var _ = require('lodash');
 var assert = require('assert');
 var Promise = require('rsvp').Promise;
 var autoId = require('firebase-auto-ids');
-var DocumentSnapshot = require('./firestore-document-snapshot');
-var QuerySnapshot = require('./firestore-query-snapshot');
 var Query = require('./firestore-query');
 var Queue = require('./queue').Queue;
 var utils = require('./utils');
 var validate = require('./validators');
 
 function MockFirestoreCollection(path, data, parent, name, DocumentReference) {
-  _.extend(this, Query.prototype, new Query());
-  this.ref = this;
+  _.extend(this, Query.prototype, new Query(path, data, parent, name));
   this.path = path || 'Mock://';
   this.DocumentReference = DocumentReference;
-  this.errs = {};
-  this.priority = null;
   this.id = parent ? name : extractName(path);
-  this.flushDelay = parent ? parent.flushDelay : false;
-  this.queue = parent ? parent.queue : new Queue();
   this.parent = parent || null;
   this.children = {};
   if (parent) parent.children[this.id] = this;
@@ -59,7 +52,8 @@ MockFirestoreCollection.prototype.add = function (data) {
 };
 
 MockFirestoreCollection.prototype.doc = function (path) {
-  path = path || MockFirestoreCollection.autoId();
+  if (typeof path === 'undefined') path = MockFirestoreCollection.autoId();
+  path = path.toString();
   var parts = _.compact(path.split('/'));
   var childKey = parts.shift();
   var child = this.children[childKey];

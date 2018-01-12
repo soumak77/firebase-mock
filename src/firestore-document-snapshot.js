@@ -2,8 +2,9 @@
 
 var _ = require('lodash');
 
-function MockFirestoreDocumentSnapshot (id, data) {
+function MockFirestoreDocumentSnapshot (id, ref, data) {
   this.id = id;
+  this.ref = ref;
   data = _.cloneDeep(data) || null;
   if (_.isObject(data) && _.isEmpty(data)) {
     data = null;

@@ -3,7 +3,8 @@
 var _ = require('lodash');
 var DocumentSnapshot = require('./firestore-document-snapshot');
 
-function MockFirestoreQuerySnapshot (data) {
+function MockFirestoreQuerySnapshot (ref, data) {
+  this._ref = ref;
   this.data = _.cloneDeep(data) || {};
   if (_.isObject(this.data) && _.isEmpty(this.data)) {
     this.data = {};
@@ -11,14 +12,16 @@ function MockFirestoreQuerySnapshot (data) {
   this.size = _.size(this.data);
   this.empty = this.size === 0;
 
+  var self = this;
   this.docs = _.map(this.data, function (value, key) {
-    new DocumentSnapshot(key, value);
+    return new DocumentSnapshot(key, self._ref.doc(key), value);
   });
 }
 
 MockFirestoreQuerySnapshot.prototype.forEach = function (callback, context) {
-  _.each(this.data, function (value, key) {
-    callback.call(context, new DocumentSnapshot(key, value));
+  var self = this;
+  _.each(this.docs, function (doc) {
+    callback.call(context, doc);
   });
 };
 

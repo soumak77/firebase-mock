@@ -187,6 +187,18 @@ describe('MockFirestoreCollection', function () {
       }).to.not.throw();
     });
 
+    it('results contain ref for each doc', function (done) {
+      var results = collection.where('name_type', '==', 'string').get();
+      db.flush();
+
+      results.then(function(snap) {
+        snap.forEach(function(doc) {
+          expect(doc.ref).to.deep.equal(collection.doc(doc.id));
+        });
+        done();
+      }).catch(done);
+    });
+
     it('returns matched documents for operator "=="', function() {
       var results1 = collection.where('name', '==', 3).get();
       var results2 = collection.where('name', '==', 'a').get();
