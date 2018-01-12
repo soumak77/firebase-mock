@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.13
+/** firebase-mock - v2.0.14
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -17794,23 +17794,16 @@ var _ = require('lodash');
 var assert = require('assert');
 var Promise = require('rsvp').Promise;
 var autoId = require('firebase-auto-ids');
-var DocumentSnapshot = require('./firestore-document-snapshot');
-var QuerySnapshot = require('./firestore-query-snapshot');
 var Query = require('./firestore-query');
 var Queue = require('./queue').Queue;
 var utils = require('./utils');
 var validate = require('./validators');
 
 function MockFirestoreCollection(path, data, parent, name, DocumentReference) {
-  _.extend(this, Query.prototype, new Query());
-  this.ref = this;
+  _.extend(this, Query.prototype, new Query(path, data, parent, name));
   this.path = path || 'Mock://';
   this.DocumentReference = DocumentReference;
-  this.errs = {};
-  this.priority = null;
   this.id = parent ? name : extractName(path);
-  this.flushDelay = parent ? parent.flushDelay : false;
-  this.queue = parent ? parent.queue : new Queue();
   this.parent = parent || null;
   this.children = {};
   if (parent) parent.children[this.id] = this;
@@ -17849,7 +17842,8 @@ MockFirestoreCollection.prototype.add = function (data) {
 };
 
 MockFirestoreCollection.prototype.doc = function (path) {
-  path = path || MockFirestoreCollection.autoId();
+  if (typeof path === 'undefined') path = MockFirestoreCollection.autoId();
+  path = path.toString();
   var parts = _.compact(path.split('/'));
   var childKey = parts.shift();
   var child = this.children[childKey];
@@ -17877,7 +17871,7 @@ function extractName(path) {
 
 module.exports = MockFirestoreCollection;
 
-},{"./firestore-document-snapshot":20,"./firestore-query":23,"./firestore-query-snapshot":22,"./queue":27,"./utils":31,"./validators":32,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],19:[function(require,module,exports){
+},{"./firestore-query":23,"./queue":27,"./utils":31,"./validators":32,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],19:[function(require,module,exports){
 'use strict';
 
 var _ = require('lodash');
@@ -17933,8 +17927,9 @@ module.exports = MockFirestoreDeltaDocumentSnapshot;
 
 var _ = require('lodash');
 
-function MockFirestoreDocumentSnapshot (id, data) {
+function MockFirestoreDocumentSnapshot (id, ref, data) {
   this.id = id;
+  this.ref = ref;
   data = _.cloneDeep(data) || null;
   if (_.isObject(data) && _.isEmpty(data)) {
     data = null;
@@ -17975,7 +17970,6 @@ function MockFirestoreDocument(path, data, parent, name, CollectionReference) {
   this.path = path || 'Mock://';
   this.CollectionReference = CollectionReference;
   this.errs = {};
-  this.priority = null;
   this.id = parent ? name : extractName(path);
   this.flushDelay = parent ? parent.flushDelay : false;
   this.queue = parent ? parent.queue : new Queue();
@@ -18040,7 +18034,7 @@ MockFirestoreDocument.prototype.get = function () {
   return new Promise(function (resolve, reject) {
     self._defer('get', _.toArray(arguments), function () {
       if (err === null) {
-        resolve(new DocumentSnapshot(self.id, self.getData()));
+        resolve(new DocumentSnapshot(self.id, self.ref, self.getData()));
       } else {
         reject(err);
       }
@@ -18163,7 +18157,8 @@ module.exports = MockFirestoreDocument;
 var _ = require('lodash');
 var DocumentSnapshot = require('./firestore-document-snapshot');
 
-function MockFirestoreQuerySnapshot (data) {
+function MockFirestoreQuerySnapshot (ref, data) {
+  this._ref = ref;
   this.data = _.cloneDeep(data) || {};
   if (_.isObject(this.data) && _.isEmpty(this.data)) {
     this.data = {};
@@ -18171,14 +18166,16 @@ function MockFirestoreQuerySnapshot (data) {
   this.size = _.size(this.data);
   this.empty = this.size === 0;
 
+  var self = this;
   this.docs = _.map(this.data, function (value, key) {
-    new DocumentSnapshot(key, value);
+    return new DocumentSnapshot(key, self._ref.doc(key), value);
   });
 }
 
 MockFirestoreQuerySnapshot.prototype.forEach = function (callback, context) {
-  _.each(this.data, function (value, key) {
-    callback.call(context, new DocumentSnapshot(key, value));
+  var self = this;
+  _.each(this.docs, function (doc) {
+    callback.call(context, doc);
   });
 };
 
@@ -18197,21 +18194,11 @@ var utils = require('./utils');
 var validate = require('./validators');
 
 function MockFirestoreQuery(path, data, parent, name) {
-  this.ref = this;
-  this.path = path || 'Mock://';
   this.errs = {};
-  this.priority = null;
-  this.myName = parent ? name : extractName(path);
-  this.key = this.myName;
+  this.path = path || 'Mock://';
+  this.id = parent ? name : extractName(path);
   this.flushDelay = parent ? parent.flushDelay : false;
   this.queue = parent ? parent.queue : new Queue();
-  this._events = {
-    value: [],
-    child_added: [],
-    child_removed: [],
-    child_changed: [],
-    child_moved: []
-  };
   this.parent = parent || null;
   this.children = {};
   this.orderedProperties = [];
@@ -18293,9 +18280,9 @@ MockFirestoreQuery.prototype.get = function () {
             });
           }
 
-          resolve(new QuerySnapshot(results));
+          resolve(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id), results));
         } else {
-          resolve(new QuerySnapshot());
+          resolve(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id)));
         }
       } else {
         reject(err);
@@ -18326,22 +18313,22 @@ MockFirestoreQuery.prototype.where = function (property, operator, value) {
             break;
         }
       });
-      return new MockFirestoreQuery(this.path, results, this.parent, this.myName);
+      return new MockFirestoreQuery(this.path, results, this.parent, this.id);
     } else {
-      return new MockFirestoreQuery(this.path, null, this.parent, this.myName);
+      return new MockFirestoreQuery(this.path, null, this.parent, this.id);
     }
   }
 };
 
 MockFirestoreQuery.prototype.orderBy = function (property, direction) {
-  var query = new MockFirestoreQuery(this.path, this.getData(), this.parent, this.myName);
+  var query = new MockFirestoreQuery(this.path, this.getData(), this.parent, this.id);
   query.orderedProperties.push(property);
   query.orderedDirections.push(direction || 'asc');
   return query;
 };
 
 MockFirestoreQuery.prototype.limit = function (limit) {
-  var query = new MockFirestoreQuery(this.path, this.getData(), this.parent, this.myName);
+  var query = new MockFirestoreQuery(this.path, this.getData(), this.parent, this.id);
   query.limited = limit;
   return query;
 };
