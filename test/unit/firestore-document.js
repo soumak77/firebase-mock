@@ -139,6 +139,25 @@ describe('MockFirestoreDocument', function () {
 
       db.flush();
     });
+    it('does not merge nested properties recursively', function (done) {
+      doc.set({
+        nested: {
+          prop1: 'prop1'
+        }
+      });
+      doc.update({
+        nested: {
+          prop2: 'prop2'
+        }
+      });
+
+      doc.get().then(function (snap) {
+        expect(snap.get('nested')).to.deep.equal({ prop2: 'prop2' });
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
   });
 
   describe('#delete', function () {
