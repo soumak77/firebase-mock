@@ -83,8 +83,14 @@ MockFirestore.prototype.runTransaction = function(transFunc) {
 MockFirestore.prototype.batch = function () {
   var self = this;
   return {
-    set: function(doc, data) {
-      doc.set(data);
+    set: function(doc, data, opts) {
+      var _opts = _.assign({}, { merge: false }, opts);
+      if (_opts.merge) {
+        doc._update(data, { setMerge: true });
+      }
+      else {
+        doc.set(data);
+      }
     },
     update: function(doc, data) {
       doc.update(data);
