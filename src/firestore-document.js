@@ -86,7 +86,11 @@ MockFirestoreDocument.prototype.get = function () {
   });
 };
 
-MockFirestoreDocument.prototype.set = function (data, callback) {
+MockFirestoreDocument.prototype.set = function (data, opts, callback) {
+  var _opts = _.assign({}, { merge: false }, opts);
+  if (_opts.merge) {
+    return this._update(data, { setMerge: true }, callback);
+  }
   var err = this._nextErr('set');
   data = _.cloneDeep(data);
   var self = this;
@@ -105,15 +109,22 @@ MockFirestoreDocument.prototype.set = function (data, callback) {
   });
 };
 
-MockFirestoreDocument.prototype.update = function (changes, callback) {
+MockFirestoreDocument.prototype._update = function (changes, opts, callback) {
   assert.equal(typeof changes, 'object', 'First argument must be an object when calling "update"');
+  var _opts = _.assign({}, { setMerge: false }, opts);
   var err = this._nextErr('update');
   var self = this;
   return new Promise(function (resolve, reject) {
     self._defer('update', _.toArray(arguments), function () {
       if (!err) {
         var base = self.getData();
-        var data = _.merge(_.isObject(base) ? base : {}, utils.updateToObject(changes));
+        var data;
+        if (_opts.setMerge) {
+          data = _.merge(_.isObject(base) ? base : {}, changes);
+        }
+        else {
+          data = _.assign(_.isObject(base) ? base : {}, utils.updateToObject(changes));
+        }
         data = utils.removeEmptyProperties(data);
         self._dataChanged(data);
         resolve(data);
@@ -125,6 +136,10 @@ MockFirestoreDocument.prototype.update = function (changes, callback) {
       }
     });
   });
+};
+
+MockFirestoreDocument.prototype.update = function (changes, callback) {
+  return this._update(changes, { setMerge: false }, callback);
 };
 
 MockFirestoreDocument.prototype.delete = function (callback) {

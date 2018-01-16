@@ -98,6 +98,68 @@ describe('MockFirestoreDocument', function () {
     });
   });
 
+  describe('#set with {merge: true}', function () {
+    it('updates value of doc', function (done) {
+      doc.set({
+        title: 'title2',
+        nested: {
+          prop1: 'prop1'
+        }
+      });
+      doc.set({
+        nested: {
+          prop2: 'prop2'
+        }
+      }, { merge: true });
+
+      doc.get().then(function (snap) {
+        expect(snap.get('title')).to.equal('title2');
+        expect(snap.get('nested')).to.deep.equal({ prop1: 'prop1', prop2: 'prop2' });
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+  });
+
+  describe('#update', function () {
+    it('updates value of doc', function (done) {
+      doc.set({
+        title: 'title2'
+      });
+      doc.update({
+        nextTitle: 'nextTitle'
+      });
+
+      doc.get().then(function (snap) {
+        expect(snap.get('title')).to.equal('title2');
+        expect(snap.get('nextTitle')).to.equal('nextTitle');
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+    it('does not merge nested properties recursively', function (done) {
+      doc.set({
+        nested: {
+          prop1: 'prop1'
+        }
+      });
+      doc.update({
+        nested: {
+          prop2: 'prop2'
+        }
+      });
+
+      doc.get().then(function (snap) {
+        expect(snap.get('nested')).to.deep.equal({ prop2: 'prop2' });
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+  });
+
   describe('#delete', function () {
     it('delete doc', function () {
       var result;
