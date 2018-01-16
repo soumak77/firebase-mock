@@ -91,6 +91,7 @@ exports.removeEmptyProperties = function removeEmptyProperties(obj) {
   if (t === 'boolean' || t === 'string' || t === 'number' || t === 'undefined') {
     return obj;
   }
+  if (obj instanceof Date) return obj;
 
   var keys = getKeys(obj);
   if (keys.length === 0) {
