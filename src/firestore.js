@@ -9,10 +9,11 @@ var DocumentReference = require('./firestore-document');
 var Queue = require('./queue').Queue;
 var utils = require('./utils');
 var validate = require('./validators');
+var DEFAULT_PATH = 'Mock://';
 
 function MockFirestore(path, data, parent, name) {
   this.ref = this;
-  this.path = path || 'Mock://';
+  this.path = path || DEFAULT_PATH;
   this.errs = {};
   this.priority = null;
   this.id = parent ? name : extractName(path);
@@ -138,9 +139,9 @@ MockFirestore.prototype._child = function (childPath, findingDoc) {
     }
 
     if (firstChildIsDoc) {
-      child = new DocumentReference(utils.mergePaths(this.path, childKey), this._childData(childKey), this, childKey, CollectionReference);
+      child = new DocumentReference(this.path === DEFAULT_PATH ? childKey : utils.mergePaths(this.path, childKey), this._childData(childKey), this, childKey, CollectionReference);
     } else {
-      child = new CollectionReference(utils.mergePaths(this.path, childKey), this._childData(childKey), this, childKey, DocumentReference);
+      child = new CollectionReference(this.path === DEFAULT_PATH ? childKey : utils.mergePaths(this.path, childKey), this._childData(childKey), this, childKey, DocumentReference);
     }
 
     this.children[child.id] = child;

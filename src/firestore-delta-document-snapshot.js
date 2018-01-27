@@ -1,36 +1,17 @@
 'use strict';
 
 var _ = require('lodash');
+var DocumentSnapshot = require('./firestore-document-snapshot');
 
 function MockFirestoreDeltaDocumentSnapshot (id, data, previous, ref) {
-  this.id = id;
+  _.extend(this, DocumentSnapshot.prototype, new DocumentSnapshot(id, ref, data));
   this.previous = previous;
-  this.ref = ref;
-  data = _.cloneDeep(data) || null;
-  if (_.isObject(data) && _.isEmpty(data)) {
-    data = null;
-  }
-  this.data = function() {
-    return data;
-  };
-  this.exists = data !== null;
 }
-
-MockFirestoreDeltaDocumentSnapshot.prototype.get = function (path) {
-  var parts = path.split('/');
-  var part = parts.shift();
-  var value = null;
-  while (part) {
-    value = this.data()[part];
-    part = parts.shift();
-  }
-  return value;
-};
 
 MockFirestoreDeltaDocumentSnapshot.create = function(app, data, delta, path) {
   var id = path.split('/').pop();
   var ref = app.firestore().doc(path);
-  var previous = data === null ? null : new MockFirestoreDeltaDocumentSnapshot(id, data, null, ref);
+  var previous = new MockFirestoreDeltaDocumentSnapshot(id, data, null, ref);
   return new MockFirestoreDeltaDocumentSnapshot(id, applyDelta(data, delta), previous, ref);
 };
 
