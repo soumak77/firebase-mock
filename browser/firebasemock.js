@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.17
+/** firebase-mock - v2.0.18
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -17875,36 +17875,17 @@ module.exports = MockFirestoreCollection;
 'use strict';
 
 var _ = require('lodash');
+var DocumentSnapshot = require('./firestore-document-snapshot');
 
 function MockFirestoreDeltaDocumentSnapshot (id, data, previous, ref) {
-  this.id = id;
+  _.extend(this, DocumentSnapshot.prototype, new DocumentSnapshot(id, ref, data));
   this.previous = previous;
-  this.ref = ref;
-  data = _.cloneDeep(data) || null;
-  if (_.isObject(data) && _.isEmpty(data)) {
-    data = null;
-  }
-  this.data = function() {
-    return data;
-  };
-  this.exists = data !== null;
 }
-
-MockFirestoreDeltaDocumentSnapshot.prototype.get = function (path) {
-  var parts = path.split('/');
-  var part = parts.shift();
-  var value = null;
-  while (part) {
-    value = this.data()[part];
-    part = parts.shift();
-  }
-  return value;
-};
 
 MockFirestoreDeltaDocumentSnapshot.create = function(app, data, delta, path) {
   var id = path.split('/').pop();
   var ref = app.firestore().doc(path);
-  var previous = data === null ? null : new MockFirestoreDeltaDocumentSnapshot(id, data, null, ref);
+  var previous = new MockFirestoreDeltaDocumentSnapshot(id, data, null, ref);
   return new MockFirestoreDeltaDocumentSnapshot(id, applyDelta(data, delta), previous, ref);
 };
 
@@ -17922,7 +17903,7 @@ function applyDelta(data, delta) {
 
 module.exports = MockFirestoreDeltaDocumentSnapshot;
 
-},{"lodash":13}],20:[function(require,module,exports){
+},{"./firestore-document-snapshot":20,"lodash":13}],20:[function(require,module,exports){
 'use strict';
 
 var _ = require('lodash');
@@ -18395,10 +18376,11 @@ var DocumentReference = require('./firestore-document');
 var Queue = require('./queue').Queue;
 var utils = require('./utils');
 var validate = require('./validators');
+var DEFAULT_PATH = 'Mock://';
 
 function MockFirestore(path, data, parent, name) {
   this.ref = this;
-  this.path = path || 'Mock://';
+  this.path = path || DEFAULT_PATH;
   this.errs = {};
   this.priority = null;
   this.id = parent ? name : extractName(path);
@@ -18524,9 +18506,9 @@ MockFirestore.prototype._child = function (childPath, findingDoc) {
     }
 
     if (firstChildIsDoc) {
-      child = new DocumentReference(utils.mergePaths(this.path, childKey), this._childData(childKey), this, childKey, CollectionReference);
+      child = new DocumentReference(this.path === DEFAULT_PATH ? childKey : utils.mergePaths(this.path, childKey), this._childData(childKey), this, childKey, CollectionReference);
     } else {
-      child = new CollectionReference(utils.mergePaths(this.path, childKey), this._childData(childKey), this, childKey, DocumentReference);
+      child = new CollectionReference(this.path === DEFAULT_PATH ? childKey : utils.mergePaths(this.path, childKey), this._childData(childKey), this, childKey, DocumentReference);
     }
 
     this.children[child.id] = child;
