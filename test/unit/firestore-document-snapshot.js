@@ -59,6 +59,12 @@ describe('DocumentSnapshot', function () {
       };
       expect(new Snapshot('docid', ref, data).get('world')).to.equal(undefined);
     });
+    it('returns undefined if path leads to null value', function () {
+      var data = {
+        hello: null
+      };
+      expect(new Snapshot('docid', ref, data).get('hello.world')).to.equal(undefined);
+    });
     it('returns data if path exists', function () {
       var data = {
         hello: 123

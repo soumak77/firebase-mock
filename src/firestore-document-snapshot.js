@@ -23,7 +23,7 @@ MockFirestoreDocumentSnapshot.prototype.get = function (path) {
   var data = this.data();
 
   while (part) {
-    if (!data.hasOwnProperty(part)) {
+    if (!data || !data.hasOwnProperty(part)) {
       return undefined;
     }
 
