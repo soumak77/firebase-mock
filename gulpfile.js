@@ -72,8 +72,7 @@ gulp.task('karma', function () {
     },
     files: [
       'node_modules/es5-shim/es5-shim.js',
-      'test/unit/*.js',
-      '!test/unit/firestore-delta-document-snapshot.js'
+      'test/unit/!(firestore-delta-document-snapshot).js'
     ],
     plugins: [
       'karma-phantomjs-launcher',
