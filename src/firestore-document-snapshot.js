@@ -16,7 +16,7 @@ function MockFirestoreDocumentSnapshot (id, ref, data) {
 }
 
 MockFirestoreDocumentSnapshot.prototype.get = function (path) {
-  if (!path) return undefined;
+  if (!path || !this.exists) return undefined;
 
   var parts = path.split('.');
   var part = parts.shift();

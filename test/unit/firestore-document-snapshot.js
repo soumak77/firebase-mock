@@ -39,6 +39,14 @@ describe('DocumentSnapshot', function () {
   });
 
   describe('#get', function () {
+    it('returns undefined if data does not exist', function () {
+      var data = null;
+      expect(new Snapshot('docid', ref, data).get('path')).to.equal(undefined);
+    });
+    it('returns undefined if data does not exist', function () {
+      var data = {};
+      expect(new Snapshot('docid', ref, data).get('path')).to.equal(undefined);
+    });
     it('returns undefined if path is empty', function () {
       var data = {
         hello: 123
