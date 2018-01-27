@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.18
+/** firebase-mock - v2.0.19
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -17929,7 +17929,7 @@ MockFirestoreDocumentSnapshot.prototype.get = function (path) {
   var data = this.data();
 
   while (part) {
-    if (!data.hasOwnProperty(part)) {
+    if (!data || !data.hasOwnProperty(part)) {
       return undefined;
     }
 
