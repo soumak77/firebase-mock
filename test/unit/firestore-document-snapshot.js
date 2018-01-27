@@ -39,11 +39,31 @@ describe('DocumentSnapshot', function () {
   });
 
   describe('#get', function () {
-    it('returns data at child path', function () {
+    it('returns undefined if path is empty', function () {
+      var data = {
+        hello: 123
+      };
+      expect(new Snapshot('docid', ref, data).get('')).to.equal(undefined);
+    });
+    it('returns undefined if path does not exist', function () {
+      var data = {
+        hello: 123
+      };
+      expect(new Snapshot('docid', ref, data).get('world')).to.equal(undefined);
+    });
+    it('returns data if path exists', function () {
       var data = {
         hello: 123
       };
       expect(new Snapshot('docid', ref, data).get('hello')).to.equal(123);
+    });
+    it('returns data with complex path', function () {
+      var data = {
+        hello: {
+          world: 123
+        }
+      };
+      expect(new Snapshot('docid', ref, data).get('hello.world')).to.equal(123);
     });
   });
 

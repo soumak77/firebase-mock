@@ -16,14 +16,22 @@ function MockFirestoreDocumentSnapshot (id, ref, data) {
 }
 
 MockFirestoreDocumentSnapshot.prototype.get = function (path) {
-  var parts = path.split('/');
+  if (!path) return undefined;
+
+  var parts = path.split('.');
   var part = parts.shift();
-  var value = null;
+  var data = this.data();
+
   while (part) {
-    value = this.data()[part];
+    if (!data.hasOwnProperty(part)) {
+      return undefined;
+    }
+
+    data = data[part];
     part = parts.shift();
   }
-  return value;
+
+  return data;
 };
 
 module.exports = MockFirestoreDocumentSnapshot;
