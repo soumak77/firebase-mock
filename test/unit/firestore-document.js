@@ -120,6 +120,23 @@ describe('MockFirestoreDocument', function () {
 
       db.flush();
     });
+    it('can update date fields', function (done) {
+      var date = new Date(2018, 2, 2);
+      var nextDate = new Date(2018, 3, 3);
+      doc.set({
+        date: date
+      });
+      doc.set({
+        date: nextDate
+      }, { merge: true });
+
+      doc.get().then(function (snap) {
+        expect(snap.get('date').getTime()).to.equal(nextDate.getTime());
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
   });
 
   describe('#update', function () {
@@ -155,6 +172,25 @@ describe('MockFirestoreDocument', function () {
         expect(snap.get('nested')).to.deep.equal({ prop2: 'prop2' });
         done();
       }).catch(done);
+
+      db.flush();
+    });
+    it('can update date fields', function (done) {
+      var date = new Date(2018, 2, 2);
+      var nextDate = new Date(2018, 3, 3);
+      doc.set({
+        date: date
+      });
+      doc.update({
+        date: nextDate
+      });
+
+      doc.get()
+        .then(function (snap) {
+          expect(snap.get('date').getTime()).to.equal(nextDate.getTime());
+          done();
+        })
+        .catch(done);
 
       db.flush();
     });
