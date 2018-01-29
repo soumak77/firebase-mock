@@ -120,6 +120,24 @@ describe('MockFirestoreDocument', function () {
 
       db.flush();
     });
+
+    it('can update date fields', function (done) {
+      var date = new Date(2018, 2, 2);
+      var nextDate = new Date(2018, 3, 3);
+      doc.set({
+        date: date
+      });
+      doc.set({
+        date: nextDate
+      }, { merge: true });
+
+      doc.get().then(function (snap) {
+        expect(snap.get('date').getTime()).to.equal(nextDate.getTime());
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
   });
 
   describe('#update', function () {
@@ -139,7 +157,7 @@ describe('MockFirestoreDocument', function () {
 
       db.flush();
     });
-    it('does not merge nested properties recursively', function (done) {
+    it('does not merge nested properties recursively by default', function (done) {
       doc.set({
         nested: {
           prop1: 'prop1'
@@ -155,6 +173,46 @@ describe('MockFirestoreDocument', function () {
         expect(snap.get('nested')).to.deep.equal({ prop2: 'prop2' });
         done();
       }).catch(done);
+
+      db.flush();
+    });
+    it('merges nested properties recursively when using nested paths', function (done) {
+      doc.set({
+        nested: {
+          prop1: 'prop1'
+        }
+      });
+      doc.update({
+        'nested.prop2': 'prop2'
+      });
+
+      doc.get().then(function (snap) {
+        expect(snap.get('nested')).to.deep.equal({
+          prop1: 'prop1',
+          prop2: 'prop2'
+        });
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
+    it('can update date fields', function (done) {
+      var date = new Date(2018, 2, 2);
+      var nextDate = new Date(2018, 3, 3);
+      doc.set({
+        date: date
+      });
+      doc.update({
+        date: nextDate
+      });
+
+      doc.get()
+        .then(function (snap) {
+          expect(snap.get('date').getTime()).to.equal(nextDate.getTime());
+          done();
+        })
+        .catch(done);
 
       db.flush();
     });
