@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.19
+/** firebase-mock - v2.0.20
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -17273,8 +17273,8 @@ MockFirebase.prototype.update = function (changes, callback) {
     self._defer('update', _.toArray(arguments), function () {
       if (!err) {
         var base = self.getData();
-        var data = _.merge(_.isObject(base) ? base : {}, utils.updateToObject(changes));
-        data = utils.removeEmptyProperties(data);
+        var data = _.merge(_.isObject(base) ? base : {}, utils.updateToRtdbObject(changes));
+        data = utils.removeEmptyRtdbProperties(data);
         self._dataChanged(data);
         resolve(data);
       } else {
@@ -18066,11 +18066,17 @@ MockFirestoreDocument.prototype._update = function (changes, opts, callback) {
         var data;
         if (_opts.setMerge) {
           data = _.merge(_.isObject(base) ? base : {}, changes);
+        } else {
+          // check if changes contain no nested objects
+          if (_.every(Object.keys(changes), function(key) { return !_.isObject(changes[key]); })) {
+            // allow data to be merged, which allows merging of nested data
+            data = _.merge(_.isObject(base) ? base : {}, utils.updateToFirestoreObject(changes));
+          } else {
+            // don't allow data to be merged, which overwrite nested data
+            data = _.assign(_.isObject(base) ? base : {}, utils.updateToFirestoreObject(changes));
+          }
         }
-        else {
-          data = _.assign(_.isObject(base) ? base : {}, utils.updateToObject(changes));
-        }
-        data = utils.removeEmptyProperties(data);
+        data = utils.removeEmptyFirestoreProperties(data);
         self._dataChanged(data);
         resolve(data);
       } else {
@@ -19541,9 +19547,6 @@ exports.cleanData = function cleanData(data) {
     if (_.has(newData, '.priority')) {
       delete newData['.priority'];
     }
-//      _.each(newData, function(v,k) {
-//        newData[k] = cleanData(v);
-//      });
     if (_.isEmpty(newData)) {
       newData = null;
     }
@@ -19607,7 +19610,7 @@ exports.isServerTimestamp = function isServerTimestamp(data) {
   return _.isObject(data) && data['.sv'] === 'timestamp';
 };
 
-exports.removeEmptyProperties = function removeEmptyProperties(obj) {
+exports.removeEmptyRtdbProperties = function removeEmptyRtdbProperties(obj) {
   var t = typeof obj;
   if (t === 'boolean' || t === 'string' || t === 'number' || t === 'undefined') {
     return obj;
@@ -19618,7 +19621,7 @@ exports.removeEmptyProperties = function removeEmptyProperties(obj) {
     return null;
   } else {
     for (var s in obj) {
-      var value = removeEmptyProperties(obj[s]);
+      var value = removeEmptyRtdbProperties(obj[s]);
       if (value === null) {
         delete obj[s];
       }
@@ -19636,10 +19639,58 @@ exports.removeEmptyProperties = function removeEmptyProperties(obj) {
   }
 };
 
-exports.updateToObject = function updateToObject(update) {
+exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties(obj) {
+  var t = typeof obj;
+  if (t === 'boolean' || t === 'string' || t === 'number' || t === 'undefined') {
+    return obj;
+  }
+  if (obj instanceof Date) return obj;
+
+  var keys = getKeys(obj);
+  if (keys.length === 0) {
+    return null;
+  } else {
+    for (var s in obj) {
+      var value = removeEmptyFirestoreProperties(obj[s]);
+      if (value === null) {
+        delete obj[s];
+      }
+    }
+    if (getKeys(obj).length === 0) {
+      return null;
+    }
+  }
+  return obj;
+
+  function getKeys(o) {
+    var result = [];
+    for (var s in o) result.push(s);
+    return result;
+  }
+};
+
+exports.updateToRtdbObject = function updateToRtdbObject(update) {
   var result = {};
   for (var s in update) {
     var parts = s.split('/');
+    var value = update[s];
+    var o = result;
+    do {
+      var key = parts.shift();
+      if(key) {
+        var newObject = o[key] || {};
+        o[key] = parts.length > 0 ? newObject : value;
+        o = newObject;
+      }
+    } while (parts.length);
+  }
+  return result;
+};
+
+exports.updateToFirestoreObject = function updateToFirestoreObject(update) {
+  var result = {};
+  for (var s in update) {
+    var parts = s.split('.');
     var value = update[s];
     var o = result;
     do {
