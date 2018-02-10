@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.20
+/** firebase-mock - v2.0.21
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -16,7 +16,7 @@ exports.DeltaDocumentSnapshot = MockFirestoreDeltaDocumentSnapshot.create;
 /** @deprecated */
 exports.MockFirebaseSimpleLogin = require('./login');
 
-},{"./firebase":17,"./firestore":24,"./firestore-delta-document-snapshot":19,"./login":25,"./sdk":28}],2:[function(require,module,exports){
+},{"./firebase":17,"./firestore":25,"./firestore-delta-document-snapshot":19,"./login":26,"./sdk":29}],2:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
 // THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
@@ -17787,7 +17787,7 @@ function render(datum) {
 
 module.exports = MockFirebase;
 
-},{"./auth":16,"./query":26,"./queue":27,"./snapshot":30,"./utils":31,"./validators":32,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],18:[function(require,module,exports){
+},{"./auth":16,"./query":27,"./queue":28,"./snapshot":31,"./utils":32,"./validators":33,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],18:[function(require,module,exports){
 'use strict';
 
 var _ = require('lodash');
@@ -17871,7 +17871,7 @@ function extractName(path) {
 
 module.exports = MockFirestoreCollection;
 
-},{"./firestore-query":23,"./queue":27,"./utils":31,"./validators":32,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],19:[function(require,module,exports){
+},{"./firestore-query":24,"./queue":28,"./utils":32,"./validators":33,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],19:[function(require,module,exports){
 'use strict';
 
 var _ = require('lodash');
@@ -17912,9 +17912,6 @@ function MockFirestoreDocumentSnapshot (id, ref, data) {
   this.id = id;
   this.ref = ref;
   data = _.cloneDeep(data) || null;
-  if (_.isObject(data) && _.isEmpty(data)) {
-    data = null;
-  }
   this.data = function() {
     return data;
   };
@@ -18161,7 +18158,31 @@ function extractName(path) {
 
 module.exports = MockFirestoreDocument;
 
-},{"./firestore-document-snapshot":20,"./queue":27,"./utils":31,"./validators":32,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],22:[function(require,module,exports){
+},{"./firestore-document-snapshot":20,"./queue":28,"./utils":32,"./validators":33,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],22:[function(require,module,exports){
+'use strict';
+
+function MockFirestoreFieldValue(type) {
+  this.type = type;
+}
+
+MockFirestoreFieldValue.prototype.isEqual = function (other) {
+  if (other instanceof MockFirestoreFieldValue && this.type === other.type) {
+    return true;
+  }
+  return false;
+};
+
+MockFirestoreFieldValue.delete = function () {
+  return new MockFirestoreFieldValue('delete');
+};
+
+MockFirestoreFieldValue.serverTimestamp = function () {
+  return new MockFirestoreFieldValue('serverTimestamp');
+};
+
+module.exports = MockFirestoreFieldValue;
+
+},{}],23:[function(require,module,exports){
 'use strict';
 
 var _ = require('lodash');
@@ -18191,7 +18212,7 @@ MockFirestoreQuerySnapshot.prototype.forEach = function (callback, context) {
 
 module.exports = MockFirestoreQuerySnapshot;
 
-},{"./firestore-document-snapshot":20,"lodash":13}],23:[function(require,module,exports){
+},{"./firestore-document-snapshot":20,"lodash":13}],24:[function(require,module,exports){
 'use strict';
 
 var _ = require('lodash');
@@ -18370,7 +18391,7 @@ function extractName(path) {
 
 module.exports = MockFirestoreQuery;
 
-},{"./firestore-query-snapshot":22,"./queue":27,"./utils":31,"./validators":32,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],24:[function(require,module,exports){
+},{"./firestore-query-snapshot":23,"./queue":28,"./utils":32,"./validators":33,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],25:[function(require,module,exports){
 'use strict';
 
 var _ = require('lodash');
@@ -18403,11 +18424,6 @@ MockFirestore.defaultAutoId = function () {
 };
 
 MockFirestore.autoId = MockFirestore.defaultAutoId;
-MockFirestore.FieldValue = {
-  delete: function() {
-    return null;
-  }
-};
 
 MockFirestore.prototype.flush = function (delay) {
   this.queue.flush(delay);
@@ -18566,7 +18582,7 @@ function extractName(path) {
 
 module.exports = MockFirestore;
 
-},{"./firestore-collection":18,"./firestore-document":21,"./queue":27,"./utils":31,"./validators":32,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],25:[function(require,module,exports){
+},{"./firestore-collection":18,"./firestore-document":21,"./queue":28,"./utils":32,"./validators":33,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],26:[function(require,module,exports){
 'use strict';
 
 var _   = require('lodash');
@@ -18874,7 +18890,7 @@ function createDefaultUser (provider) {
 
 module.exports = MockFirebaseSimpleLogin;
 
-},{"lodash":13,"md5":14}],26:[function(require,module,exports){
+},{"lodash":13,"md5":14}],27:[function(require,module,exports){
 'use strict';
 
 var _        = require('lodash');
@@ -19067,7 +19083,7 @@ function assertQuery (method, pri, key) {
 
 module.exports = MockQuery;
 
-},{"./slice":29,"./utils":31,"./validators":32,"lodash":13,"rsvp":15}],27:[function(require,module,exports){
+},{"./slice":30,"./utils":32,"./validators":33,"lodash":13,"rsvp":15}],28:[function(require,module,exports){
 'use strict';
 
 var _            = require('lodash');
@@ -19143,9 +19159,10 @@ FlushEvent.prototype.cancel = function () {
 exports.Queue = FlushQueue;
 exports.Event = FlushEvent;
 
-},{"events":3,"lodash":13,"util":7}],28:[function(require,module,exports){
+},{"events":3,"lodash":13,"util":7}],29:[function(require,module,exports){
 var MockFirebase = require('./firebase');
 var MockFirestore = require('./firestore');
+var MockFieldValue = require('./firestore-field-value');
 
 var EmailAuthProvider = function() {
   this.providerId = EmailAuthProvider.PROVIDER_ID;
@@ -19217,7 +19234,7 @@ function MockFirebaseSdk(createDatabase, createAuth, createFirestore) {
   function MockFirebaseFirestore() {
     return createFirestore ? createFirestore() : new MockFirestore();
   }
-  MockFirebaseFirestore.FieldValue = MockFirestore.FieldValue;
+  MockFirebaseFirestore.FieldValue = MockFieldValue;
 
   return {
     database: MockFirebaseDatabase,
@@ -19237,7 +19254,7 @@ function MockFirebaseSdk(createDatabase, createAuth, createFirestore) {
 
 module.exports = MockFirebaseSdk;
 
-},{"./firebase":17,"./firestore":24}],29:[function(require,module,exports){
+},{"./firebase":17,"./firestore":25,"./firestore-field-value":22}],30:[function(require,module,exports){
 'use strict';
 
 var _        = require('lodash');
@@ -19439,7 +19456,7 @@ Slice.prototype._build = function(ref, rawData) {
 
 module.exports = Slice;
 
-},{"./snapshot":30,"./utils":31,"lodash":13}],30:[function(require,module,exports){
+},{"./snapshot":31,"./utils":32,"lodash":13}],31:[function(require,module,exports){
 'use strict';
 
 var _ = require('lodash');
@@ -19524,10 +19541,11 @@ function isValue (value) {
 
 module.exports = MockDataSnapshot;
 
-},{"lodash":13}],31:[function(require,module,exports){
+},{"lodash":13}],32:[function(require,module,exports){
 'use strict';
 
 var Snapshot = require('./snapshot');
+var FieldValue = require('./firestore-field-value');
 var _ = require('lodash');
 
 exports.makeRefSnap = function makeRefSnap(ref) {
@@ -19647,17 +19665,15 @@ exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties
   if (obj instanceof Date) return obj;
 
   var keys = getKeys(obj);
-  if (keys.length === 0) {
-    return null;
-  } else {
+  if (keys.length > 0) {
     for (var s in obj) {
       var value = removeEmptyFirestoreProperties(obj[s]);
-      if (value === null) {
+      if (FieldValue.delete().isEqual(value)) {
         delete obj[s];
       }
-    }
-    if (getKeys(obj).length === 0) {
-      return null;
+      if (FieldValue.serverTimestamp().isEqual(value)) {
+        obj[s] = new Date();
+      }
     }
   }
   return obj;
@@ -19705,7 +19721,7 @@ exports.updateToFirestoreObject = function updateToFirestoreObject(update) {
   return result;
 };
 
-},{"./snapshot":30,"lodash":13}],32:[function(require,module,exports){
+},{"./firestore-field-value":22,"./snapshot":31,"lodash":13}],33:[function(require,module,exports){
 'use strict';
 
 var assert = require('assert');
