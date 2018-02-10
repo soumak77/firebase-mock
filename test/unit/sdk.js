@@ -89,7 +89,11 @@ describe('MockFirebaseSdk', function () {
     });
 
     it('FieldValue.delete', function () {
-      expect(firebase.firestore.FieldValue.delete()).to.equal(null);
+      expect(firebase.firestore.FieldValue.delete).to.be.a('function');
+    });
+
+    it('FieldValue.serverTimestamp', function () {
+      expect(firebase.firestore.FieldValue.serverTimestamp).to.be.a('function');
     });
   });
 

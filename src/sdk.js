@@ -1,5 +1,6 @@
 var MockFirebase = require('./firebase');
 var MockFirestore = require('./firestore');
+var MockFieldValue = require('./firestore-field-value');
 
 var EmailAuthProvider = function() {
   this.providerId = EmailAuthProvider.PROVIDER_ID;
@@ -71,7 +72,7 @@ function MockFirebaseSdk(createDatabase, createAuth, createFirestore) {
   function MockFirebaseFirestore() {
     return createFirestore ? createFirestore() : new MockFirestore();
   }
-  MockFirebaseFirestore.FieldValue = MockFirestore.FieldValue;
+  MockFirebaseFirestore.FieldValue = MockFieldValue;
 
   return {
     database: MockFirebaseDatabase,

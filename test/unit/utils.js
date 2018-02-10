@@ -57,7 +57,7 @@ describe('utils', function () {
   describe('removeEmptyFirestoreProperties', function () {
 
     it('should return null, when the obj is empty', function () {
-      expect(removeEmptyFirestoreProperties({})).to.equal(null);
+      expect(removeEmptyFirestoreProperties({})).to.eql({});
     });
 
     it('should make no changes, when obj does not contain an empty property', function () {
@@ -90,16 +90,16 @@ describe('utils', function () {
     });
 
     it('should remove property, when it is null', function () {
-      expect(removeEmptyFirestoreProperties({a: 1, b: null})).to.eql({a: 1});
+      expect(removeEmptyFirestoreProperties({a: 1, b: null})).to.eql({a: 1, b: null});
     });
     it('should remove property, when it is an empty object', function () {
-      expect(removeEmptyFirestoreProperties({a: 1, b: {}})).to.eql({a: 1});
+      expect(removeEmptyFirestoreProperties({a: 1, b: {}})).to.eql({a: 1, b: {}});
     });
     it('should remove property, when it is an empty array', function () {
-      expect(removeEmptyFirestoreProperties({a: 1, b: []})).to.eql({a: 1});
+      expect(removeEmptyFirestoreProperties({a: 1, b: []})).to.eql({a: 1, b: []});
     });
     it('should return null, when all properties are null ', function () {
-      expect(removeEmptyFirestoreProperties({a: {b: null}})).to.eql(null);
+      expect(removeEmptyFirestoreProperties({a: {b: null}})).to.eql({a: {b: null}});
     });
   });
 

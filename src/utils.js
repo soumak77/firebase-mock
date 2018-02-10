@@ -1,6 +1,7 @@
 'use strict';
 
 var Snapshot = require('./snapshot');
+var FieldValue = require('./firestore-field-value');
 var _ = require('lodash');
 
 exports.makeRefSnap = function makeRefSnap(ref) {
@@ -120,17 +121,15 @@ exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties
   if (obj instanceof Date) return obj;
 
   var keys = getKeys(obj);
-  if (keys.length === 0) {
-    return null;
-  } else {
+  if (keys.length > 0) {
     for (var s in obj) {
       var value = removeEmptyFirestoreProperties(obj[s]);
-      if (value === null) {
+      if (FieldValue.delete().isEqual(value)) {
         delete obj[s];
       }
-    }
-    if (getKeys(obj).length === 0) {
-      return null;
+      if (FieldValue.serverTimestamp().isEqual(value)) {
+        obj[s] = new Date();
+      }
     }
   }
   return obj;

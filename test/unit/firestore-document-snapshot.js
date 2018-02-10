@@ -18,6 +18,10 @@ describe('DocumentSnapshot', function () {
       expect(new Snapshot('docid', ref).exists).to.equal(false);
     });
 
+    it('returns true if data is empty', function () {
+      expect(new Snapshot('docid', ref, {}).exists).to.equal(true);
+    });
+
     it('returns true if data available', function () {
       expect(new Snapshot('docid', ref, {
         hello: 123
@@ -28,6 +32,11 @@ describe('DocumentSnapshot', function () {
   describe('#data', function () {
     it('returns null if no data', function () {
       expect(new Snapshot('docid', ref).data()).to.equal(null);
+    });
+
+    it('returns empty data if empty data provided', function () {
+      var data = {};
+      expect(new Snapshot('docid', ref, data).data()).to.deep.equal(data);
     });
 
     it('returns data if data provided', function () {

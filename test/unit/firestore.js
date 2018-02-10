@@ -19,12 +19,6 @@ describe('MockFirestore', function () {
     spy = sinon.spy();
   });
 
-  describe('FieldValue', function () {
-    it('delete', function () {
-      expect(Firestore.FieldValue.delete()).to.equal(null);
-    });
-  });
-
   describe('#flush', function () {
     it('flushes the queue and returns itself', function () {
       sinon.stub(db.queue, 'flush');
