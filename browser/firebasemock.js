@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.21
+/** firebase-mock - v2.0.22
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -18400,6 +18400,7 @@ var Promise = require('rsvp').Promise;
 var autoId = require('firebase-auto-ids');
 var CollectionReference = require('./firestore-collection');
 var DocumentReference = require('./firestore-document');
+var FieldValue = require('./firestore-field-value');
 var Queue = require('./queue').Queue;
 var utils = require('./utils');
 var validate = require('./validators');
@@ -18424,6 +18425,7 @@ MockFirestore.defaultAutoId = function () {
 };
 
 MockFirestore.autoId = MockFirestore.defaultAutoId;
+MockFirestore.FieldValue = FieldValue;
 
 MockFirestore.prototype.flush = function (delay) {
   this.queue.flush(delay);
@@ -18582,7 +18584,7 @@ function extractName(path) {
 
 module.exports = MockFirestore;
 
-},{"./firestore-collection":18,"./firestore-document":21,"./queue":28,"./utils":32,"./validators":33,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],26:[function(require,module,exports){
+},{"./firestore-collection":18,"./firestore-document":21,"./firestore-field-value":22,"./queue":28,"./utils":32,"./validators":33,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],26:[function(require,module,exports){
 'use strict';
 
 var _   = require('lodash');
@@ -19574,11 +19576,6 @@ exports.cleanData = function cleanData(data) {
 
 exports.cleanFirestoreData = function cleanFirestoreData(data) {
   var newData = _.clone(data);
-  if (_.isObject(newData)) {
-    if (_.isEmpty(newData)) {
-      newData = null;
-    }
-  }
   return newData;
 };
 
