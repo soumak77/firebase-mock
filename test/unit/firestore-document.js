@@ -90,7 +90,21 @@ describe('MockFirestoreDocument', function () {
         title: 'title2'
       });
       doc.get().then(function(snap) {
+        expect(snap.exists).to.equal(true);
         expect(snap.get('title')).to.equal('title2');
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
+    it('sets value of doc with null values', function (done) {
+      doc.set({
+        prop: null
+      });
+      doc.get().then(function(snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.get('prop')).to.equal(null);
         done();
       }).catch(done);
 
@@ -113,8 +127,32 @@ describe('MockFirestoreDocument', function () {
       }, { merge: true });
 
       doc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
         expect(snap.get('title')).to.equal('title2');
         expect(snap.get('nested')).to.deep.equal({ prop1: 'prop1', prop2: 'prop2' });
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
+    it('updates value of doc with null values', function (done) {
+      doc.set({
+        title: 'title2',
+        nested: {
+          prop1: 'prop1'
+        }
+      });
+      doc.set({
+        nested: {
+          prop2: null
+        }
+      }, { merge: true });
+
+      doc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.get('title')).to.equal('title2');
+        expect(snap.get('nested')).to.deep.equal({ prop1: 'prop1', prop2: null });
         done();
       }).catch(done);
 
@@ -132,6 +170,7 @@ describe('MockFirestoreDocument', function () {
       }, { merge: true });
 
       doc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
         expect(snap.get('date').getTime()).to.equal(nextDate.getTime());
         done();
       }).catch(done);
@@ -150,6 +189,7 @@ describe('MockFirestoreDocument', function () {
       });
 
       doc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
         expect(snap.get('title')).to.equal('title2');
         expect(snap.get('nextTitle')).to.equal('nextTitle');
         done();
@@ -157,6 +197,42 @@ describe('MockFirestoreDocument', function () {
 
       db.flush();
     });
+
+    it('updates value of doc with null properties', function (done) {
+      doc.set({
+        title: 'title2'
+      });
+      doc.update({
+        nextTitle: null
+      });
+
+      doc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.get('title')).to.equal('title2');
+        expect(snap.get('nextTitle')).to.equal(null);
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
+    it('removes property when using FieldValue.delete()', function (done) {
+      doc.set({
+        title: 'title2'
+      });
+      doc.update({
+        title: Firestore.FieldValue.delete()
+      });
+
+      doc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.data()).to.deep.equal({});
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
     it('does not merge nested properties recursively by default', function (done) {
       doc.set({
         nested: {
@@ -176,6 +252,7 @@ describe('MockFirestoreDocument', function () {
 
       db.flush();
     });
+
     it('merges nested properties recursively when using nested paths', function (done) {
       doc.set({
         nested: {

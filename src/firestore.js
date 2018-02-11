@@ -6,6 +6,7 @@ var Promise = require('rsvp').Promise;
 var autoId = require('firebase-auto-ids');
 var CollectionReference = require('./firestore-collection');
 var DocumentReference = require('./firestore-document');
+var FieldValue = require('./firestore-field-value');
 var Queue = require('./queue').Queue;
 var utils = require('./utils');
 var validate = require('./validators');
@@ -30,6 +31,7 @@ MockFirestore.defaultAutoId = function () {
 };
 
 MockFirestore.autoId = MockFirestore.defaultAutoId;
+MockFirestore.FieldValue = FieldValue;
 
 MockFirestore.prototype.flush = function (delay) {
   this.queue.flush(delay);

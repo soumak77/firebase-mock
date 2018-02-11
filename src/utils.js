@@ -30,11 +30,6 @@ exports.cleanData = function cleanData(data) {
 
 exports.cleanFirestoreData = function cleanFirestoreData(data) {
   var newData = _.clone(data);
-  if (_.isObject(newData)) {
-    if (_.isEmpty(newData)) {
-      newData = null;
-    }
-  }
   return newData;
 };
 
