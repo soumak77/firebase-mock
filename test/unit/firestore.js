@@ -161,5 +161,21 @@ describe('MockFirestore', function () {
 
       db.flush();
     });
+
+    it('works with set + merge', function (done) {
+      var batch = db.batch();
+      batch.set(db.doc('doc'), {
+        name: null
+      }, { merge: true });
+      batch.commit();
+
+      db.doc('doc').get().then(function(doc) {
+        expect(doc.exists).to.equal(true);
+        expect(doc.get('name')).to.equal(null);
+        done();
+      });
+
+      db.flush();
+    });
   });
 });

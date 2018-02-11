@@ -113,6 +113,34 @@ describe('MockFirestoreDocument', function () {
   });
 
   describe('#set with {merge: true}', function () {
+    it('creates doc if does not exist', function (done) {
+      doc.set({
+        prop: 'value'
+      }, { merge: true });
+
+      doc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.get('prop')).to.equal('value');
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
+    it('creates doc with null values if does not exist', function (done) {
+      doc.set({
+        prop: null
+      }, { merge: true });
+
+      doc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.get('prop')).to.equal(null);
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
     it('updates value of doc', function (done) {
       doc.set({
         title: 'title2',
