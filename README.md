@@ -43,7 +43,7 @@ Firebase Mock supports the normal [Firebase API](https://firebase.google.com/doc
 * [Cloud Events](tutorials/rtdb/cloudevents.md)
 
 ### Firestore
-* [Basic](tutorials/rtdb/basic.md)
+* [Basic](tutorials/firestore/basic.md)
 * [Overriding `require('firebase')`](tutorials/firestore/proxyquire.md)
 * [Cloud Events](tutorials/firestore/cloudevents.md)
 
