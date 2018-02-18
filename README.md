@@ -1,7 +1,7 @@
 Firebase Mock [![Build Status](https://travis-ci.org/soumak77/firebase-mock.svg?branch=master)](https://travis-ci.org/soumak77/firebase-mock)
 ============
 
-Firebase Mock extends [mockfirebase](https://github.com/katowulf/mockfirebase) to provide support for Firebase 3.0.
+Firebase Mock extends [mockfirebase](https://github.com/katowulf/mockfirebase) to provide support for Firebase 3.0+ and Firebase Admin SDKs
 
 ## Setup
 
@@ -43,6 +43,8 @@ Firebase Mock supports the normal [Firebase API](https://firebase.google.com/doc
 * [Cloud Events](tutorials/rtdb/cloudevents.md)
 
 ### Firestore
+* [Basic](tutorials/rtdb/basic.md)
+* [Overriding `require('firebase')`](tutorials/firestore/proxyquire.md)
 * [Cloud Events](tutorials/firestore/cloudevents.md)
 
 ## Projects using firebase-mock
