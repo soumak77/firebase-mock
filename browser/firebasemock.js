@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.22
+/** firebase-mock - v2.0.23
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -16712,30 +16712,52 @@ FirebaseAuth.prototype.onAuthStateChanged = function (callback) {
   }
 };
 
-FirebaseAuth.prototype.getUserByEmail = function (email) {
+FirebaseAuth.prototype.getUserByEmail = function (email, onComplete) {
+  var err = this._nextErr('getUserByEmail');
   var users = this._auth.users;
-  if (users.hasOwnProperty(email)) {
-    return Promise.resolve(_.clone(users[email]));
-  } else {
-    return Promise.reject({
-      code: 'auth/user-not-found',
-      message: 'There is no existing user record corresponding to the provided identifier.'
+  var self = this;
+  return new Promise(function (resolve, reject) {
+    var user = null;
+    err = err || self._validateExistingEmail({
+      email: email
     });
-  }
+    if (!err) {
+      user = _.clone(users[email]);
+      if (onComplete) {
+        onComplete(err, user);
+      }
+      resolve(user);
+    } else {
+      if (onComplete) {
+        onComplete(err, null);
+      }
+      reject(err);
+    }
+  });
 };
 
-FirebaseAuth.prototype.getUser = function (uid) {
-  var user = _.find(this._auth.users, function(user) {
-    return user.uid == uid;
-  });
-  if (user) {
-    return Promise.resolve(_.clone(user));
-  } else {
-    return Promise.reject({
-      code: 'auth/user-not-found',
-      message: 'There is no existing user record corresponding to the provided identifier.'
+FirebaseAuth.prototype.getUser = function (uid, onComplete) {
+  var err = this._nextErr('getUser');
+  var users = this._auth.users;
+  var self = this;
+  return new Promise(function (resolve, reject) {
+    var user = null;
+    err = err || self._validateExistingUid({
+      uid: uid
     });
-  }
+    if (!err) {
+      user = _.clone(user);
+      if (onComplete) {
+        onComplete(err, user);
+      }
+      resolve(user);
+    } else {
+      if (onComplete) {
+        onComplete(err, null);
+      }
+      reject(err);
+    }
+  });
 };
 
 // number of arguments
@@ -16919,6 +16941,7 @@ FirebaseAuth.prototype._createUser = function (method, credentials, onComplete) 
     self._defer(method, _.toArray(arguments), function () {
       var user = null;
       err = err || self._validateNewEmail(credentials);
+      err = err || self._validateNewUid(credentials);
       if (!err) {
         var key = credentials.email;
         users[key] = {
@@ -17024,10 +17047,24 @@ FirebaseAuth.prototype._nextUid = function () {
   return 'simplelogin:' + (this._auth.uidCounter++);
 };
 
+FirebaseAuth.prototype._validateNewUid = function (credentials) {
+  if (credentials.uid) {
+    var user = _.find(this._auth.users, function(user) {
+      return user.uid == credentials.uid;
+    });
+    if (user) {
+      var err = new Error('The provided uid is already in use by an existing user. Each user must have a unique uid.');
+      err.code = 'auth/uid-already-exists';
+      return err;
+    }
+  }
+  return null;
+};
+
 FirebaseAuth.prototype._validateNewEmail = function (credentials) {
   if (this._auth.users.hasOwnProperty(credentials.email)) {
-    var err = new Error('The specified email address is already in use.');
-    err.code = 'EMAIL_TAKEN';
+    var err = new Error('The provided email is already in use by an existing user. Each user must have a unique email.');
+    err.code = 'auth/email-already-exists';
     return err;
   }
   return null;
@@ -17035,8 +17072,8 @@ FirebaseAuth.prototype._validateNewEmail = function (credentials) {
 
 FirebaseAuth.prototype._validateExistingEmail = function (credentials) {
   if (!this._auth.users.hasOwnProperty(credentials.email)) {
-    var err = new Error('The specified user does not exist.');
-    err.code = 'INVALID_USER';
+    var err = new Error('There is no existing user record corresponding to the provided identifier.');
+    err.code = 'auth/user-not-found';
     return err;
   }
   return null;
@@ -17046,8 +17083,8 @@ FirebaseAuth.prototype._validPass = function (object, name) {
   var err = null;
   var key = object.email;
   if (object[name] !== this._auth.users[key].password) {
-    err = new Error('The specified password is incorrect.');
-    err.code = 'INVALID_PASSWORD';
+    err = new Error('The provided value for the password user property is invalid. It must be a string with at least six characters.');
+    err.code = 'auth/invalid-password';
   }
   return err;
 };
@@ -18615,10 +18652,10 @@ MockFirebaseSimpleLogin.DEFAULT_FAIL_WHEN = function(provider, options, user) {
 //      res = createError();
   }
   else if( !user ) {
-    res = createError('INVALID_USER', 'The specified user does not exist');
+    res = createError('auth/user-not-found', 'The specified user does not exist');
   }
   else if( provider === 'password' && user.password !== options.password ) {
-    res = createError('INVALID_PASSWORD', 'The specified password is incorrect');
+    res = createError('auth/invalid-password', 'The specified password is incorrect');
   }
   return res;
 };
@@ -18702,10 +18739,10 @@ MockFirebaseSimpleLogin.prototype = {
    *   // this is a simplified example of the default implementation (MockFirebaseSimpleLogin.DEFAULT_FAIL_WHEN)
    *   auth.failWhen(function(provider, options, user) {
    *      if( user.email !== options.email ) {
-   *         return MockFirebaseSimpleLogin.createError('INVALID_USER');
+   *         return MockFirebaseSimpleLogin.createError('auth/user-not-found');
    *      }
    *      else if( user.password !== options.password ) {
-   *         return MockFirebaseSimpleLogin.createError('INVALID_PASSWORD');
+   *         return MockFirebaseSimpleLogin.createError('auth/invalid-password');
    *      }
    *      else {
    *         return null;
@@ -18784,7 +18821,7 @@ MockFirebaseSimpleLogin.prototype = {
     this._defer(function() {
       var user = this.getUser('password', {email: email});
       if( !user ) {
-        callback(createError('INVALID_USER'), false);
+        callback(createError('auth/user-not-found'), false);
       }
       else {
         callback(null, true);
@@ -18797,10 +18834,10 @@ MockFirebaseSimpleLogin.prototype = {
     this._defer(function() {
       var user = this.getUser('password', {email: email});
       if( !user ) {
-        callback(createError('INVALID_USER'), false);
+        callback(createError('auth/user-not-found'), false);
       }
       else if( user.password !== password ) {
-        callback(createError('INVALID_PASSWORD'), false);
+        callback(createError('auth/invalid-password'), false);
       }
       else {
         delete this.userData.password[email];
