@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.24
+/** firebase-mock - v2.0.25
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -16746,6 +16746,9 @@ FirebaseAuth.prototype.getUser = function (uid, onComplete) {
       uid: uid
     });
     if (!err) {
+      user = _.find(users, function(u) {
+        return u.uid == uid;
+      });
       user = _.clone(user);
       if (onComplete) {
         onComplete(err, user);
