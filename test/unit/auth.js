@@ -126,10 +126,10 @@ describe('Auth', function () {
 
     it('calls the callback with a nextErr', function () {
       spy = sinon.spy(function (error, result) {
-        expect(error.message).to.equal('INVALID_TOKEN');
+        expect(error.message).to.equal('auth/invalid-credential');
         expect(result).to.equal(null);
       });
-      ref.failNext('authWithCustomToken', new Error('INVALID_TOKEN'));
+      ref.failNext('authWithCustomToken', new Error('auth/invalid-credential'));
       ref.authWithCustomToken('invalidToken', spy);
       ref.flush();
       expect(spy.called).to.equal(true);
@@ -366,8 +366,8 @@ describe('Auth', function () {
       }, spy);
       ref.flush();
       var err = spy.firstCall.args[0];
-      expect(err.message).to.contain('email address is already in use');
-      expect(err.code).to.equal('EMAIL_TAKEN');
+      expect(err.message).to.contain('email is already in use');
+      expect(err.code).to.equal('auth/email-already-exists');
     });
 
     it('fails if failNext is set', function () {
@@ -463,8 +463,8 @@ describe('Auth', function () {
       }, spy);
       ref.flush();
       var err = spy.firstCall.args[0];
-      expect(err.code).to.equal('INVALID_USER');
-      expect(err.message).to.contain('user does not exist');
+      expect(err.code).to.equal('auth/user-not-found');
+      expect(err.message).to.contain('no existing user');
     });
 
     it('fails if password is incorrect', function () {
@@ -475,8 +475,8 @@ describe('Auth', function () {
       }, spy);
       ref.flush();
       var err = spy.firstCall.args[0];
-      expect(err.code).to.equal('INVALID_PASSWORD');
-      expect(err.message).to.contain('password is incorrect');
+      expect(err.code).to.equal('auth/invalid-password');
+      expect(err.message).to.contain('password user property is invalid');
     });
 
     it('fails if failNext is set', function () {
@@ -547,8 +547,8 @@ describe('Auth', function () {
       }, spy);
       ref.flush();
       var err = spy.firstCall.args[0];
-      expect(err.code).to.equal('INVALID_USER');
-      expect(err.message).to.contain('user does not exist');
+      expect(err.code).to.equal('auth/user-not-found');
+      expect(err.message).to.contain('no existing user');
     });
 
     it('fails if oldPassword is incorrect', function () {
@@ -563,8 +563,8 @@ describe('Auth', function () {
       }, spy);
       ref.flush();
       var err = spy.firstCall.args[0];
-      expect(err.code).to.equal('INVALID_PASSWORD');
-      expect(err.message).to.contain('password is incorrect');
+      expect(err.code).to.equal('auth/invalid-password');
+      expect(err.message).to.contain('password user property is invalid');
     });
 
     it('fails if failNext is set', function () {
@@ -634,8 +634,8 @@ describe('Auth', function () {
       }, spy);
       ref.flush();
       var err = spy.firstCall.args[0];
-      expect(err.code).to.equal('INVALID_USER');
-      expect(err.message).to.contain('user does not exist');
+      expect(err.code).to.equal('auth/user-not-found');
+      expect(err.message).to.contain('no existing user');
     });
 
     it('fails if password is incorrect', function () {
@@ -649,8 +649,8 @@ describe('Auth', function () {
       }, spy);
       ref.flush();
       var err = spy.firstCall.args[0];
-      expect(err.code).to.equal('INVALID_PASSWORD');
-      expect(err.message).to.contain('password is incorrect');
+      expect(err.code).to.equal('auth/invalid-password');
+      expect(err.message).to.contain('password user property is invalid');
     });
 
     it('fails if failNext is set', function () {
@@ -701,8 +701,8 @@ describe('Auth', function () {
       }, spy);
       ref.flush();
       var err = spy.firstCall.args[0];
-      expect(err.code).to.equal('INVALID_USER');
-      expect(err.message).to.contain('user does not exist');
+      expect(err.code).to.equal('auth/user-not-found');
+      expect(err.message).to.contain('no existing user');
     });
 
     it('fails if failNext is set', function () {

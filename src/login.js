@@ -28,10 +28,10 @@ MockFirebaseSimpleLogin.DEFAULT_FAIL_WHEN = function(provider, options, user) {
 //      res = createError();
   }
   else if( !user ) {
-    res = createError('INVALID_USER', 'The specified user does not exist');
+    res = createError('auth/user-not-found', 'The specified user does not exist');
   }
   else if( provider === 'password' && user.password !== options.password ) {
-    res = createError('INVALID_PASSWORD', 'The specified password is incorrect');
+    res = createError('auth/invalid-password', 'The specified password is incorrect');
   }
   return res;
 };
@@ -115,10 +115,10 @@ MockFirebaseSimpleLogin.prototype = {
    *   // this is a simplified example of the default implementation (MockFirebaseSimpleLogin.DEFAULT_FAIL_WHEN)
    *   auth.failWhen(function(provider, options, user) {
    *      if( user.email !== options.email ) {
-   *         return MockFirebaseSimpleLogin.createError('INVALID_USER');
+   *         return MockFirebaseSimpleLogin.createError('auth/user-not-found');
    *      }
    *      else if( user.password !== options.password ) {
-   *         return MockFirebaseSimpleLogin.createError('INVALID_PASSWORD');
+   *         return MockFirebaseSimpleLogin.createError('auth/invalid-password');
    *      }
    *      else {
    *         return null;
@@ -197,7 +197,7 @@ MockFirebaseSimpleLogin.prototype = {
     this._defer(function() {
       var user = this.getUser('password', {email: email});
       if( !user ) {
-        callback(createError('INVALID_USER'), false);
+        callback(createError('auth/user-not-found'), false);
       }
       else {
         callback(null, true);
@@ -210,10 +210,10 @@ MockFirebaseSimpleLogin.prototype = {
     this._defer(function() {
       var user = this.getUser('password', {email: email});
       if( !user ) {
-        callback(createError('INVALID_USER'), false);
+        callback(createError('auth/user-not-found'), false);
       }
       else if( user.password !== password ) {
-        callback(createError('INVALID_PASSWORD'), false);
+        callback(createError('auth/invalid-password'), false);
       }
       else {
         delete this.userData.password[email];
