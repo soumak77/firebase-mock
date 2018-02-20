@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.23
+/** firebase-mock - v2.0.24
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -17055,6 +17055,20 @@ FirebaseAuth.prototype._validateNewUid = function (credentials) {
     if (user) {
       var err = new Error('The provided uid is already in use by an existing user. Each user must have a unique uid.');
       err.code = 'auth/uid-already-exists';
+      return err;
+    }
+  }
+  return null;
+};
+
+FirebaseAuth.prototype._validateExistingUid = function (credentials) {
+  if (credentials.uid) {
+    var user = _.find(this._auth.users, function(user) {
+      return user.uid == credentials.uid;
+    });
+    if (!user) {
+      var err = new Error('There is no existing user record corresponding to the provided identifier.');
+      err.code = 'auth/user-not-found';
       return err;
     }
   }
