@@ -75,7 +75,7 @@ describe('Auth', function () {
       };
       ref._auth.users[user.email] = user;
       var found = ref.getUserByEmail('ben@example.com');
-      expect(found).to.eventually.become(user);
+      return expect(found).to.eventually.become(user);
     });
 
     it('only searches own properties', function () {
@@ -104,7 +104,7 @@ describe('Auth', function () {
       };
       ref._auth.users[user.email] = user;
       var found = ref.getUser('bd');
-      expect(found).to.eventually.become(user);
+      return expect(found).to.eventually.become(user);
     });
 
     it('only searches own properties', function () {

@@ -78,6 +78,9 @@ FirebaseAuth.prototype.getUser = function (uid, onComplete) {
       uid: uid
     });
     if (!err) {
+      user = _.find(users, function(u) {
+        return u.uid == uid;
+      });
       user = _.clone(user);
       if (onComplete) {
         onComplete(err, user);
