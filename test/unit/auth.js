@@ -83,6 +83,16 @@ describe('Auth', function () {
       return expect(found).to.be.rejected;
     });
 
+    it('fails when user not found', function () {
+      var user = {
+        uid: 'bd',
+        email: 'ben@example.com'
+      };
+      var found = ref.getUser('bd');
+      return expect(found).to.be.rejected.then(function(err) {
+        expect(err.code).to.equal('auth/user-not-found');
+      });
+    });
   });
 
   describe('#getUser', function () {
@@ -102,6 +112,16 @@ describe('Auth', function () {
       return expect(found).to.be.rejected;
     });
 
+    it('fails when user not found', function () {
+      var user = {
+        uid: 'bd',
+        email: 'ben@example.com'
+      };
+      var found = ref.getUser('bd');
+      return expect(found).to.be.rejected.then(function(err) {
+        expect(err.code).to.equal('auth/user-not-found');
+      });
+    });
   });
 
   describe('#auth', function () {

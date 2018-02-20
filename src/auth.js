@@ -393,6 +393,20 @@ FirebaseAuth.prototype._validateNewUid = function (credentials) {
   return null;
 };
 
+FirebaseAuth.prototype._validateExistingUid = function (credentials) {
+  if (credentials.uid) {
+    var user = _.find(this._auth.users, function(user) {
+      return user.uid == credentials.uid;
+    });
+    if (!user) {
+      var err = new Error('There is no existing user record corresponding to the provided identifier.');
+      err.code = 'auth/user-not-found';
+      return err;
+    }
+  }
+  return null;
+};
+
 FirebaseAuth.prototype._validateNewEmail = function (credentials) {
   if (this._auth.users.hasOwnProperty(credentials.email)) {
     var err = new Error('The provided email is already in use by an existing user. Each user must have a unique email.');
