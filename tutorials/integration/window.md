@@ -1,4 +1,4 @@
-# Tutorial: Override
+# Tutorial: Window Override
 
 When writing unit tests, you'll probably want to replace calls to `Firebase` in your source code with `MockFirebase`.
 

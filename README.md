@@ -34,20 +34,23 @@ Firebase Mock supports the normal [Firebase API](https://firebase.google.com/doc
 
 ## Tutorials
 
+### Integration
+* [Setup](tutorials/integration/setup.md)
+* [Proxyquire](tutorials/integration/proxyquire.md)
+* [Jest](tutorials/integration/jest.md)
+* [Window Override](tutorials/integration/window.md)
+
 ### Authentication
 * [Authentication](tutorials/auth/authentication.md)
 
 ### Realtime Database
 * [Basic](tutorials/rtdb/basic.md)
 * [Simulating Errors](tutorials/rtdb/errors.md)
-* [Overriding `window.Firebase`](tutorials/rtdb/override.md)
-* [Overriding `require('firebase')`](tutorials/rtdb/proxyquire.md)
 * [Using Spies for Ordering](tutorials/rtdb/spies.md)
 * [Cloud Events](tutorials/rtdb/cloudevents.md)
 
 ### Firestore
 * [Basic](tutorials/firestore/basic.md)
-* [Overriding `require('firebase')`](tutorials/firestore/proxyquire.md)
 * [Cloud Events](tutorials/firestore/cloudevents.md)
 
 ## Projects using firebase-mock

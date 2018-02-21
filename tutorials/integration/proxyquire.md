@@ -1,9 +1,12 @@
-# Tutorial: Overriding `require('firebase')`
+# Tutorial: Integrating with proxyquire
 
 In Node/Browserify, you need to patch `require` itself to override `firebase` calls. The trio of [proxyquire](https://github.com/thlorenz/proxyquire) (Node), [proxyquireify](https://github.com/thlorenz/proxyquireify) (Browserify), and [proxyquire-universal](https://github.com/bendrucker/proxyquire-universal) (both) make this easy.
 
-##### Source
+## Examples
 
+### RTDB
+
+#### Source
 ```js
 // ./mySrc.js
 var firebase = require('firebase');
@@ -13,23 +16,39 @@ ref.on('value', function (snapshot) {
 });
 ```
 
-##### Test
-
+#### Test
 ```js
-// ./test.js
 var proxyquire   = require('proxyquire');
-var firebasemock    = require('firebase-mock');
 
-var mockdatabase = new firebasemock.MockFirebase();
-var mockauth = new firebasemock.MockFirebase();
-var mocksdk = firebasemock.MockFirebaseSdk(function(path) {
-  return path ? mockdatabase.child(path) : mockdatabase;
-}, function() {
-  return mockauth;
-});
 var mySrc = proxyquire('./mySrc', {
   firebase: mocksdk
 });
-mockdatabase.flush();
+mocksdk.database().flush();
+// data is logged
+```
+
+### Firestore
+
+#### Source
+
+```js
+// ./mySrc.js
+var firebase = require('firebase');
+var ref = firebase.firestore().doc('users/123');
+ref.get().then(function(doc) {
+  console.log(doc.data());
+}).catch(function(err) {
+  console.error(err);
+});
+```
+
+#### Test
+
+```js
+// ./test.js
+var mySrc = proxyquire('./mySrc', {
+  firebase: mocksdk
+});
+mocksdk.firestore().flush();
 // data is logged
 ```
