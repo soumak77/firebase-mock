@@ -1,7 +1,10 @@
 Firebase Mock [![Build Status](https://travis-ci.org/soumak77/firebase-mock.svg?branch=master)](https://travis-ci.org/soumak77/firebase-mock)
 ============
 
-Firebase Mock extends [mockfirebase](https://github.com/katowulf/mockfirebase) to provide support for Firebase 3.0+ and Firebase Admin SDKs
+Firebase Mock extends [mockfirebase](https://github.com/katowulf/mockfirebase) to provide support for the following Javascript SDKS:
+- [Web Client](https://firebase.google.com/docs/reference/js/)
+- [Node Client](https://firebase.google.com/docs/reference/node)
+- [Node Admin](https://firebase.google.com/docs/reference/admin/node/admin)
 
 ## Setup
 
