@@ -30,6 +30,7 @@ function MockFirebase(path, data, parent, name) {
   this.parent = parent || null;
   this.children = {};
   if (parent) parent.children[this.key] = this;
+  this.root = this._getRoot();
   this.sortedDataKeys = [];
   this.data = null;
   this._dataChanged(_.cloneDeep(data) || null);
@@ -220,7 +221,7 @@ MockFirebase.prototype.name = function () {
   return this.key;
 };
 
-MockFirebase.prototype.root = function () {
+MockFirebase.prototype._getRoot = function () {
   var next = this;
   while (next.parent) {
     next = next.parent;

@@ -463,7 +463,7 @@ describe('MockFirebase', function () {
     });
 
     it('can be called on the root', function () {
-      ref.root().setPriority(1);
+      ref.root.setPriority(1);
       ref.flush();
     });
 
@@ -802,7 +802,7 @@ describe('MockFirebase', function () {
   describe('#root', function () {
 
     it('traverses to the top of the reference', function () {
-      expect(ref.child('foo/bar').root().path)
+      expect(ref.child('foo/bar').root.path)
         .to.equal('Mock://');
     });
 
