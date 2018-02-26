@@ -325,6 +325,10 @@ describe('MockFirebase', function () {
       ref.autoFlush();
     });
 
+    it('should validate the data', function(){
+      expect(ref.set.bind(ref,{someProp:undefined})).to.throw();
+    });
+
     it('should return a promise', function () {
       return expect(ref.set({test: 'one'})).to.eventually.eql({test: 'one'});
     });
@@ -493,6 +497,10 @@ describe('MockFirebase', function () {
 
     it('must be called with an object', function () {
       expect(ref.update).to.throw();
+    });
+
+    it('should validate the data', function(){
+      expect(ref.update.bind(ref,{someProp:undefined})).to.throw();
     });
 
     it('extends the data', function () {
@@ -767,6 +775,10 @@ describe('MockFirebase', function () {
   });
 
   describe('#push', function () {
+
+    it('should validate the data', function(){
+      expect(ref.push.bind(ref,{someProp:undefined})).to.throw();
+    });
 
     it('can add data by auto id', function () {
       var id = ref._newAutoId();
