@@ -171,3 +171,31 @@ exports.updateToFirestoreObject = function updateToFirestoreObject(update) {
   }
   return result;
 };
+
+/**
+ * Recurse through obj and find all properties, which are undefined
+ * @param obj
+ * @returns {Array} Returns the property paths of undefined properties
+ */
+exports.findUndefinedProperties = function (obj) {
+  var results = [];
+  var path = [];
+
+  var recurse = function (o, p) {
+    var keys = _.keys(o);
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      if (o[key] === undefined) {
+        results.push(p.concat([key]).join('.'));
+      } else {
+        var to = typeof o[key];
+        if (to === 'object') {
+          recurse(o[key], p.concat([key]));
+        }
+      }
+    }
+  };
+
+  recurse(obj, path);
+  return results;
+};

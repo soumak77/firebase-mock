@@ -162,6 +162,7 @@ MockFirebase.prototype.child = function (childPath) {
 };
 
 MockFirebase.prototype.set = function (data, callback) {
+  validate.data(data);
   var err = this._nextErr('set');
   data = _.cloneDeep(data);
   var self = this;
@@ -182,6 +183,7 @@ MockFirebase.prototype.set = function (data, callback) {
 
 MockFirebase.prototype.update = function (changes, callback) {
   assert.equal(typeof changes, 'object', 'First argument must be an object when calling "update"');
+  validate.data(changes);
   var err = this._nextErr('update');
   var self = this;
   return new Promise(function (resolve, reject) {
@@ -235,6 +237,7 @@ MockFirebase.prototype.push = function (data, callback) {
   if (err) child.failNext('set', err);
   if (arguments.length && data !== null) {
     // currently, callback only invoked if child exists
+    validate.data(data);
     child.set(data, callback);
   }
   return child;
