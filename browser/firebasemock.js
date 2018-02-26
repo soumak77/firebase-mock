@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.26
+/** firebase-mock - v2.0.27
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -17302,6 +17302,7 @@ MockFirebase.prototype.child = function (childPath) {
 };
 
 MockFirebase.prototype.set = function (data, callback) {
+  validate.data(data);
   var err = this._nextErr('set');
   data = _.cloneDeep(data);
   var self = this;
@@ -17322,6 +17323,7 @@ MockFirebase.prototype.set = function (data, callback) {
 
 MockFirebase.prototype.update = function (changes, callback) {
   assert.equal(typeof changes, 'object', 'First argument must be an object when calling "update"');
+  validate.data(changes);
   var err = this._nextErr('update');
   var self = this;
   return new Promise(function (resolve, reject) {
@@ -17375,6 +17377,7 @@ MockFirebase.prototype.push = function (data, callback) {
   if (err) child.failNext('set', err);
   if (arguments.length && data !== null) {
     // currently, callback only invoked if child exists
+    validate.data(data);
     child.set(data, callback);
   }
   return child;
@@ -19773,11 +19776,39 @@ exports.updateToFirestoreObject = function updateToFirestoreObject(update) {
   return result;
 };
 
+/**
+ * Recurse through obj and find all properties, which are undefined
+ * @param obj
+ * @returns {Array} Returns the property paths of undefined properties
+ */
+exports.findUndefinedProperties = function (obj) {
+  var results = [];
+  var path = [];
+
+  var recurse = function (o, p) {
+    var keys = _.keys(o);
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      if (o[key] === undefined) {
+        results.push(p.concat([key]).join('.'));
+      } else {
+        var to = typeof o[key];
+        if (to === 'object') {
+          recurse(o[key], p.concat([key]));
+        }
+      }
+    }
+  };
+
+  recurse(obj, path);
+  return results;
+};
 },{"./firestore-field-value":22,"./snapshot":31,"lodash":13}],33:[function(require,module,exports){
 'use strict';
 
 var assert = require('assert');
 var format = require('util').format;
+var findUndefinedProperties = require('./utils').findUndefinedProperties;
 
 var events = ['value', 'child_added', 'child_removed', 'child_changed', 'child_moved'];
 exports.event = function (name) {
@@ -19786,7 +19817,12 @@ exports.event = function (name) {
   }).join(', ')));
 };
 
-},{"assert":2,"util":7}]},{},[1])(1)
+exports.data = function(obj){
+  assert(obj !== undefined, 'Data is undefined');
+  var undefinedProperties = findUndefinedProperties(obj);
+  assert(undefinedProperties.length === 0, 'Data contains undefined properties at ' + undefinedProperties);
+};
+},{"./utils":32,"assert":2,"util":7}]},{},[1])(1)
 });;(function (window) {
   'use strict';
   if (typeof window !== 'undefined' && window.firebasemock) {
