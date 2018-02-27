@@ -49,7 +49,7 @@ describe('MockFirebase', function () {
         {input: {0: 'a', 2: 'c', 5: 'e'}, output: ['a', undefined, 'c', undefined, undefined, 'e']},
         {input: {0: 'a', 2: 'c', 6: 'e'}, output: {'0': 'a', '2': 'c', '6': 'e'}},
         {input: {10: 'a', 11: 'b', 12: 'c'}, output: {'10': 'a', '11': 'b', '12': 'c'}},
-        {input: {0: 'a', 1: {0: 'x', 1: 'y'} }, output: ['a', ['x', 'y']]}
+        {input: {0: 'a', 1: {0: 'x', 1: 'y'}}, output: ['a', ['x', 'y']]}
       ];
       examples.forEach(function (example) {
         ref.set(example.input);
@@ -325,8 +325,8 @@ describe('MockFirebase', function () {
       ref.autoFlush();
     });
 
-    it('should validate the data', function(){
-      expect(ref.set.bind(ref,{someProp:undefined})).to.throw();
+    it('should validate the data', function () {
+      expect(ref.set.bind(ref, {someProp: undefined})).to.throw();
     });
 
     it('should return a promise', function () {
@@ -339,6 +339,21 @@ describe('MockFirebase', function () {
         bravo: false
       });
       expect(ref.getData().a).to.equal(undefined);
+    });
+
+    it('should remove empty properties from data', function(){
+        ref.set({
+            alpha: true,
+            bravo: [],
+            charlie: "some string",
+            delta: {nestedArray:[]},
+            echo: 5
+        });
+        expect(ref.getData()).to.eql({
+            alpha: true,
+            charlie: "some string",
+            echo: 5
+        });
     });
 
     it('should set priorities on children if included in data', function () {
@@ -499,8 +514,8 @@ describe('MockFirebase', function () {
       expect(ref.update).to.throw();
     });
 
-    it('should validate the data', function(){
-      expect(ref.update.bind(ref,{someProp:undefined})).to.throw();
+    it('should validate the data', function () {
+      expect(ref.update.bind(ref, {someProp: undefined})).to.throw();
     });
 
     it('extends the data', function () {
@@ -776,8 +791,8 @@ describe('MockFirebase', function () {
 
   describe('#push', function () {
 
-    it('should validate the data', function(){
-      expect(ref.push.bind(ref,{someProp:undefined})).to.throw();
+    it('should validate the data', function () {
+      expect(ref.push.bind(ref, {someProp: undefined})).to.throw();
     });
 
     it('can add data by auto id', function () {
@@ -859,7 +874,7 @@ describe('MockFirebase', function () {
   });
 
   describe('Firebase.autoId', function () {
-    afterEach(function(){
+    afterEach(function () {
       Firebase.autoId = Firebase.defaultAutoId;
     });
 
