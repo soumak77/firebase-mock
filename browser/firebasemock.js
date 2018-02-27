@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.27
+/** firebase-mock - v2.0.28
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -17309,6 +17309,7 @@ MockFirebase.prototype.set = function (data, callback) {
   return new Promise(function (resolve, reject) {
     self._defer('set', _.toArray(arguments), function () {
       if (err === null) {
+        data = utils.removeEmptyRtdbProperties(data);
         self._dataChanged(data);
         resolve(data);
       } else {
