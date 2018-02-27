@@ -169,6 +169,7 @@ MockFirebase.prototype.set = function (data, callback) {
   return new Promise(function (resolve, reject) {
     self._defer('set', _.toArray(arguments), function () {
       if (err === null) {
+        data = utils.removeEmptyRtdbProperties(data);
         self._dataChanged(data);
         resolve(data);
       } else {
