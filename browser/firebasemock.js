@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.28
+/** firebase-mock - v2.0.29
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -16947,11 +16947,8 @@ FirebaseAuth.prototype._createUser = function (method, credentials, onComplete) 
       err = err || self._validateNewUid(credentials);
       if (!err) {
         var key = credentials.email;
-        users[key] = {
-          uid: credentials.uid || self._nextUid(),
-          email: key,
-          password: credentials.password
-        };
+        users[key] = _.cloneDeep(credentials);
+        users[key].uid = users[key].uid || self._nextUid();
         user = {
           uid: users[key].uid,
           email: key
