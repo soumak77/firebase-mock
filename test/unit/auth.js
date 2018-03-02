@@ -354,6 +354,21 @@ describe('Auth', function () {
       expect(spy.firstCall.args[1].uid).to.equal('uid1');
     });
 
+    it('creates a new user with preset additional attributes', function () {
+      ref.createUser({
+        uid: 'uid1',
+        email: 'new1@new1.com',
+        password: 'new1',
+        displayName: 'new user 1',
+        emailVerified: true,
+      }, spy);
+      ref.flush();
+      return Promise.all([
+        expect(ref.getUser('uid1')).to.eventually.have.property('displayName', 'new user 1'),
+        expect(ref.getUser('uid1')).to.eventually.have.property('emailVerified', true),
+      ]);
+    });
+
     it('fails if credentials is not an object', function () {
       expect(ref.createUser.bind(ref, 29)).to.throw('must be a valid object');
     });
