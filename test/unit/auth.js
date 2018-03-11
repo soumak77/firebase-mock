@@ -10,6 +10,7 @@ var expect = chai.expect;
 var _        = require('lodash');
 var Firebase = require('../../').MockFirebase;
 var Promise   = require('rsvp').Promise;
+var User = require('../../src/user');
 
 describe('Auth', function () {
 
@@ -67,15 +68,25 @@ describe('Auth', function () {
   });
 
   describe('#getUserByEmail', function () {
+    beforeEach(function () {
+      ref.autoFlush();
+    });
+
+    afterEach(function () {
+      ref.autoFlush(false);
+    });
 
     it('gets a copy of the user by email', function () {
-      var user = {
+      ref.createUser({
         uid: 'bd',
-        email: 'ben@example.com'
-      };
-      ref._auth.users[user.email] = user;
+        email: 'ben@example.com',
+        password: '123'
+      });
       var found = ref.getUserByEmail('ben@example.com');
-      return expect(found).to.eventually.become(user);
+      return Promise.all([
+        expect(found).to.eventually.have.property('uid', 'bd'),
+        expect(found).to.eventually.have.property('email', 'ben@example.com'),
+      ]);
     });
 
     it('only searches own properties', function () {
@@ -84,10 +95,6 @@ describe('Auth', function () {
     });
 
     it('fails when user not found', function () {
-      var user = {
-        uid: 'bd',
-        email: 'ben@example.com'
-      };
       var found = ref.getUser('bd');
       return expect(found).to.be.rejected.then(function(err) {
         expect(err.code).to.equal('auth/user-not-found');
@@ -96,15 +103,25 @@ describe('Auth', function () {
   });
 
   describe('#getUser', function () {
+    beforeEach(function () {
+      ref.autoFlush();
+    });
+
+    afterEach(function () {
+      ref.autoFlush(false);
+    });
 
     it('gets a copy of the user by uid', function () {
-      var user = {
+      ref.createUser({
         uid: 'bd',
-        email: 'ben@example.com'
-      };
-      ref._auth.users[user.email] = user;
+        email: 'ben@example.com',
+        password: '123'
+      });
       var found = ref.getUser('bd');
-      return expect(found).to.eventually.become(user);
+      return Promise.all([
+        expect(found).to.eventually.have.property('uid', 'bd'),
+        expect(found).to.eventually.have.property('email', 'ben@example.com'),
+      ]);
     });
 
     it('only searches own properties', function () {
@@ -113,10 +130,6 @@ describe('Auth', function () {
     });
 
     it('fails when user not found', function () {
-      var user = {
-        uid: 'bd',
-        email: 'ben@example.com'
-      };
       var found = ref.getUser('bd');
       return expect(found).to.be.rejected.then(function(err) {
         expect(err.code).to.equal('auth/user-not-found');
@@ -753,6 +766,41 @@ describe('Auth', function () {
       }, spy);
       ref.flush();
       expect(spy).to.have.been.calledWith(err);
+    });
+
+  });
+
+  describe('#verifyIdToken', function () {
+    beforeEach(function () {
+      ref.autoFlush();
+    });
+
+    afterEach(function () {
+      ref.autoFlush(false);
+    });
+
+    it('succeeds if user exists with token', function () {
+      return ref.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }).then(function(user) {
+        return expect(ref.verifyIdToken(user._idtoken)).to.eventually.have.property('uid', user.uid);
+      });
+    });
+
+    it('fails if no user exists with token', function () {
+      return expect(ref.verifyIdToken('token')).to.be.rejected;
+    });
+
+    it('fails if failNext is set', function () {
+      return ref.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }).then(function(user) {
+        var err = new Error('custom error');
+        ref.failNext('verifyIdToken', err);
+        return expect(ref.verifyIdToken(user._idtoken)).to.be.rejectedWith(Error, 'custom error');
+      });
     });
 
   });

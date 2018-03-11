@@ -24,6 +24,7 @@ Firebase Mock supports the normal [Firebase API](https://firebase.google.com/doc
 
 ### Authentication
 * [Authentication](tutorials/auth/authentication.md)
+* [JWT Tokens](tutorials/auth/tokens.md)
 
 ### Realtime Database
 * [Basic](tutorials/rtdb/basic.md)
