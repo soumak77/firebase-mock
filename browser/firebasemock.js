@@ -1,4 +1,4 @@
-/** firebase-mock - v2.0.29
+/** firebase-mock - v2.1.0
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -16671,13 +16671,14 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var _      = require('lodash');
 var format = require('util').format;
 var Promise   = require('rsvp').Promise;
+var User = require('./user');
 
 function FirebaseAuth () {
   this.currentUser = null;
   this._auth = {
     listeners: [],
     completionListeners: [],
-    users: {},
+    users: [],
     uidCounter: 1
   };
 }
@@ -16714,19 +16715,18 @@ FirebaseAuth.prototype.onAuthStateChanged = function (callback) {
 
 FirebaseAuth.prototype.getUserByEmail = function (email, onComplete) {
   var err = this._nextErr('getUserByEmail');
-  var users = this._auth.users;
   var self = this;
   return new Promise(function (resolve, reject) {
     var user = null;
-    err = err || self._validateExistingEmail({
-      email: email
-    });
+    err = err || self._validateExistingEmail(email);
     if (!err) {
-      user = _.clone(users[email]);
+      user = _.find(self._auth.users, function(u) {
+        return u.email === email;
+      });
       if (onComplete) {
-        onComplete(err, user);
+        onComplete(err, user.clone());
       }
-      resolve(user);
+      resolve(user.clone());
     } else {
       if (onComplete) {
         onComplete(err, null);
@@ -16738,22 +16738,18 @@ FirebaseAuth.prototype.getUserByEmail = function (email, onComplete) {
 
 FirebaseAuth.prototype.getUser = function (uid, onComplete) {
   var err = this._nextErr('getUser');
-  var users = this._auth.users;
   var self = this;
   return new Promise(function (resolve, reject) {
     var user = null;
-    err = err || self._validateExistingUid({
-      uid: uid
-    });
+    err = err || self._validateExistingUid(uid);
     if (!err) {
-      user = _.find(users, function(u) {
+      user = _.find(self._auth.users, function(u) {
         return u.uid == uid;
       });
-      user = _.clone(user);
       if (onComplete) {
-        onComplete(err, user);
+        onComplete(err, user.clone());
       }
-      resolve(user);
+      resolve(user.clone());
     } else {
       if (onComplete) {
         onComplete(err, null);
@@ -16938,25 +16934,27 @@ FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
 
 FirebaseAuth.prototype._createUser = function (method, credentials, onComplete) {
   var err = this._nextErr(method);
-  var users = this._auth.users;
   var self = this;
   return new Promise(function (resolve, reject) {
     self._defer(method, _.toArray(arguments), function () {
       var user = null;
-      err = err || self._validateNewEmail(credentials);
-      err = err || self._validateNewUid(credentials);
+      err = err || self._validateNewEmail(credentials.email);
+      err = err || self._validateNewUid(credentials.uid);
       if (!err) {
-        var key = credentials.email;
-        users[key] = _.cloneDeep(credentials);
-        users[key].uid = users[key].uid || self._nextUid();
-        user = {
-          uid: users[key].uid,
-          email: key
-        };
+        user = new User(this, {
+          uid: credentials.uid || self._nextUid(),
+          email: credentials.email,
+          password: credentials.password,
+          phoneNumber: credentials.phoneNumber,
+          emailVerified: credentials.emailVerified,
+          displayName: credentials.displayName,
+          photoURL: credentials.photoURL
+        });
+        self._auth.users.push(user);
         if (onComplete) {
-          onComplete(err, user);
+          onComplete(err, user.clone());
         }
-        resolve(user);
+        resolve(user.clone());
       } else {
         if (onComplete) {
           onComplete(err, null);
@@ -16974,23 +16972,28 @@ FirebaseAuth.prototype.changeEmail = function (credentials, onComplete) {
     'password'
   ]);
   var err = this._nextErr('changeEmail');
-  this._defer('changeEmail', _.toArray(arguments), function () {
-    err = err ||
-      this._validateExistingEmail({
-        email: credentials.oldEmail
-      }) ||
-      this._validPass({
-        password: credentials.password,
-        email: credentials.oldEmail
-      }, 'password');
-    if (!err) {
-      var users = this._auth.users;
-      var user = users[credentials.oldEmail];
-      delete users[credentials.oldEmail];
-      user.email = credentials.newEmail;
-      users[user.email] = user;
-    }
-    onComplete(err);
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    self._defer('changeEmail', _.toArray(arguments), function () {
+      err = err ||
+        self._validateExistingEmail(credentials.oldEmail) ||
+        self._validPass(credentials.oldEmail, credentials.password);
+      if (!err) {
+        var user = _.find(self._auth.users, function(u) {
+          return u.email === credentials.oldEmail;
+        });
+        user.email = credentials.newEmail;
+        if (onComplete) {
+          onComplete(err);
+        }
+        resolve();
+      } else {
+        if (onComplete) {
+          onComplete(err);
+        }
+        reject(err);
+      }
+    });
   });
 };
 
@@ -17001,16 +17004,49 @@ FirebaseAuth.prototype.changePassword = function (credentials, onComplete) {
     'newPassword'
   ]);
   var err = this._nextErr('changePassword');
-  this._defer('changePassword', _.toArray(arguments), function () {
-    err = err ||
-      this._validateExistingEmail(credentials) ||
-      this._validPass(credentials, 'oldPassword');
-    if (!err) {
-      var key = credentials.email;
-      var user = this._auth.users[key];
-      user.password = credentials.newPassword;
-    }
-    onComplete(err);
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    self._defer('changePassword', _.toArray(arguments), function () {
+      err = err ||
+        self._validateExistingEmail(credentials.email) ||
+        self._validPass(credentials.email, credentials.oldPassword);
+      if (!err) {
+        var user = _.find(self._auth.users, function(u) {
+          return u.email === credentials.email;
+        });
+        user.password = credentials.newPassword;
+        if (onComplete) {
+          onComplete(err);
+        }
+        resolve();
+      } else {
+        if (onComplete) {
+          onComplete(err);
+        }
+        reject(err);
+      }
+    });
+  });
+};
+
+FirebaseAuth.prototype.deleteUser = function (uid) {
+  var err = this._nextErr('deleteUser');
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    self._defer('deleteUser', _.toArray(arguments), function () {
+      if (!err) {
+        _.remove(self._auth.users, function(u) {
+          return u.uid === uid;
+        });
+
+        if (self.currentUser && self.currentUser.uid === uid) {
+          self.currentUser = null;
+        }
+        resolve();
+      } else {
+        reject(err);
+      }
+    });
   });
 };
 
@@ -17020,14 +17056,27 @@ FirebaseAuth.prototype.removeUser = function (credentials, onComplete) {
     'password'
   ]);
   var err = this._nextErr('removeUser');
-  this._defer('removeUser', _.toArray(arguments), function () {
-    err = err ||
-      this._validateExistingEmail(credentials) ||
-      this._validPass(credentials, 'password');
-    if (!err) {
-      delete this._auth.users[credentials.email];
-    }
-    onComplete(err);
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    self._defer('removeUser', _.toArray(arguments), function () {
+      err = err ||
+        self._validateExistingEmail(credentials.email) ||
+        self._validPass(credentials.email, credentials.password);
+      if (!err) {
+        _.remove(self._auth.users, function(u) {
+          return u.email === credentials.email;
+        });
+        if (onComplete) {
+          onComplete(err);
+        }
+        resolve();
+      } else {
+        if (onComplete) {
+          onComplete(err);
+        }
+        reject(err);
+      }
+    });
   });
 };
 
@@ -17036,10 +17085,44 @@ FirebaseAuth.prototype.resetPassword = function (credentials, onComplete) {
     'email'
   ]);
   var err = this._nextErr('resetPassword');
-  this._defer('resetPassword', _.toArray(arguments), function() {
-    err = err ||
-      this._validateExistingEmail(credentials);
-    onComplete(err);
+  var self = this;
+  return new Promise(function (resolve, reject) {
+    self._defer('resetPassword', _.toArray(arguments), function() {
+      err = err ||
+        self._validateExistingEmail(credentials.email);
+      if (!err) {
+        if (onComplete) {
+          onComplete(err);
+        }
+        resolve();
+      } else {
+        if (onComplete) {
+          onComplete(err);
+        }
+        reject(err);
+      }
+    });
+  });
+};
+
+FirebaseAuth.prototype.verifyIdToken = function (token) {
+  var err = this._nextErr('verifyIdToken');
+  var self = this;
+  return new Promise(function (resolve, reject) {
+    self._defer('verifyIdToken', _.toArray(arguments), function() {
+      if (err) {
+        reject(err);
+      } else {
+        var user = _.find(self._auth.users, function(u) {
+          return u._idtoken === token;
+        });
+        if (!user) {
+          reject(new Error('Cannot verify token'));
+        } else {
+          resolve(_.clone(user));
+        }
+      }
+    });
   });
 };
 
@@ -17047,10 +17130,10 @@ FirebaseAuth.prototype._nextUid = function () {
   return 'simplelogin:' + (this._auth.uidCounter++);
 };
 
-FirebaseAuth.prototype._validateNewUid = function (credentials) {
-  if (credentials.uid) {
+FirebaseAuth.prototype._validateNewUid = function (uid) {
+  if (uid) {
     var user = _.find(this._auth.users, function(user) {
-      return user.uid == credentials.uid;
+      return user.uid == uid;
     });
     if (user) {
       var err = new Error('The provided uid is already in use by an existing user. Each user must have a unique uid.');
@@ -17061,10 +17144,10 @@ FirebaseAuth.prototype._validateNewUid = function (credentials) {
   return null;
 };
 
-FirebaseAuth.prototype._validateExistingUid = function (credentials) {
-  if (credentials.uid) {
+FirebaseAuth.prototype._validateExistingUid = function (uid) {
+  if (uid) {
     var user = _.find(this._auth.users, function(user) {
-      return user.uid == credentials.uid;
+      return user.uid == uid;
     });
     if (!user) {
       var err = new Error('There is no existing user record corresponding to the provided identifier.');
@@ -17075,8 +17158,11 @@ FirebaseAuth.prototype._validateExistingUid = function (credentials) {
   return null;
 };
 
-FirebaseAuth.prototype._validateNewEmail = function (credentials) {
-  if (this._auth.users.hasOwnProperty(credentials.email)) {
+FirebaseAuth.prototype._validateNewEmail = function (email) {
+  var user = _.find(this._auth.users, function(u) {
+    return u.email === email;
+  });
+  if (user) {
     var err = new Error('The provided email is already in use by an existing user. Each user must have a unique email.');
     err.code = 'auth/email-already-exists';
     return err;
@@ -17084,8 +17170,11 @@ FirebaseAuth.prototype._validateNewEmail = function (credentials) {
   return null;
 };
 
-FirebaseAuth.prototype._validateExistingEmail = function (credentials) {
-  if (!this._auth.users.hasOwnProperty(credentials.email)) {
+FirebaseAuth.prototype._validateExistingEmail = function (email) {
+  var user = _.find(this._auth.users, function(u) {
+    return u.email === email;
+  });
+  if (!user) {
     var err = new Error('There is no existing user record corresponding to the provided identifier.');
     err.code = 'auth/user-not-found';
     return err;
@@ -17093,10 +17182,12 @@ FirebaseAuth.prototype._validateExistingEmail = function (credentials) {
   return null;
 };
 
-FirebaseAuth.prototype._validPass = function (object, name) {
+FirebaseAuth.prototype._validPass = function (email, pass) {
   var err = null;
-  var key = object.email;
-  if (object[name] !== this._auth.users[key].password) {
+  var user = _.find(this._auth.users, function(u) {
+    return u.email === email;
+  });
+  if (pass !== user.password) {
     err = new Error('The provided value for the password user property is invalid. It must be a string with at least six characters.');
     err.code = 'auth/invalid-password';
   }
@@ -17134,7 +17225,7 @@ function validateArgument (method, object, position, name, type) {
 
 module.exports = FirebaseAuth;
 
-},{"lodash":13,"rsvp":15,"util":7}],17:[function(require,module,exports){
+},{"./user":32,"lodash":13,"rsvp":15,"util":7}],17:[function(require,module,exports){
 'use strict';
 
 var _ = require('lodash');
@@ -17520,6 +17611,7 @@ MockFirebase.prototype.limitToLast = function (limit) {
  * Just a stub so it can be spied on during testing
  */
 MockFirebase.prototype.orderByChild = function (child) {
+  console.warn("orderByChild() is not supported by firebase-mock.  You will need to use spies to test this functionality.  Please refer to the firebase-mock README for more info.");
   return new Query(this);
 };
 
@@ -17527,6 +17619,7 @@ MockFirebase.prototype.orderByChild = function (child) {
  * Just a stub so it can be spied on during testing
  */
 MockFirebase.prototype.orderByKey = function (key) {
+  console.warn("orderByKey() is not supported by firebase-mock.  You will need to use spies to test this functionality.  Please refer to the firebase-mock README for more info.");
   return new Query(this);
 };
 
@@ -17534,6 +17627,7 @@ MockFirebase.prototype.orderByKey = function (key) {
  * Just a stub so it can be spied on during testing
  */
 MockFirebase.prototype.orderByPriority = function (property) {
+  console.warn("orderByPriority() is not supported by firebase-mock.  You will need to use spies to test this functionality.  Please refer to the firebase-mock README for more info.");
   return new Query(this);
 };
 
@@ -17541,6 +17635,7 @@ MockFirebase.prototype.orderByPriority = function (property) {
  * Just a stub so it can be spied on during testing
  */
 MockFirebase.prototype.orderByValue = function (value) {
+  console.warn("orderByValue() is not supported by firebase-mock.  You will need to use spies to test this functionality.  Please refer to the firebase-mock README for more info.");
   return new Query(this);
 };
 
@@ -17843,7 +17938,7 @@ function render(datum) {
 
 module.exports = MockFirebase;
 
-},{"./auth":16,"./query":27,"./queue":28,"./snapshot":31,"./utils":32,"./validators":33,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],18:[function(require,module,exports){
+},{"./auth":16,"./query":27,"./queue":28,"./snapshot":31,"./utils":33,"./validators":34,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],18:[function(require,module,exports){
 'use strict';
 
 var _ = require('lodash');
@@ -17927,7 +18022,7 @@ function extractName(path) {
 
 module.exports = MockFirestoreCollection;
 
-},{"./firestore-query":24,"./queue":28,"./utils":32,"./validators":33,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],19:[function(require,module,exports){
+},{"./firestore-query":24,"./queue":28,"./utils":33,"./validators":34,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],19:[function(require,module,exports){
 'use strict';
 
 var _ = require('lodash');
@@ -18214,7 +18309,7 @@ function extractName(path) {
 
 module.exports = MockFirestoreDocument;
 
-},{"./firestore-document-snapshot":20,"./queue":28,"./utils":32,"./validators":33,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],22:[function(require,module,exports){
+},{"./firestore-document-snapshot":20,"./queue":28,"./utils":33,"./validators":34,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],22:[function(require,module,exports){
 'use strict';
 
 function MockFirestoreFieldValue(type) {
@@ -18447,7 +18542,7 @@ function extractName(path) {
 
 module.exports = MockFirestoreQuery;
 
-},{"./firestore-query-snapshot":23,"./queue":28,"./utils":32,"./validators":33,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],25:[function(require,module,exports){
+},{"./firestore-query-snapshot":23,"./queue":28,"./utils":33,"./validators":34,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],25:[function(require,module,exports){
 'use strict';
 
 var _ = require('lodash');
@@ -18640,7 +18735,7 @@ function extractName(path) {
 
 module.exports = MockFirestore;
 
-},{"./firestore-collection":18,"./firestore-document":21,"./firestore-field-value":22,"./queue":28,"./utils":32,"./validators":33,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],26:[function(require,module,exports){
+},{"./firestore-collection":18,"./firestore-document":21,"./firestore-field-value":22,"./queue":28,"./utils":33,"./validators":34,"assert":2,"firebase-auto-ids":11,"lodash":13,"rsvp":15}],26:[function(require,module,exports){
 'use strict';
 
 var _   = require('lodash');
@@ -19141,7 +19236,7 @@ function assertQuery (method, pri, key) {
 
 module.exports = MockQuery;
 
-},{"./slice":30,"./utils":32,"./validators":33,"lodash":13,"rsvp":15}],28:[function(require,module,exports){
+},{"./slice":30,"./utils":33,"./validators":34,"lodash":13,"rsvp":15}],28:[function(require,module,exports){
 'use strict';
 
 var _            = require('lodash');
@@ -19514,7 +19609,7 @@ Slice.prototype._build = function(ref, rawData) {
 
 module.exports = Slice;
 
-},{"./snapshot":31,"./utils":32,"lodash":13}],31:[function(require,module,exports){
+},{"./snapshot":31,"./utils":33,"lodash":13}],31:[function(require,module,exports){
 'use strict';
 
 var _ = require('lodash');
@@ -19600,6 +19695,118 @@ function isValue (value) {
 module.exports = MockDataSnapshot;
 
 },{"lodash":13}],32:[function(require,module,exports){
+'use strict';
+
+var _ = require('lodash');
+var Promise = require('rsvp').Promise;
+
+function MockFirebaseUser(ref, data) {
+  this._auth = ref;
+  this._idtoken = Math.random().toString();
+  this.uid = data.uid;
+  this.email = data.email;
+  this.password = data.password;
+  this.phoneNumber = data.phoneNumber;
+  this.displayName = data.displayName;
+  this.photoURL = data.photoURL;
+  this.emailVerified = !!data.emailVerified;
+  this.isAnonymous = !!data.isAnonymous;
+  this.metadata = data.metadata;
+  this.providerData = data.providerData;
+  this.providerId = data.providerId;
+  this.refreshToken = data.refreshToken;
+}
+
+MockFirebaseUser.prototype.clone = function () {
+  var user = new MockFirebaseUser(this._auth, this);
+  user._idtoken = this._idtoken;
+  return user;
+};
+
+MockFirebaseUser.prototype.delete = function () {
+  return this._auth.deleteUser(this.uid);
+};
+
+MockFirebaseUser.prototype.reload = function () {
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    self._auth.getUser(self.uid).then(function(user) {
+      self.email = user.email;
+      self.displayName = user.displayName;
+      self.phoneNumber = user.phoneNumber;
+      self.emailVerified = !!user.emailVerified;
+      self.isAnonymous = !!user.isAnonymous;
+      self.metadata = user.metadata;
+      self.photoURL = user.photoURL;
+      self.providerData = user.providerData;
+      self.providerId = user.providerId;
+      self.refreshToken = user.refreshToken;
+      resolve();
+    }).catch(reject);
+  });
+};
+
+MockFirebaseUser.prototype.updateEmail = function (newEmail) {
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    self._auth.changeEmail({
+      newEmail: newEmail,
+      oldEmail: self.email,
+      password: self.password
+    }).then(function() {
+      self.email = newEmail;
+      resolve();
+    }).catch(reject);
+  });
+};
+
+MockFirebaseUser.prototype.updatePassword = function (newPassword) {
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    self._auth.changePassword({
+      email: self.email,
+      oldPassword: self.password,
+      newPassword: newPassword
+    }).then(function() {
+      self.password = newPassword;
+      resolve();
+    }).catch(reject);
+  });
+};
+
+// Passing a null value will delete the current attribute's value, but not
+// passing a property won't change the current attribute's value:
+// Let's say we're using the same user than before, after the update.
+MockFirebaseUser.prototype.updateProfile = function (profile) {
+  if (!profile) return Promise.reject();
+  var self = this;
+  var user = _.find(this._auth._auth.users, function(u) {
+    return u.uid === self.uid;
+  });
+  if (typeof profile.displayName !== 'undefined') {
+    this.displayName = profile.displayName;
+    user.displayName = profile.displayName;
+  }
+  if (typeof profile.photoURL !== 'undefined') {
+    this.photoURL = profile.photoURL;
+    user.photoURL = profile.photoURL;
+  }
+  return Promise.resolve();
+};
+
+MockFirebaseUser.prototype.getIdToken = function (forceRefresh) {
+  var self = this;
+  return new Promise(function(resolve) {
+    if (forceRefresh) {
+      self._idtoken = Math.random().toString();
+    }
+    resolve(self._idtoken);
+  });
+};
+
+module.exports = MockFirebaseUser;
+
+},{"lodash":13,"rsvp":15}],33:[function(require,module,exports){
 'use strict';
 
 var Snapshot = require('./snapshot');
@@ -19801,7 +20008,7 @@ exports.findUndefinedProperties = function (obj) {
   recurse(obj, path);
   return results;
 };
-},{"./firestore-field-value":22,"./snapshot":31,"lodash":13}],33:[function(require,module,exports){
+},{"./firestore-field-value":22,"./snapshot":31,"lodash":13}],34:[function(require,module,exports){
 'use strict';
 
 var assert = require('assert');
@@ -19820,7 +20027,7 @@ exports.data = function(obj){
   var undefinedProperties = findUndefinedProperties(obj);
   assert(undefinedProperties.length === 0, 'Data contains undefined properties at ' + undefinedProperties);
 };
-},{"./utils":32,"assert":2,"util":7}]},{},[1])(1)
+},{"./utils":33,"assert":2,"util":7}]},{},[1])(1)
 });;(function (window) {
   'use strict';
   if (typeof window !== 'undefined' && window.firebasemock) {
