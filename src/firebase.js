@@ -383,6 +383,7 @@ MockFirebase.prototype.limitToLast = function (limit) {
  * Just a stub so it can be spied on during testing
  */
 MockFirebase.prototype.orderByChild = function (child) {
+  console.warn("orderByChild() is not supported by firebase-mock.  You will need to use spies to test this functionality.  Please refer to the firebase-mock README for more info.");
   return new Query(this);
 };
 
@@ -390,6 +391,7 @@ MockFirebase.prototype.orderByChild = function (child) {
  * Just a stub so it can be spied on during testing
  */
 MockFirebase.prototype.orderByKey = function (key) {
+  console.warn("orderByKey() is not supported by firebase-mock.  You will need to use spies to test this functionality.  Please refer to the firebase-mock README for more info.");
   return new Query(this);
 };
 
@@ -397,6 +399,7 @@ MockFirebase.prototype.orderByKey = function (key) {
  * Just a stub so it can be spied on during testing
  */
 MockFirebase.prototype.orderByPriority = function (property) {
+  console.warn("orderByPriority() is not supported by firebase-mock.  You will need to use spies to test this functionality.  Please refer to the firebase-mock README for more info.");
   return new Query(this);
 };
 
@@ -404,6 +407,7 @@ MockFirebase.prototype.orderByPriority = function (property) {
  * Just a stub so it can be spied on during testing
  */
 MockFirebase.prototype.orderByValue = function (value) {
+  console.warn("orderByValue() is not supported by firebase-mock.  You will need to use spies to test this functionality.  Please refer to the firebase-mock README for more info.");
   return new Query(this);
 };
 
