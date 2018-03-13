@@ -1,4 +1,4 @@
-/** firebase-mock - v2.1.0
+/** firebase-mock - v2.1.1
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -17645,6 +17645,14 @@ MockFirebase.prototype.startAt = function (priority, key) {
 
 MockFirebase.prototype.endAt = function (priority, key) {
   return new Query(this).endAt(priority, key);
+};
+
+/**
+ * Just a stub so it can be spied on during testing
+ */
+MockFirebase.prototype.equalTo = function () {
+  console.warn("equalTo() is not supported by firebase-mock.  You will need to use spies to test this functionality.  Please refer to the firebase-mock README for more info.");
+  return new Query(this);
 };
 
 MockFirebase.prototype._childChanged = function (ref) {
