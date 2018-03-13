@@ -7,7 +7,7 @@ Firebase Mock extends [mockfirebase](https://github.com/katowulf/mockfirebase) t
 
 ## Setup
 ```bash
-npm install firebase-mock
+npm install firebase-mock --save-dev
 ```
 
 ### Integration
