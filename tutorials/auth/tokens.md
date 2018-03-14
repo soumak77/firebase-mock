@@ -9,13 +9,6 @@ function clientLogic() {
     console.log(token);
   });
 }
-
-function serverLogic(token) {
-  firebase.auth().verifyIdToken(token).then(function(user) {
-    // do something with the user
-    console.log(user.uid);
-  });
-}
 ```
 
 ##### Test
@@ -34,11 +27,4 @@ mocksdk.auth().createUser({
 
 clientLogic();
 // token has been logged
-
-mocksdk.auth().getUser('123').then(function(user) {
-  user.getIdToken().then(function(token) {
-    serverLogic(token);
-    // uid has been logged
-  });
-});
 ```
