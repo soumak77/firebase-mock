@@ -24,7 +24,7 @@ Firebase Mock supports the client-side [JavaScript API](https://firebase.google.
 
 ### Admin
 * [RTDB Cloud Events](tutorials/rtdb/cloudevents.md)
-* [Firestore Cloud Events](tutorials/rtdb/cloudevents.md)
+* [Firestore Cloud Events](tutorials/firestore/cloudevents.md)
 
 ### Authentication
 * [Authentication](tutorials/auth/authentication.md)
