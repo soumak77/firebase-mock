@@ -1,4 +1,4 @@
-/** firebase-mock - v2.1.1
+/** firebase-mock - v2.1.2
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -18070,11 +18070,11 @@ var _ = require('lodash');
 function MockFirestoreDocumentSnapshot (id, ref, data) {
   this.id = id;
   this.ref = ref;
-  data = _.cloneDeep(data) || null;
+  this._snapshotdata = _.cloneDeep(data) || null;
   this.data = function() {
-    return data;
+    return _.cloneDeep(this._snapshotdata);
   };
-  this.exists = data !== null;
+  this.exists = this._snapshotdata !== null;
 }
 
 MockFirestoreDocumentSnapshot.prototype.get = function (path) {
@@ -19625,13 +19625,10 @@ var _ = require('lodash');
 function MockDataSnapshot (ref, data, priority) {
   this.ref = ref;
   this.key = ref.key;
-  data = _.cloneDeep(data);
-  if (_.isObject(data) && _.isEmpty(data)) {
-    data = null;
+  this._snapshotdata = _.cloneDeep(data);
+  if (_.isObject(this._snapshotdata) && _.isEmpty(this._snapshotdata)) {
+    this._snapshotdata = null;
   }
-  this.val = function () {
-    return data;
-  };
   this.getPriority = function () {
     return priority;
   };
@@ -19639,23 +19636,27 @@ function MockDataSnapshot (ref, data, priority) {
 
 MockDataSnapshot.prototype.child = function (key) {
   var ref = this.ref.child(key);
-  var data = this.hasChild(key) ? this.val()[key] : null;
+  var data = this.hasChild(key) ? this._snapshotdata[key] : null;
   var priority = this.ref.child(key).priority;
   return new MockDataSnapshot(ref, data, priority);
 };
 
+MockDataSnapshot.prototype.val = function () {
+  return _.cloneDeep(this._snapshotdata);
+};
+
 MockDataSnapshot.prototype.exists = function () {
-  return this.val() !== null;
+  return this._snapshotdata !== null;
 };
 
 MockDataSnapshot.prototype.forEach = function (callback, context) {
-  _.each(this.val(), function (value, key) {
+  _.each(this._snapshotdata, function (value, key) {
     callback.call(context, this.child(key));
   }, this);
 };
 
 MockDataSnapshot.prototype.hasChild = function (path) {
-  return !!(this.val() && this.val()[path]);
+  return !!(this._snapshotdata && this._snapshotdata[path]);
 };
 
 MockDataSnapshot.prototype.hasChildren = function () {
@@ -19668,7 +19669,7 @@ MockDataSnapshot.prototype.name = function () {
 };
 
 MockDataSnapshot.prototype.numChildren = function () {
-  return _.size(this.val());
+  return _.size(this._snapshotdata);
 };
 
 
@@ -19679,7 +19680,7 @@ MockDataSnapshot.prototype.exportVal = function () {
   if (hasPriority) {
     exportData['.priority'] = priority;
   }
-  if (isValue(this.val())) {
+  if (isValue(this._snapshotdata)) {
     if (hasPriority) {
       exportData['.value'] = this.val();
     }
@@ -19688,7 +19689,7 @@ MockDataSnapshot.prototype.exportVal = function () {
     }
   }
   else {
-    _.reduce(this.val(), function (acc, value, key) {
+    _.reduce(this._snapshotdata, function (acc, value, key) {
       acc[key] = this.child(key).exportVal();
       return acc;
     }, exportData, this);
