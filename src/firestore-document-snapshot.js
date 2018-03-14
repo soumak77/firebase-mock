@@ -5,11 +5,11 @@ var _ = require('lodash');
 function MockFirestoreDocumentSnapshot (id, ref, data) {
   this.id = id;
   this.ref = ref;
-  data = _.cloneDeep(data) || null;
+  this._snapshotdata = _.cloneDeep(data) || null;
   this.data = function() {
-    return data;
+    return _.cloneDeep(this._snapshotdata);
   };
-  this.exists = data !== null;
+  this.exists = this._snapshotdata !== null;
 }
 
 MockFirestoreDocumentSnapshot.prototype.get = function (path) {
