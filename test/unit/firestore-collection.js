@@ -128,6 +128,14 @@ describe('MockFirestoreCollection', function () {
       var doc = collection.doc();
       expect(doc.id).to.be.a('string');
     });
+
+    it('creates child documents with a firestore property pointing at the root db', function () {
+      expect(collection.doc('doc').firestore).to.equal(db);
+    });
+
+    it('creates child documents with a firestore property pointing at the firestore of the collection', function () {
+      expect(collection.doc('doc').firestore).to.equal(collection.firestore);
+    });
   });
 
   describe('#add', function () {
