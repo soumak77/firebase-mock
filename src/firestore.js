@@ -14,6 +14,7 @@ var DEFAULT_PATH = 'Mock://';
 
 function MockFirestore(path, data, parent, name) {
   this.ref = this;
+  this.firestore = this;
   this.path = path || DEFAULT_PATH;
   this.errs = {};
   this.priority = null;

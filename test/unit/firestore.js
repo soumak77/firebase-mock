@@ -75,6 +75,10 @@ describe('MockFirestore', function () {
     it('caches deep children with paths', function () {
       expect(db.collection('collections/doc/collections2')).to.equal(db.collection('collections').doc('doc').collection('collections2'));
     });
+
+    it('creates child collection with a firestore property pointing at itself', function () {
+      expect(db.collection('collections').firestore).to.equal(db);
+    });
   });
 
   describe('#doc', function () {
@@ -100,6 +104,10 @@ describe('MockFirestore', function () {
 
     it('caches deep children with paths', function () {
       expect(db.doc('doc/collections/doc2')).to.equal(db.doc('doc').collection('collections').doc('doc2'));
+    });
+
+    it('creates child document with a firestore property pointing at itself', function () {
+      expect(db.doc('doc').firestore).to.equal(db);
     });
   });
 
