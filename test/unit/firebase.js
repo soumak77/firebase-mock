@@ -847,7 +847,26 @@ describe('MockFirebase', function () {
 
       expect(ref.getData().item).to.eql(ref.child('item').getData());
     });
+
+    it('should remove empty properties from data', function(){
+      ref.transaction(function(value) {
+        return {
+          alpha: true,
+          bravo: [],
+          charlie: "some string",
+          delta: {nestedArray:[]},
+          echo: 5
+        };
+      });
+      ref.flush();
+
+      expect(ref.getData()).to.eql({
+          alpha: true,
+          charlie: "some string",
+          echo: 5
+      });
   });
+});
 
   describe('#push', function () {
 
