@@ -1,3 +1,6 @@
+# NOTICE
+If you would like to help implement ordering for this library, please refer to https://github.com/soumak77/firebase-mock/issues/63
+
 # Tutorial: Using Spies for Ordering
 
 `firebase-mock` does not provide mocked behavior for orderBy* methods due to the complex way in which data is ordered by firebase.  The mocks provided for `orderByChild`, `orderByKey`, `orderByPriority`, and `orderByValue` are simply pass through methods and do not provide any filtering on the data.  This allows your firebase code to execute during testing, though the results will not be as you expect.
