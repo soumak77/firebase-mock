@@ -4,7 +4,7 @@
   "description": "Firebase mock library for writing unit tests",
   "main": "./src",
   "scripts": {
-    "test": "gulp lint && gulp test && gulp karma",
+    "test": "gulp lint && gulp test",
     "publish-patch": "git checkout master && git pull && gulp release && npm publish",
     "publish-minor": "git checkout master && git pull && gulp release --type minor && npm publish",
     "publish-major": "git checkout master && git pull && gulp release --type major && npm publish"

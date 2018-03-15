@@ -9,4 +9,3 @@ before_script:
 script:
 - gulp test
 - gulp karma
-- gulp smoke
