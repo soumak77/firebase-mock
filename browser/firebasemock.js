@@ -1,4 +1,4 @@
-/** firebase-mock - v2.1.5
+/** firebase-mock - v2.1.6
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -44765,6 +44765,7 @@ MockFirebase.prototype.transaction = function (valueFn, finishedFn, applyLocally
   var self = this;
   return new Promise(function (resolve, reject) {
     self._defer('transaction', _.toArray(arguments), function () {
+      newData = utils.removeEmptyRtdbProperties(newData);
       self._dataChanged(newData);
       if (typeof finishedFn === 'function') {
         finishedFn(err, err === null && !_.isUndefined(res), new Snapshot(self, newData, self.priority));
