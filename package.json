@@ -67,8 +67,8 @@
     "rsvp": "^3.6.2"
   },
   "devDependencies": {
-    "browserify": "^6.3.2",
-    "browserify-shim": "^3.8.0",
+    "browserify": "^16.1.1",
+    "browserify-shim": "^3.8.14",
     "chai": "~3.5.0",
     "chai-as-promised": "^6.0.0",
     "es5-shim": "^4.5.10",
