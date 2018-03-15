@@ -642,11 +642,11 @@ describe('Auth', function () {
       }, _.noop);
       ref.flush();
 
-      return expect(ref.getUserByEmail('kato@kato.com')).to.become({
-        uid: 'simplelogin:1',
-        email: 'kato@kato.com',
-        password: 'kato'
-      }).and.notify(function() {
+      return ref.getUserByEmail('kato@kato.com').then(function(user) {
+        expect(user).to.have.property('uid').to.equal('simplelogin:1');
+        expect(user).to.have.property('email').to.equal('kato@kato.com');
+        expect(user).to.have.property('password').to.equal('kato');
+        
         ref.removeUser({
           email: 'kato@kato.com',
           password: 'kato'
