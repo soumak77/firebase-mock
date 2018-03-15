@@ -1,4 +1,4 @@
-/** firebase-mock - v2.1.6
+/** firebase-mock - v2.1.7
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -44841,12 +44841,8 @@ MockFirebase.prototype.endAt = function (priority, key) {
   return new Query(this).endAt(priority, key);
 };
 
-/**
- * Just a stub so it can be spied on during testing
- */
-MockFirebase.prototype.equalTo = function () {
-  console.warn("equalTo() is not supported by firebase-mock.  You will need to use spies to test this functionality.  Please refer to the firebase-mock README for more info.");
-  return new Query(this);
+MockFirebase.prototype.equalTo = function (priority, key) {
+  return new Query(this).equalTo(priority, key);
 };
 
 MockFirebase.prototype._childChanged = function (ref) {
@@ -46448,10 +46444,8 @@ MockQuery.prototype.limitToLast = function (intVal) {
   return q;
 };
 
-MockQuery.prototype.equalTo = function () {
-  var q = new MockQuery(this.ref);
-  _.extend(q._q, this._q);
-  return q;
+MockQuery.prototype.equalTo = function (priority, key) {
+  return this.startAt(priority, key).endAt(priority, key);
 };
 
 MockQuery.prototype.startAt = function (priority, key) {
