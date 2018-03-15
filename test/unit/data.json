@@ -82,27 +82,45 @@
   "collections": {
     "a": {
       "name": "a",
-      "name_type": "string"
+      "name_type": "string",
+      "complex": {
+        "name": "a"
+      }
     },
     "b": {
       "name": "b",
-      "name_type": "string"
+      "name_type": "string",
+      "complex": {
+        "name": "b"
+      }
     },
     "c": {
       "name": "c",
-      "name_type": "string"
+      "name_type": "string",
+      "complex": {
+        "name": "c"
+      }
     },
     "1": {
       "name": 1,
-      "name_type": "number"
+      "name_type": "number",
+      "complex": {
+        "name": 1
+      }
     },
     "2": {
       "name": 2,
-      "name_type": "number"
+      "name_type": "number",
+      "complex": {
+        "name": 2
+      }
     },
     "3": {
       "name": 3,
-      "name_type": "number"
+      "name_type": "number",
+      "complex": {
+        "name": 3
+      }
     }
   },
   "doc": {

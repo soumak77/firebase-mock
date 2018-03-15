@@ -247,6 +247,17 @@ describe('MockFirestoreCollection', function () {
         expect(results4).to.eventually.have.property('size').to.equal(0)
       ]);
     });
+
+    it('allow using complex path', function() {
+      var results1 = collection.where('complex.name', '==', 'a').get();
+      var results2 = collection.where('complex.name', '==', 1).get();
+      db.flush();
+
+      return Promise.all([
+        expect(results1).to.eventually.have.property('size').to.equal(1),
+        expect(results2).to.eventually.have.property('size').to.equal(1)
+      ]);
+    });
   });
 
   describe('#orderBy', function () {
