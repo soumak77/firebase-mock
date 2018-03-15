@@ -349,8 +349,8 @@ MockFirebase.prototype.transaction = function (valueFn, finishedFn, applyLocally
       if (typeof finishedFn === 'function') {
         finishedFn(err, err === null && !_.isUndefined(res), new Snapshot(self, newData, self.priority));
       }
-      if (err === null && !_.isUndefined(res)) {
-        resolve({committed: true, snapshot: new Snapshot(self, newData, self.priority)});
+      if (err === null) {
+        resolve({committed: err === null && !_.isUndefined(res), snapshot: new Snapshot(self, newData, self.priority)});
       } else {
         reject(err);
       }
