@@ -45,6 +45,15 @@ describe('DocumentSnapshot', function () {
       };
       expect(new Snapshot('docid', ref, data).data()).to.deep.equal(data);
     });
+
+    it('returns clone of data', function () {
+      var data = {
+        hello: 123
+      };
+      var snapshot = new Snapshot('docid', ref, data);
+      expect(snapshot.data()).to.not.equal(snapshot._snapshotdata); // verify data is not reference to original
+      expect(snapshot.data()).to.deep.equal(data);
+    });
   });
 
   describe('#get', function () {

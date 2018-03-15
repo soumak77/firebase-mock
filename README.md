@@ -4,10 +4,11 @@ Firebase Mock [![Build Status](https://travis-ci.org/soumak77/firebase-mock.svg?
 Firebase Mock extends [mockfirebase](https://github.com/katowulf/mockfirebase) to provide support for the following Firebase Javascript SDKS:
 - [firebase](https://github.com/firebase/firebase-js-sdk)
 - [firebase-admin](https://github.com/firebase/firebase-admin-node)
+- [firebase-functions](https://github.com/firebase/firebase-functions)
 
 ## Setup
 ```bash
-npm install firebase-mock
+npm install firebase-mock --save-dev
 ```
 
 ### Integration
@@ -23,8 +24,12 @@ Firebase Mock supports the client-side [JavaScript API](https://firebase.google.
 ## Tutorials
 
 ### Admin
-* [RTDB Cloud Events](tutorials/rtdb/cloudevents.md)
-* [Firestore Cloud Events](tutorials/rtdb/cloudevents.md)
+* [JWT Tokens](tutorials/admin/tokens.md)
+
+### Functions
+* [Realtime Database](tutorials/functions/rtdb.md)
+* [Firestore](tutorials/functions/firestore.md)
+* [HTTP](tutorials/functions/http.md)
 
 ### Authentication
 * [Authentication](tutorials/auth/authentication.md)
@@ -37,6 +42,3 @@ Firebase Mock supports the client-side [JavaScript API](https://firebase.google.
 
 ### Firestore
 * [Basic](tutorials/firestore/basic.md)
-
-## Projects using firebase-mock
-* [Angular Base Apps Template](https://github.com/base-apps/angular-firebase-template)

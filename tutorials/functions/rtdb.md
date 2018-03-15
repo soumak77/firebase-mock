@@ -1,4 +1,4 @@
-# Tutorial: Mocking Realtime Database Cloud Events
+# Tutorial: Mocking Realtime Database Functions
 Read more at https://firebase.google.com/docs/functions/unit-testing
 
 ```
@@ -10,7 +10,7 @@ DeltaSnapshot(app: firebase.app.App, adminApp: firebase.app.App, data: any, delt
 var functions = require('firebase-functions');
 var sinon    = require('sinon');
 var expect   = require('chai').use(require('sinon-chai')).expect;
-var firebasemock = require('../../');
+var firebasemock    = require('firebase-mock');
 var mockauth        = new firebasemock.MockFirebase();
 var mockdatabase   = new firebasemock.MockFirebase();
 var mocksdk         = firebasemock.MockFirebaseSdk(function(path) {

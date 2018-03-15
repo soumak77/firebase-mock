@@ -29,6 +29,7 @@ describe('DataSnapshot', function () {
         }
       };
       var snapshot = new Snapshot(ref, data);
+      expect(snapshot.val()).to.not.equal(snapshot._snapshotdata); // verify data is not reference to original
       expect(snapshot.val()).to.deep.equal(data);
       expect(snapshot.val()).to.not.equal(data);
       expect(snapshot.val().foo).to.not.equal(data.foo);
