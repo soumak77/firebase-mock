@@ -29,7 +29,7 @@
   "homepage": "https://github.com/soumak77/firebase-mock",
   "dependencies": {
     "firebase-auto-ids": "~1.1.0",
-    "lodash": "^3.10.1",
+    "lodash": "^4.17.5",
     "md5": "~2.2.1",
     "rsvp": "^3.3.3"
   },

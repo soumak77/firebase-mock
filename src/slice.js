@@ -67,6 +67,7 @@ Slice.prototype.pri = function (key) {
 };
 
 Slice.prototype.changeMap = function (slice) {
+  var self = this;
   var changes = { added: [], removed: [] };
   _.each(this.data, function(v,k) {
     if( !slice.has(k) ) {
@@ -74,10 +75,10 @@ Slice.prototype.changeMap = function (slice) {
     }
   });
   _.each(slice.data, function(v,k) {
-    if( !this.has(k) ) {
+    if( !self.has(k) ) {
       changes.added.push(k);
     }
-  }, this);
+  });
   return changes;
 };
 
@@ -185,16 +186,17 @@ Slice.prototype._makeProps = function (queueProps, ref, numRecords) {
 };
 
 Slice.prototype._build = function(ref, rawData) {
+  var self = this;
   var i = 0, map = this.map, keys = this.keys, outer = this.outerMap;
   var props = this.props, slicedData = this.data;
   _.each(rawData, function(v,k) {
     outer[k] = i < props.min? props.min - i : i - Math.max(props.min,0);
-    if( this._inRange(props, k, ref.child(k).priority, i++) ) {
+    if( self._inRange(props, k, ref.child(k).priority, i++) ) {
       map[k] = keys.length;
       keys.push(k);
       slicedData[k] = v;
     }
-  }, this);
+  });
 };
 
 module.exports = Slice;

@@ -86,7 +86,7 @@ MockFirestoreQuery.prototype.get = function () {
               });
             });
 
-            queryable = _.sortByOrder(queryable, _.map(self.orderedProperties, function(p) { return 'data.' + p; }), self.orderedDirections);
+            queryable = _.orderBy(queryable, _.map(self.orderedProperties, function(p) { return 'data.' + p; }), self.orderedDirections);
 
             queryable.forEach(function(q) {
               if (self.limited <= 0 || limit < self.limited) {

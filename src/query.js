@@ -41,9 +41,7 @@ MockQuery.prototype.fakeEvent = function (event, snapshot) {
     })
     .each(function (parts) {
       parts[1].call(parts[2], snapshot);
-    })
-    .value();  // Lodash 3.x chains are lazy,
-               // must explicitly call value() to execute the above chain
+    });
 };
 
 MockQuery.prototype.on = function (event, callback, cancelCallback, context) {

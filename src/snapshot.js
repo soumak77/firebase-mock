@@ -29,9 +29,10 @@ MockDataSnapshot.prototype.exists = function () {
 };
 
 MockDataSnapshot.prototype.forEach = function (callback, context) {
+  var self = this;
   _.each(this.val(), function (value, key) {
-    callback.call(context, this.child(key));
-  }, this);
+    callback.call(context, self.child(key));
+  });
 };
 
 MockDataSnapshot.prototype.hasChild = function (path) {
@@ -53,6 +54,7 @@ MockDataSnapshot.prototype.numChildren = function () {
 
 
 MockDataSnapshot.prototype.exportVal = function () {
+  var self = this;
   var exportData = {};
   var priority = this.getPriority();
   var hasPriority = _.isString(priority) || _.isNumber(priority);
@@ -69,9 +71,9 @@ MockDataSnapshot.prototype.exportVal = function () {
   }
   else {
     _.reduce(this.val(), function (acc, value, key) {
-      acc[key] = this.child(key).exportVal();
+      acc[key] = self.child(key).exportVal();
       return acc;
-    }, exportData, this);
+    }, exportData);
   }
   return exportData;
 };
