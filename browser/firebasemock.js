@@ -1,4 +1,4 @@
-/** firebase-mock - v2.1.7
+/** firebase-mock - v2.1.8
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -45316,6 +45316,7 @@ function MockFirestoreDocument(path, data, parent, name, CollectionReference) {
   this.flushDelay = parent ? parent.flushDelay : false;
   this.queue = parent ? parent.queue : new Queue();
   this.parent = parent || null;
+  this.firestore = parent ? parent.firestore : null;
   this.children = {};
   if (parent) parent.children[this.id] = this;
   this.data = null;
@@ -45587,6 +45588,7 @@ function MockFirestoreQuery(path, data, parent, name) {
   this.flushDelay = parent ? parent.flushDelay : false;
   this.queue = parent ? parent.queue : new Queue();
   this.parent = parent || null;
+  this.firestore = parent ? parent.firestore : null;
   this.children = {};
   this.orderedProperties = [];
   this.orderedDirections = [];
@@ -45764,6 +45766,7 @@ var DEFAULT_PATH = 'Mock://';
 
 function MockFirestore(path, data, parent, name) {
   this.ref = this;
+  this.firestore = this;
   this.path = path || DEFAULT_PATH;
   this.errs = {};
   this.priority = null;
