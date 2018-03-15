@@ -759,7 +759,6 @@ describe('MockFirebase', function () {
   });
 
   describe('#transaction', function () {
-
     it('should call the transaction function', function () {
       ref.transaction(spy);
       ref.flush();
@@ -789,6 +788,65 @@ describe('MockFirebase', function () {
       });
     });
 
+    it('should update primative value', function () {
+      ref.set({
+        item: 1234
+      });
+      ref.flush();
+
+      ref.child('item').transaction(function(value) {
+        if (value) {
+          value = 9999;
+        }
+
+        return value;
+      });
+      ref.flush();
+
+      expect(ref.getData().item).to.equal(ref.child('item').getData());
+    });
+
+    it('should update property value', function () {
+      ref.set({
+        item: {
+          time: 1234
+        },
+      });
+      ref.flush();
+
+      ref.child('item').transaction(function(value) {
+        if (value) {
+          value.time = 9999;
+        }
+
+        return value;
+      });
+      ref.flush();
+
+      expect(ref.getData().item).to.eql(ref.child('item').getData());
+    });
+
+    it('should update nested property value', function () {
+      ref.set({
+        item: {
+          meta: {
+            time: 1234
+          }
+        },
+      });
+      ref.flush();
+
+      ref.child('item').transaction(function(value) {
+        if (value) {
+          value.meta.time = 9999;
+        }
+
+        return value;
+      });
+      ref.flush();
+
+      expect(ref.getData().item).to.eql(ref.child('item').getData());
+    });
   });
 
   describe('#push', function () {

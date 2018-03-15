@@ -349,7 +349,7 @@ MockFirebase.prototype.transaction = function (valueFn, finishedFn, applyLocally
       if (typeof finishedFn === 'function') {
         finishedFn(err, err === null && !_.isUndefined(res), new Snapshot(self, newData, self.priority));
       }
-      if (err === null) {
+      if (err === null && !_.isUndefined(res)) {
         resolve({committed: true, snapshot: new Snapshot(self, newData, self.priority)});
       } else {
         reject(err);
@@ -716,10 +716,12 @@ function render(datum) {
 
         return array;
       }
+    } else {
+      return _.cloneDeep(datum);
     }
+  } else {
+    return _.clone(datum);
   }
-
-  return _.clone(datum);
 }
 
 module.exports = MockFirebase;
