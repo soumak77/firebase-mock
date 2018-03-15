@@ -18,6 +18,7 @@ function MockFirestoreDocument(path, data, parent, name, CollectionReference) {
   this.flushDelay = parent ? parent.flushDelay : false;
   this.queue = parent ? parent.queue : new Queue();
   this.parent = parent || null;
+  this.firestore = parent ? parent.firestore : null;
   this.children = {};
   if (parent) parent.children[this.id] = this;
   this.data = null;

@@ -16,6 +16,7 @@ function MockFirestoreQuery(path, data, parent, name) {
   this.flushDelay = parent ? parent.flushDelay : false;
   this.queue = parent ? parent.queue : new Queue();
   this.parent = parent || null;
+  this.firestore = parent ? parent.firestore : null;
   this.children = {};
   this.orderedProperties = [];
   this.orderedDirections = [];
