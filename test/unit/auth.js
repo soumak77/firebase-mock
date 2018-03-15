@@ -10,9 +10,7 @@ var expect = chai.expect;
 var Firebase = require('../../').MockFirebase;
 var Promise   = require('rsvp').Promise;
 var User = require('../../src/user');
-var _ = {
-  noop: require('lodash.noop')
-};
+var _ = require('../../src/lodash');
 
 describe('Auth', function () {
 
@@ -98,7 +96,7 @@ describe('Auth', function () {
 
     it('fails when user not found', function () {
       var found = ref.getUser('bd');
-      return expect(found).to.be.rejected.then(function(err) {
+      return expect(found).to.be.rejected.and.notify(function(err) {
         expect(err.code).to.equal('auth/user-not-found');
       });
     });
@@ -133,7 +131,7 @@ describe('Auth', function () {
 
     it('fails when user not found', function () {
       var found = ref.getUser('bd');
-      return expect(found).to.be.rejected.then(function(err) {
+      return expect(found).to.be.rejected.and.notify(function(err) {
         expect(err.code).to.equal('auth/user-not-found');
       });
     });
@@ -637,13 +635,14 @@ describe('Auth', function () {
 
   describe('#removeUser', function () {
 
-    it('removes the account', function (done) {
+    it('removes the account', function () {
       ref.createUser({
         email: 'kato@kato.com',
         password: 'kato'
       }, _.noop);
       ref.flush();
-      expect(ref.getUserByEmail('kato@kato.com')).to.become({
+
+      return expect(ref.getUserByEmail('kato@kato.com')).to.become({
         uid: 'simplelogin:1',
         email: 'kato@kato.com',
         password: 'kato'
@@ -653,7 +652,7 @@ describe('Auth', function () {
           password: 'kato'
         }, _.noop);
         ref.flush();
-        expect(ref.getUserByEmail('kato@kato.com')).to.be.rejected.and.notify(done);
+        return expect(ref.getUserByEmail('kato@kato.com')).to.be.rejected;
       });
     });
 

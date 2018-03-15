@@ -9,9 +9,8 @@ var fs              = require('fs');
 var argv            = require('yargs').argv;
 var path            = require('path');
 var os              = require('os');
-var _ = {
-  extend: require('lodash.assignin')
-};
+var Server          = require('karma').Server;
+var _extend         = require('lodash.assignin');
 
 var v;
 function version () {
@@ -30,7 +29,7 @@ function bundle () {
     .pipe(source('firebasemock.js'))
     .pipe(buffer())
     .pipe(plugins.header(fs.readFileSync('./helpers/header.txt'), {
-      pkg: _.extend(require('./package.json'), {
+      pkg: _extend(require('./package.json'), {
         version: version()
       })
     }))
@@ -65,8 +64,8 @@ gulp.task('test', ['cover'], function () {
     .pipe(plugins.istanbul.writeReports());
 });
 
-gulp.task('karma', function () {
-  return require('karma-as-promised').server.start({
+gulp.task('karma', function (cb) {
+  new Server({
     frameworks: ['browserify', 'mocha', 'sinon'],
     browsers: ['PhantomJS'],
     client: {
@@ -90,11 +89,11 @@ gulp.task('karma', function () {
     },
     autoWatch: false,
     singleRun: true
-  });
+  }, cb).start();
 });
 
-gulp.task('smoke', ['bundle-smoke'], function () {
-  return require('karma-as-promised').server.start({
+gulp.task('smoke', ['bundle-smoke'], function (cb) {
+  new Server({
     frameworks: ['mocha', 'chai'],
     browsers: ['PhantomJS'],
     client: {
@@ -111,7 +110,7 @@ gulp.task('smoke', ['bundle-smoke'], function () {
     ],
     autoWatch: false,
     singleRun: true
-  });
+  }, cb).start();
 });
 
 gulp.task('lint', function () {

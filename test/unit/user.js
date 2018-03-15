@@ -20,7 +20,7 @@ describe('User', function () {
         password: 'pw'
       }).then(function(user) {
         return user.delete().then(function() {
-          return expect(auth.getUser('123')).to.be.rejected.then(function(err) {
+          return expect(auth.getUser('123')).to.be.rejected.and.notify(function(err) {
             expect(err.code).to.equal('auth/user-not-found');
           });
         });
