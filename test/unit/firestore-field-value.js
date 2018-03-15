@@ -8,7 +8,7 @@ chai.use(require('chai-as-promised'));
 chai.use(require('sinon-chai'));
 
 var expect = chai.expect;
-var _ = require('lodash');
+var _ = require('../../src/lodash');
 var FieldValue = require('../../src/firestore-field-value');
 
 describe('FieldValue', function () {

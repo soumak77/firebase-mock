@@ -2,7 +2,7 @@
 
 var sinon = require('sinon');
 var expect = require('chai').use(require('sinon-chai')).expect;
-var _ = require('lodash');
+var _ = require('../../src/lodash');
 var removeEmptyRtdbProperties = require('../../src/utils').removeEmptyRtdbProperties;
 var removeEmptyFirestoreProperties = require('../../src/utils').removeEmptyFirestoreProperties;
 var updateToRtdbObject = require('../../src/utils').updateToRtdbObject;

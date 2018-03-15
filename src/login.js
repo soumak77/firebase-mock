@@ -1,6 +1,6 @@
 'use strict';
 
-var _   = require('lodash');
+var _ = require('./lodash');
 var md5 = require('md5');
 
 /*******************************************************************************
@@ -38,7 +38,7 @@ MockFirebaseSimpleLogin.DEFAULT_FAIL_WHEN = function(provider, options, user) {
 
 var USER_COUNT = 100;
 MockFirebaseSimpleLogin.DEFAULT_USER_DATA = {};
-_.each(['password', 'anonymous', 'facebook', 'twitter', 'google', 'github'], function(provider) {
+_.forEach(['password', 'anonymous', 'facebook', 'twitter', 'google', 'github'], function(provider) {
   var user = createDefaultUser(provider);
   if( provider !== 'password' ) {
     MockFirebaseSimpleLogin.DEFAULT_USER_DATA[provider] = user;
@@ -74,7 +74,7 @@ MockFirebaseSimpleLogin.prototype = {
     else {
       var attempts = self.attempts;
       self.attempts = [];
-      _.each(attempts, function(x) {
+      _.forEach(attempts, function(x) {
         x[0].apply(self, x.slice(1));
       });
     }

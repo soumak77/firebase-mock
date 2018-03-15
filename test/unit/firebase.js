@@ -7,8 +7,10 @@ chai.use(require('chai-as-promised'));
 chai.use(require('sinon-chai'));
 
 var expect = chai.expect;
-var _ = require('lodash');
 var Firebase = require('../../').MockFirebase;
+var _ = {
+  noop: require('lodash.noop')
+};
 
 describe('MockFirebase', function () {
 

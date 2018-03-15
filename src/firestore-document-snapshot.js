@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('lodash');
+var _ = require('./lodash');
 
 function MockFirestoreDocumentSnapshot (id, ref, data) {
   this.id = id;

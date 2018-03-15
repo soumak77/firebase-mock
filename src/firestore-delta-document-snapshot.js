@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('lodash');
+var _ = require('./lodash');
 var DocumentSnapshot = require('./firestore-document-snapshot');
 
 function MockFirestoreDeltaDocumentSnapshot (id, data, previous, ref) {

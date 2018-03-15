@@ -2,7 +2,7 @@
 
 var expect       = require('chai').use(require('sinon-chai')).expect;
 var sinon        = require('sinon');
-var _            = require('lodash');
+var _            = require('../../src/lodash');
 var Queue        = require('../../src/queue').Queue;
 var FlushEvent   = require('../../src/queue').Event;
 var EventEmitter = require('events').EventEmitter;

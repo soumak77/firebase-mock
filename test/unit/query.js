@@ -1,7 +1,7 @@
 'use strict';
 
 var sinon     = require('sinon');
-var _         = require('lodash');
+var _         = require('../../src/lodash');
 var expect    = require('chai').use(require('sinon-chai')).expect;
 var Query     = require('../../src/query');
 var Firebase  = require('../../').MockFirebase;
@@ -178,7 +178,7 @@ describe('MockQuery', function () {
         query.on('child_added', spy);
         query.flush();
         expect(spy).callCount(4);
-        _.each(_.keys(data), function(k, i) {
+        _.forEach(_.keys(data), function(k, i) {
           expect(spy.getCall(i).args[0].key).equals(k);
         });
       });
@@ -262,7 +262,7 @@ describe('MockQuery', function () {
       query.flush();
 
       expect(spy).callCount(2);
-      _.each(['null_a', 'null_b'], function(k, i) {
+      _.forEach(['null_a', 'null_b'], function(k, i) {
         expect(spy.getCall(i).args[0].key).equals(k);
       });
     });
@@ -290,7 +290,7 @@ describe('MockQuery', function () {
       query.flush();
 
       expect(spy).callCount(2);
-      _.each(['char_b', 'char_c'], function(k, i) {
+      _.forEach(['char_b', 'char_c'], function(k, i) {
         expect(spy.getCall(i).args[0].key).equals(k);
       });
     });

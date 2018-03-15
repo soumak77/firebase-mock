@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('lodash');
+var _ = require('./lodash');
 var DocumentSnapshot = require('./firestore-document-snapshot');
 
 function MockFirestoreQuerySnapshot (ref, data) {
@@ -20,7 +20,7 @@ function MockFirestoreQuerySnapshot (ref, data) {
 
 MockFirestoreQuerySnapshot.prototype.forEach = function (callback, context) {
   var self = this;
-  _.each(this.docs, function (doc) {
+  _.forEach(this.docs, function (doc) {
     callback.call(context, doc);
   });
 };

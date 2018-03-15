@@ -2,7 +2,7 @@
 
 var Snapshot = require('./snapshot');
 var FieldValue = require('./firestore-field-value');
-var _ = require('lodash');
+var _ = require('./lodash');
 
 exports.makeRefSnap = function makeRefSnap(ref) {
   return new Snapshot(ref, ref.getData(), ref.priority);

@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('lodash');
+var _ = require('./lodash');
 var Promise = require('rsvp').Promise;
 
 function MockFirebaseUser(ref, data) {

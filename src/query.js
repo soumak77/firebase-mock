@@ -1,6 +1,6 @@
 'use strict';
 
-var _        = require('lodash');
+var _ = require('./lodash');
 var Slice    = require('./slice');
 var utils    = require('./utils');
 var validate = require('./validators');
@@ -35,13 +35,11 @@ MockQuery.prototype.getData = function () {
 
 MockQuery.prototype.fakeEvent = function (event, snapshot) {
   validate.event(event);
-  _(this._events)
-    .filter(function (parts) {
-      return parts[0] === event;
-    })
-    .each(function (parts) {
-      parts[1].call(parts[2], snapshot);
-    });
+  _.forEach(_.filter(this._events, function (parts) {
+    return parts[0] === event;
+  }), function (parts) {
+    parts[1].call(parts[2], snapshot);
+  });
 };
 
 MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
@@ -91,10 +89,10 @@ MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
     if (map) {
       var newSnap = slice.snap();
       var oldSnap = lastSlice.snap();
-      _.each(map.added, function (addKey) {
+      _.forEach(map.added, function (addKey) {
         self.fakeEvent('child_added', newSnap.child(addKey));
       });
-      _.each(map.removed, function (remKey) {
+      _.forEach(map.removed, function (remKey) {
         self.fakeEvent('child_removed', oldSnap.child(remKey));
       });
     }
@@ -108,7 +106,7 @@ MockQuery.prototype.on = function (event, callback, cancelCallback, context) {
 
 MockQuery.prototype.off = function (event, callback, context) {
   var ref = this.ref;
-  _.each(this._events, function (parts) {
+  _.forEach(this._events, function (parts) {
     if( parts[0] === event && parts[1] === callback && parts[2] === context ) {
       ref.off(event, parts[3]);
     }

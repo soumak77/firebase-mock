@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('lodash');
+var _ = require('./lodash');
 var assert = require('assert');
 var Promise = require('rsvp').Promise;
 var autoId = require('firebase-auto-ids');
@@ -44,7 +44,7 @@ MockFirestore.prototype.autoFlush = function (delay) {
   }
   if (this.flushDelay !== delay) {
     this.flushDelay = delay;
-    _.each(this.children, function (child) {
+    _.forEach(this.children, function (child) {
       child.autoFlush(delay);
     });
     if (this.parent) {

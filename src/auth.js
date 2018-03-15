@@ -1,6 +1,6 @@
 'use strict';
 
-var _      = require('lodash');
+var _      = require('./lodash');
 var format = require('util').format;
 var Promise   = require('rsvp').Promise;
 var User = require('./user');

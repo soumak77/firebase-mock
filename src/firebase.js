@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('lodash');
+var _ = require('./lodash');
 var assert = require('assert');
 var Promise = require('rsvp').Promise;
 var autoId = require('firebase-auto-ids');
@@ -74,7 +74,7 @@ MockFirebase.prototype.autoFlush = function (delay) {
   }
   if (this.flushDelay !== delay) {
     this.flushDelay = delay;
-    _.each(this.children, function (child) {
+    _.forEach(this.children, function (child) {
       child.autoFlush(delay);
     });
     if (this.parent) {
@@ -326,7 +326,7 @@ MockFirebase.prototype.off = function (event, callback, context) {
     if (callback) {
       var events = this._events[event];
       var newEvents = this._events[event] = [];
-      _.each(events, function (parts) {
+      _.forEach(events, function (parts) {
         if (parts[0] !== callback || parts[1] !== context) {
           newEvents.push(parts);
         }
@@ -508,10 +508,10 @@ MockFirebase.prototype._resort = function (childKeyMoved) {
   this.sortedDataKeys.sort(_.bind(this.childComparator, this));
   // resort the data object to match our keys so value events return ordered content
   var oldData = _.assign({}, this.data);
-  _.each(oldData, function (v, k) {
+  _.forEach(oldData, function (v, k) {
     delete self.data[k];
   });
-  _.each(this.sortedDataKeys, function (k) {
+  _.forEach(this.sortedDataKeys, function (k) {
     self.data[k] = oldData[k];
   });
   if (!_.isUndefined(childKeyMoved) && _.has(this.data, childKeyMoved)) {
@@ -552,7 +552,7 @@ MockFirebase.prototype._trigger = function (event, data, pri, key) {
   var self = this;
   var ref = event === 'value' ? this : this.child(key);
   var snap = new Snapshot(ref, data, pri);
-  _.each(this._events[event], function (parts) {
+  _.forEach(this._events[event], function (parts) {
     var fn = parts[0], context = parts[1];
     if (_.includes(['child_added', 'child_moved'], event)) {
       fn.call(context, snap, self._getPrevChild(key));

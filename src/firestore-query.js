@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('lodash');
+var _ = require('./lodash');
 var assert = require('assert');
 var Promise = require('rsvp').Promise;
 var autoId = require('firebase-auto-ids');
@@ -112,7 +112,7 @@ MockFirestoreQuery.prototype.where = function (property, operator, value) {
 
   // check if unsupported operator
   if (operator !== '==') {
-    console.log('Using unsupported where() operator for firebase-mock, returning entire dataset');
+    console.warn('Using unsupported where() operator for firebase-mock, returning entire dataset');
     return this;
   } else {
     if (_.size(this.data) !== 0) {

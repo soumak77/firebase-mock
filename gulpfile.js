@@ -2,7 +2,6 @@
 
 var gulp            = require('gulp');
 var plugins         = require('gulp-load-plugins')();
-var _               = require('lodash');
 var browserify      = require('browserify');
 var source          = require('vinyl-source-stream');
 var buffer          = require('vinyl-buffer');
@@ -10,6 +9,9 @@ var fs              = require('fs');
 var argv            = require('yargs').argv;
 var path            = require('path');
 var os              = require('os');
+var _ = {
+  extend: require('lodash.assignin')
+};
 
 var v;
 function version () {

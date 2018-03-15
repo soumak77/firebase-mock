@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('lodash');
+var _ = require('./lodash');
 
 function MockDataSnapshot (ref, data, priority) {
   this.ref = ref;
@@ -31,7 +31,7 @@ MockDataSnapshot.prototype.exists = function () {
 
 MockDataSnapshot.prototype.forEach = function (callback, context) {
   var self = this;
-  _.each(this._snapshotdata, function (value, key) {
+  _.forEach(this._snapshotdata, function (value, key) {
     callback.call(context, self.child(key));
   });
 };

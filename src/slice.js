@@ -1,6 +1,6 @@
 'use strict';
 
-var _        = require('lodash');
+var _        = require('./lodash');
 var Snapshot = require('./snapshot');
 var utils    = require('./utils');
 
@@ -69,12 +69,12 @@ Slice.prototype.pri = function (key) {
 Slice.prototype.changeMap = function (slice) {
   var self = this;
   var changes = { added: [], removed: [] };
-  _.each(this.data, function(v,k) {
+  _.forEach(this.data, function(v,k) {
     if( !slice.has(k) ) {
       changes.removed.push(k);
     }
   });
-  _.each(slice.data, function(v,k) {
+  _.forEach(slice.data, function(v,k) {
     if( !self.has(k) ) {
       changes.added.push(k);
     }
@@ -148,7 +148,7 @@ Slice.prototype._findPos = function (pri, key, ref, isStartBoundary) {
 
 Slice.prototype._makeProps = function (queueProps, ref, numRecords) {
   var out = {};
-  _.each(queueProps, function(v,k) {
+  _.forEach(queueProps, function(v,k) {
     if(!_.isUndefined(v)) {
       out[k] = v;
     }
@@ -189,7 +189,7 @@ Slice.prototype._build = function(ref, rawData) {
   var self = this;
   var i = 0, map = this.map, keys = this.keys, outer = this.outerMap;
   var props = this.props, slicedData = this.data;
-  _.each(rawData, function(v,k) {
+  _.forEach(rawData, function(v,k) {
     outer[k] = i < props.min? props.min - i : i - Math.max(props.min,0);
     if( self._inRange(props, k, ref.child(k).priority, i++) ) {
       map[k] = keys.length;
