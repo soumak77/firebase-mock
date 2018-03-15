@@ -155,10 +155,8 @@ MockQuery.prototype.limitToLast = function (intVal) {
   return q;
 };
 
-MockQuery.prototype.equalTo = function () {
-  var q = new MockQuery(this.ref);
-  _.extend(q._q, this._q);
-  return q;
+MockQuery.prototype.equalTo = function (priority, key) {
+  return this.startAt(priority, key).endAt(priority, key);
 };
 
 MockQuery.prototype.startAt = function (priority, key) {

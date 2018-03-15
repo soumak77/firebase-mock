@@ -421,12 +421,8 @@ MockFirebase.prototype.endAt = function (priority, key) {
   return new Query(this).endAt(priority, key);
 };
 
-/**
- * Just a stub so it can be spied on during testing
- */
-MockFirebase.prototype.equalTo = function () {
-  console.warn("equalTo() is not supported by firebase-mock.  You will need to use spies to test this functionality.  Please refer to the firebase-mock README for more info.");
-  return new Query(this);
+MockFirebase.prototype.equalTo = function (priority, key) {
+  return new Query(this).equalTo(priority, key);
 };
 
 MockFirebase.prototype._childChanged = function (ref) {

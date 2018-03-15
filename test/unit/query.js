@@ -136,6 +136,24 @@ describe('MockQuery', function () {
         ref.flush();
         expect(spy).to.have.been.calledOn(context);
       });
+
+      it('should work with equalTo', function() {
+        var spy = sinon.spy(function(snap) {
+          expect(_.keys(snap.val())).eql(['num_3']);
+        });
+        ref.equalTo(3).on('value', spy);
+        ref.flush();
+        expect(spy.called).to.equal(true);
+      });
+
+      it('should return null if not equalTo', function() {
+        var spy = sinon.spy(function(snap) {
+          expect(snap.val()).equals(null);
+        });
+        ref.limitToLast(2).equalTo('foo').on('value', spy);
+        ref.flush();
+        expect(spy.called).to.equal(true);
+      });
     });
 
     describe('once', function() {
