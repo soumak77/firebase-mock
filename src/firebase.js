@@ -345,6 +345,7 @@ MockFirebase.prototype.transaction = function (valueFn, finishedFn, applyLocally
   var self = this;
   return new Promise(function (resolve, reject) {
     self._defer('transaction', _.toArray(arguments), function () {
+      newData = utils.removeEmptyRtdbProperties(newData);
       self._dataChanged(newData);
       if (typeof finishedFn === 'function') {
         finishedFn(err, err === null && !_.isUndefined(res), new Snapshot(self, newData, self.priority));
