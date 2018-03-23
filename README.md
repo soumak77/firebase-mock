@@ -10,9 +10,7 @@ Firebase Mock extends [mockfirebase](https://github.com/katowulf/mockfirebase) t
 ```bash
 npm install firebase-mock --save-dev
 ```
-
-### Integration
-* [Setup](tutorials/integration/setup.md)
+Follow the steps in the [Setup Tutorial](tutorials/integration/setup.md) to create a mock SDK to be used in your tests.  Then follow one of the tutorials below based on your testing framework:
 * [Proxyquire](tutorials/integration/proxyquire.md)
 * [Jest](tutorials/integration/jest.md)
 * [Window Override](tutorials/integration/window.md)
