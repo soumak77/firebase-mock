@@ -36,7 +36,7 @@ Firebase Mock supports the client-side [JavaScript API](https://firebase.google.
 ### Realtime Database
 * [Basic](tutorials/rtdb/basic.md)
 * [Simulating Errors](tutorials/rtdb/errors.md)
-* [Using Spies for Ordering](tutorials/rtdb/spies.md)
+* [Ordering](tutorials/rtdb/spies.md)
 
 ### Firestore
 * [Basic](tutorials/firestore/basic.md)
