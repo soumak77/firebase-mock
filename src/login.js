@@ -1,7 +1,6 @@
 'use strict';
 
 var _ = require('./lodash');
-var md5 = require('md5');
 
 /*******************************************************************************
  * SIMPLE LOGIN
@@ -250,7 +249,6 @@ function createEmailUser (email, password) {
     email: email,
     password: password,
     provider: 'password',
-    md5_hash: md5(email),
     firebaseAuthToken: 'FIREBASE_AUTH_TOKEN' //todo
   };
 }
@@ -268,7 +266,6 @@ function createDefaultUser (provider) {
   switch(provider) {
     case 'password':
       out.email = 'email@firebase.com';
-      out.md5_hash = md5(out.email);
       break;
     case 'twitter':
       out.accessToken = 'ACCESS_TOKEN'; //todo

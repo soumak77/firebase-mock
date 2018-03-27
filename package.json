@@ -63,7 +63,6 @@
     "lodash.remove": "^4.7.0",
     "lodash.size": "^4.2.0",
     "lodash.toarray": "^4.4.0",
-    "md5": "^2.2.1",
     "rsvp": "^3.6.2"
   },
   "devDependencies": {
