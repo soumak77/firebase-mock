@@ -38,6 +38,7 @@ functions.https.onRequest(triggers.createApp());
 ## Test Code
 ```js
 var proxyquire      = require('proxyquire');
+var httpMocks       = require('node-mocks-http');
 var sinon           = require('sinon');
 var expect          = require('chai').use(require('sinon-chai')).expect;
 var firebasemock    = require('firebase-mock');
