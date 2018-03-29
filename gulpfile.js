@@ -51,7 +51,7 @@ gulp.task('bundle', function () {
 });
 
 gulp.task('cover', function () {
-  return gulp.src(['./src/**/*.js', '!./src/login.js'])
+  return gulp.src(['./src/**/*.js'])
     .pipe(plugins.istanbul())
     .pipe(plugins.istanbul.hookRequire());
 });

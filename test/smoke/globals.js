@@ -5,10 +5,9 @@
 
 describe('Custom UMD Build', function () {
 
-  var OriginalFirebase, OriginalFirebaseSimpleLogin;
+  var OriginalFirebase;
   beforeEach(function () {
     window.Firebase = OriginalFirebase = {};
-    window.FirebaseSimpleLogin = OriginalFirebaseSimpleLogin = {};
   });
 
   it('exposes the full module as "firebasemock"', function () {
@@ -21,12 +20,6 @@ describe('Custom UMD Build', function () {
       .that.equals(window.firebasemock.MockFirebase);
   });
 
-  it('exposes "MockFirebaseSimpleLogin" on the window', function () {
-    expect(window)
-      .to.have.property('MockFirebaseSimpleLogin')
-      .that.equals(window.firebasemock.MockFirebaseSimpleLogin);
-  });
-
   describe('#restore', function () {
 
     it('is a noop before #override is called', function () {
@@ -34,9 +27,6 @@ describe('Custom UMD Build', function () {
       expect(window)
         .to.have.property('Firebase')
         .that.equals(OriginalFirebase);
-      expect(window)
-        .to.have.property('FirebaseSimpleLogin')
-        .that.equals(OriginalFirebaseSimpleLogin);
     });
 
     it('can restore Firebase', function () {
@@ -45,9 +35,6 @@ describe('Custom UMD Build', function () {
       expect(window)
         .to.have.property('Firebase')
         .that.equals(OriginalFirebase);
-      expect(window)
-        .to.have.property('FirebaseSimpleLogin')
-        .that.equals(OriginalFirebaseSimpleLogin);
     });
 
   });
@@ -59,9 +46,6 @@ describe('Custom UMD Build', function () {
       expect(window)
         .to.have.property('Firebase')
         .that.equals(window.firebasemock.MockFirebase);
-      expect(window)
-        .to.have.property('FirebaseSimpleLogin')
-        .that.equals(window.firebasemock.MockFirebaseSimpleLogin);
     });
 
   });
