@@ -1,6 +1,7 @@
 var MockFirebase = require('./firebase');
 var MockFirestore = require('./firestore');
 var MockFieldValue = require('./firestore-field-value');
+var MockMessaging = require('./messaging');
 var MockStorage = require('./storage');
 
 var EmailAuthProvider = function() {
@@ -47,7 +48,7 @@ var AuthCredential = function(provider) {
   this.providerId = provider;
 };
 
-function MockFirebaseSdk(createDatabase, createAuth, createFirestore, createStorage) {
+function MockFirebaseSdk(createDatabase, createAuth, createFirestore, createStorage, createMessaging) {
   function MockFirebaseAuth() {
     var auth = createAuth ? createAuth() : new MockFirebase();
     delete auth.ref;
@@ -79,18 +80,23 @@ function MockFirebaseSdk(createDatabase, createAuth, createFirestore, createStor
     return createStorage ? createStorage() : new MockStorage();
   }
 
+  function MockFirebaseMessaging() {
+    return createMessaging ? createMessaging() : new MockMessaging();
+  }
+
   return {
     database: MockFirebaseDatabase,
     auth: MockFirebaseAuth,
     firestore: MockFirebaseFirestore,
     storage: MockFirebaseStorage,
+    messaging: MockFirebaseMessaging,
     initializeApp: function() {
       return {
         database: MockFirebaseDatabase,
         auth: MockFirebaseAuth,
         firestore: MockFirebaseFirestore,
         storage: MockFirebaseStorage,
-        messaging: function() {}
+        messaging: MockFirebaseMessaging
       };
     }
   };
