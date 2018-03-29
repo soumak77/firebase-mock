@@ -17,22 +17,22 @@ var StorageBucket = require('../../src/storage-bucket');
 var StorageFile = require('../../src/storage-file');
 
 describe('StorageFile', function () {
-  var file, filename = 'filename';
+  var storage, bucket;
   beforeEach(function () {
-    file = new StorageFile(new StorageBucket(new Storage(), 'name'), filename);
+    storage = new Storage();
+    bucket = new StorageBucket(storage, 'name');
   });
 
   describe('constructor', function() {
     it('should add bucket reference', function() {
-      var storage = new Storage();
-      var bucket = new StorageBucket(storage, 'name');
-      var file = new StorageFile(bucket, 'name');
+      var file = new StorageFile(bucket, 'filename');
       expect(file.bucket).to.equal(bucket);
     });
   });
 
   describe('#get', function() {
     it('should get file', function() {
+      var file = new StorageFile(bucket, 'filename');
       return file.get().then(function(results) {
         expect(results.length).to.equal(2);
         expect(results[0]).to.equal(file);
@@ -42,6 +42,7 @@ describe('StorageFile', function () {
 
   describe('#save', function() {
     it('should save contents', function() {
+      var file = new StorageFile(bucket, 'filename');
       return file.save('abc').then(function() {
         expect(file._contents).to.equal('abc');
       });
@@ -50,11 +51,12 @@ describe('StorageFile', function () {
 
   describe('#exists', function() {
     it('should not exist when no content', function() {
-      file._contents = null;
+      var file = new StorageFile(bucket, 'filename');
       expect(file.exists()).to.eventually.equal(false);
     });
 
     it('should exist when content added', function() {
+      var file = new StorageFile(bucket, 'filename');
       file._contents = 'abc';
       expect(file.exists()).to.eventually.equal(true);
     });
@@ -62,6 +64,7 @@ describe('StorageFile', function () {
 
   describe('#getSignedUrl', function() {
     it('should get url', function() {
+      var file = new StorageFile(bucket, 'filename');
       return file.getSignedUrl().then(function(url) {
         expect(url).to.be.a('string').that.is.not.empty; // jshint ignore:line
       });
@@ -70,7 +73,8 @@ describe('StorageFile', function () {
 
   describe('#download', function() {
     it('should download file', function() {
-      var filePath = path.join(os.tmpdir(), filename);
+      var file = new StorageFile(bucket, 'filename');
+      var filePath = path.join(os.tmpdir(), 'filename.txt');
       return file.download({
         destination: filePath
       }).then(function() {
@@ -81,12 +85,14 @@ describe('StorageFile', function () {
 
   describe('#delete', function() {
     it('should delete file from bucket', function() {
+      var file = new StorageFile(bucket, 'filename');
       return file.delete().then(function() {
-        expect(file.bucket.files[filename]).to.not.be.ok; // jshint ignore:line
+        expect(bucket.files['filename']).to.not.be.ok; // jshint ignore:line
       });
     });
 
     it('should not exist after file deleted', function() {
+      var file = new StorageFile(bucket, 'filename');
       return file.delete().then(function() {
         expect(file.exists()).to.eventually.equal(false);
       });

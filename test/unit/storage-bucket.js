@@ -13,14 +13,13 @@ var Storage = require('../../src/storage');
 var StorageBucket = require('../../src/storage-bucket');
 
 describe('StorageBucket', function () {
-  var bucket;
+  var storage;
   beforeEach(function () {
-    bucket = new StorageBucket(new Storage(), 'name');
+    storage = new Storage();
   });
 
   describe('constructor', function() {
     it('should add storage reference', function() {
-      var storage = new Storage();
       var bucket = new StorageBucket(storage, 'name');
       expect(bucket.storage).to.equal(storage);
     });
@@ -28,6 +27,7 @@ describe('StorageBucket', function () {
 
   describe('#file', function() {
     it('should create file', function() {
+      var bucket = new StorageBucket(storage, 'name');
       var file = bucket.file('name2');
       expect(file.bucket).to.equal(bucket);
       expect(file.name).to.equal('name2');

@@ -1,3 +1,8 @@
+/*
+  Mock for @google-cloud/storage File
+  https://cloud.google.com/nodejs/docs/reference/storage/1.6.x/File
+*/
+
 'use strict';
 var Promise = require('rsvp').Promise;
 var fs = require('fs');

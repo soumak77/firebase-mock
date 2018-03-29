@@ -21,25 +21,25 @@ Firebase Mock supports the client-side [JavaScript API](https://firebase.google.
 
 ## Tutorials
 
+### Client
+* Authentication
+  * [Basic](tutorials/client/auth/authentication.md)
+  * [JWT Tokens](tutorials/client/auth/tokens.md)
+* Realtime Database
+  * [Basic](tutorials/client/rtdb/basic.md)
+  * [Simulating Errors](tutorials/client/rtdb/errors.md)
+  * [Ordering](tutorials/client/rtdb/spies.md)
+* [Firestore](tutorials/client/firestore.md)
+* [Storage](tutorials/client/storage.md)
+
 ### Admin
+* [Authentication](tutorials/admin/authentication.md)
+* [Realtime Database](tutorials/admin/rtdb.md)
+* [Firestore](tutorials/admin/firestore.md)
+* [Storage](tutorials/admin/storage.md)
 * [JWT Tokens](tutorials/admin/tokens.md)
 
 ### Functions
 * [Realtime Database](tutorials/functions/rtdb.md)
 * [Firestore](tutorials/functions/firestore.md)
 * [HTTP](tutorials/functions/http.md)
-
-### Authentication
-* [Authentication](tutorials/auth/authentication.md)
-* [JWT Tokens](tutorials/auth/tokens.md)
-
-### Realtime Database
-* [Basic](tutorials/rtdb/basic.md)
-* [Simulating Errors](tutorials/rtdb/errors.md)
-* [Ordering](tutorials/rtdb/spies.md)
-
-### Firestore
-* [Basic](tutorials/firestore/basic.md)
-
-### Storage
-* [Basic](tutorials/storage/basic.md)

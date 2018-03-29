@@ -1,3 +1,8 @@
+/*
+  Mock for @google-cloud/storage Bucket
+  https://cloud.google.com/nodejs/docs/reference/storage/1.6.x/Bucket
+*/
+
 'use strict';
 var Promise = require('rsvp').Promise;
 var MockStorageFile = require('./storage-file');
