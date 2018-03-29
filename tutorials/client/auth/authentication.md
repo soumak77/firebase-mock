@@ -1,20 +1,18 @@
 # Tutorial: Authentication
 
-MockFirebase replaces most of Firebase's authentication method with simple mocks. Authentication methods will always succeed unless an error is specifically specified using [`failNext`](../API.md#failnextmethod-err---undefined). You can still use methods like `createUser`. Instead of storing new users remotely, MockFirebase will maintain a local list of users and simulate normal Firebase behavior (e.g. prohibiting duplicate email addresses).
+Mocks are provided for most of Firebase's authentication methods. Authentication methods will always succeed unless an error is specifically specified using [`failNext`](../API.md#failnextmethod-err---undefined). You can still use methods like `createUser`. Instead of storing new users remotely,
+`firebase-mock` will maintain a local list of users and simulate normal Firebase behavior (e.g. prohibiting duplicate email addresses).
 
 ## Creating Users
 
-In this example, we'll create a new user via our source code and test that he is written to Firebase.
+In this example, we'll create a new user via our source code and test that the user is written to Firebase.
 
 ##### Source
 
 ```js
 var users = {
-  ref: function () {
-    return firebase.database().ref();
-  }
-  create: function (credentials, callback) {
-    users.ref().createUser(credentials, callback);
+  create: function (credentials) {
+    return firebase.auth().createUser(credentials);
   }
 };
 ```
@@ -22,14 +20,13 @@ var users = {
 ##### Test
 
 ```js
-MockFirebase.override();
-var ref = users.ref();
 users.create({
   email: 'ben@example.com',
   password: 'examplePass'
 });
-users.flush();
-users.getUserByEmail('ben@example.com').then(function(user) {
+mocksdk.auth().flush();
+
+mocksdk.auth().getUserByEmail('ben@example.com').then(function(user) {
   console.assert(user, 'ben was created');
 });
 ```
@@ -43,7 +40,7 @@ In this example, we want to redirect to an admin dashboard when a user is an adm
 ##### Source
 
 ```js
-users.ref().onAuth(function (authData) {
+firebase.auth().onAuth(function (authData) {
   if (authData.auth.isAdmin) {
     document.location.href = '#/admin';
   }
@@ -53,7 +50,7 @@ users.ref().onAuth(function (authData) {
 ##### Test
 
 ```js
-ref.changeAuthState({
+mocksdk.auth().changeAuthState({
   uid: 'testUid',
   provider: 'custom',
   token: 'authToken',
@@ -62,6 +59,6 @@ ref.changeAuthState({
     isAdmin: true
   }
 });
-ref.flush();
+mocksdk.auth().flush();
 console.assert(document.location.href === '#/admin', 'redirected to admin');
 ```
