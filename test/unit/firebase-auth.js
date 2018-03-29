@@ -7,7 +7,7 @@ chai.use(require('chai-as-promised'));
 chai.use(require('sinon-chai'));
 
 var expect = chai.expect;
-var Firebase = require('../../').MockFirebase;
+var Authentication = require('../../').MockAuthentication;
 var Promise   = require('rsvp').Promise;
 var User = require('../../src/user');
 var _ = require('../../src/lodash');
@@ -16,7 +16,7 @@ describe('Auth', function () {
 
   var ref, spy;
   beforeEach(function () {
-    ref = new Firebase().child('data');
+    ref = new Authentication();
     spy = sinon.spy();
   });
 
@@ -646,7 +646,7 @@ describe('Auth', function () {
         expect(user).to.have.property('uid').to.equal('simplelogin:1');
         expect(user).to.have.property('email').to.equal('kato@kato.com');
         expect(user).to.have.property('password').to.equal('kato');
-        
+
         ref.removeUser({
           email: 'kato@kato.com',
           password: 'kato'

@@ -3,6 +3,7 @@
 var sinon    = require('sinon');
 var expect   = require('chai').use(require('sinon-chai')).expect;
 var _        = require('../../src/lodash');
+var Authentication = require('../../').MockAuthentication;
 var Firebase = require('../../').MockFirebase;
 var MockFirebaseSdk = require('../../src/sdk');
 
@@ -71,6 +72,10 @@ describe('MockFirebaseSdk', function () {
           .that.equals(url);
       });
     });
+
+    it('ServerValue', function () {
+      expect(firebase.database.ServerValue).to.be.an('object');
+    });
   });
 
   describe('#firestore', function() {
@@ -102,12 +107,10 @@ describe('MockFirebaseSdk', function () {
       firebase = MockFirebaseSdk();
     });
 
-    it('returns MockFirebase object without ref property', function () {
+    it('returns Authentication object without ref property', function () {
       var auth = firebase.auth();
-      expect(auth)
-        .to.be.instanceof(Firebase);
-      expect(auth)
-        .to.not.have.property('ref');
+      expect(auth).to.be.instanceof(Authentication);
+      expect(auth).to.not.have.property('ref');
     });
 
     describe('#EmailAuthProvider', function() {

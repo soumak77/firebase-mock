@@ -8,7 +8,7 @@ This tutorial shows how to create a mock of the SDK to use in your test code.  R
 ```js
 var firebasemock    = require('firebase-mock');
 
-var mockauth = new firebasemock.MockFirebase();
+var mockauth = new firebasemock.MockAuthentication();
 var mockdatabase = new firebasemock.MockFirebase();
 var mockfirestore = new firebasemock.MockFirestore();
 var mockstorage = new firebasemock.MockStorage();

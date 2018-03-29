@@ -1,3 +1,4 @@
+var MockAuthentication = require('./auth');
 var MockFirebase = require('./firebase');
 var MockFirestore = require('./firestore');
 var MockFieldValue = require('./firestore-field-value');
@@ -50,7 +51,7 @@ var AuthCredential = function(provider) {
 
 function MockFirebaseSdk(createDatabase, createAuth, createFirestore, createStorage, createMessaging) {
   function MockFirebaseAuth() {
-    var auth = createAuth ? createAuth() : new MockFirebase();
+    var auth = createAuth ? createAuth() : new MockAuthentication();
     delete auth.ref;
     return auth;
   }
@@ -70,6 +71,7 @@ function MockFirebaseSdk(createDatabase, createAuth, createFirestore, createStor
       }
     };
   }
+  MockFirebaseDatabase.ServerValue = MockFirebase.ServerValue;
 
   function MockFirebaseFirestore() {
     return createFirestore ? createFirestore() : new MockFirestore();

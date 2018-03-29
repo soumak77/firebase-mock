@@ -2,6 +2,7 @@
 
 var MockFirestoreDeltaDocumentSnapshot = require('./firestore-delta-document-snapshot');
 
+exports.MockAuthentication = require('./auth');
 exports.MockFirebase = require('./firebase');
 exports.MockFirebaseSdk = require('./sdk');
 exports.MockFirestore = require('./firestore');

@@ -8,7 +8,7 @@ var Query = require('./query');
 var Snapshot = require('./snapshot');
 var Queue = require('./queue').Queue;
 var utils = require('./utils');
-var Auth = require('./auth');
+var Auth = require('./firebase-auth');
 var validate = require('./validators');
 
 function MockFirebase(path, data, parent, name) {
