@@ -1,4 +1,4 @@
-# Tutorial: Storage
+# Tutorial: Client Storage
 
 Mocks are provided for the following:
 * [firebase.storage.Storage](https://firebase.google.com/docs/reference/js/firebase.storage.Storage)

@@ -1,4 +1,4 @@
-# Tutorial: Storage
+# Tutorial: Admin Storage
 
 Mocks are provided for the following:
 * [admin.storage.Storage](https://firebase.google.com/docs/reference/admin/node/admin.storage.Storage)
