@@ -40,3 +40,6 @@ Firebase Mock supports the client-side [JavaScript API](https://firebase.google.
 
 ### Firestore
 * [Basic](tutorials/firestore/basic.md)
+
+### Storage
+* [Basic](tutorials/storage/basic.md)
