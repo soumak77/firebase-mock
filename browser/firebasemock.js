@@ -1,4 +1,4 @@
-/** firebase-mock - v2.1.9
+/** firebase-mock - v2.1.10
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -496,7 +496,9 @@ var objectKeys = Object.keys || function (obj) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"util/":43}],2:[function(require,module,exports){
+},{"util/":44}],2:[function(require,module,exports){
+
+},{}],3:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -1017,7 +1019,7 @@ function functionBindPolyfill(context) {
   };
 }
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 var allowedCharacters = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
@@ -1071,7 +1073,7 @@ IdGenerator.prototype.generate = function (now) {
 
 module.exports = IdGenerator;
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 var IdGenerator = require('./generator');
@@ -1084,7 +1086,7 @@ exports = module.exports = function generateAutoId (now) {
 
 exports.Generator = IdGenerator;
 
-},{"./generator":3}],5:[function(require,module,exports){
+},{"./generator":4}],6:[function(require,module,exports){
 /**
  * lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -1723,7 +1725,7 @@ function keys(object) {
 
 module.exports = assign;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /**
  * lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -2351,7 +2353,7 @@ function keysIn(object) {
 
 module.exports = assignIn;
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -3609,7 +3611,7 @@ bind.placeholder = {};
 module.exports = bind;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -5369,7 +5371,7 @@ function stubFalse() {
 module.exports = clone;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -7121,7 +7123,7 @@ function stubFalse() {
 module.exports = cloneDeep;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -8883,7 +8885,7 @@ function stubFalse() {
 module.exports = cloneDeepWith;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /**
  * lodash 3.0.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -8924,7 +8926,7 @@ function compact(array) {
 
 module.exports = compact;
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -10098,7 +10100,7 @@ function isObjectLike(value) {
 module.exports = difference;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -12497,7 +12499,7 @@ function property(path) {
 module.exports = every;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -14867,7 +14869,7 @@ function property(path) {
 module.exports = filter;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -17324,7 +17326,7 @@ function property(path) {
 module.exports = find;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -19722,7 +19724,7 @@ function property(path) {
 module.exports = findIndex;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 /**
  * lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -20289,7 +20291,7 @@ function identity(value) {
 
 module.exports = forEach;
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 /**
  * lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -20782,7 +20784,7 @@ function identity(value) {
 
 module.exports = forIn;
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -21717,7 +21719,7 @@ function get(object, path, defaultValue) {
 module.exports = get;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -22810,7 +22812,7 @@ function has(object, path) {
 module.exports = has;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 /**
  * lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -23557,7 +23559,7 @@ function values(object) {
 
 module.exports = includes;
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 /**
  * lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -23890,7 +23892,7 @@ function toNumber(value) {
 
 module.exports = indexOf;
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -24476,7 +24478,7 @@ function stubFalse() {
 module.exports = isEmpty;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 (function (global){
 /**
  * Lodash (Custom Build) <https://lodash.com/>
@@ -26328,7 +26330,7 @@ function stubFalse() {
 module.exports = isEqual;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 (function (global){
 /**
  * Lodash (Custom Build) <https://lodash.com/>
@@ -26487,7 +26489,7 @@ function isObject(value) {
 module.exports = isFunction;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 /**
  * lodash 3.0.3 (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -26568,7 +26570,7 @@ function isNumber(value) {
 
 module.exports = isNumber;
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 /**
  * lodash 3.0.2 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -26607,7 +26609,7 @@ function isObject(value) {
 
 module.exports = isObject;
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 /**
  * lodash 4.0.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -26704,7 +26706,7 @@ function isString(value) {
 
 module.exports = isString;
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 /**
  * lodash 3.0.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -26736,7 +26738,7 @@ function isUndefined(value) {
 
 module.exports = isUndefined;
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 /**
  * lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -27139,7 +27141,7 @@ function keys(object) {
 
 module.exports = keys;
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -29509,7 +29511,7 @@ function property(path) {
 module.exports = map;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 (function (global){
 /**
  * Lodash (Custom Build) <https://lodash.com/>
@@ -31476,7 +31478,7 @@ function stubFalse() {
 module.exports = merge;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 /**
  * lodash 3.0.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize include="noop" exports="npm" -o ./foo`
@@ -31506,7 +31508,7 @@ function noop() {
 
 module.exports = noop;
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -33996,7 +33998,7 @@ function property(path) {
 module.exports = orderBy;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -36372,7 +36374,7 @@ function property(path) {
 module.exports = reduce;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -38716,7 +38718,7 @@ function property(path) {
 module.exports = remove;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -39309,7 +39311,7 @@ function isString(value) {
 module.exports = size;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -40182,7 +40184,7 @@ function values(object) {
 module.exports = toArray;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -40368,7 +40370,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 (function (process,global){
 /*!
  * @overview RSVP - a tiny implementation of Promises/A+.
@@ -42917,7 +42919,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":39}],41:[function(require,module,exports){
+},{"_process":40}],42:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -42942,14 +42944,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -43539,7 +43541,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":42,"_process":39,"inherits":41}],44:[function(require,module,exports){
+},{"./support/isBuffer":43,"_process":40,"inherits":42}],45:[function(require,module,exports){
 'use strict';
 
 var _      = require('./lodash');
@@ -44099,7 +44101,7 @@ function validateArgument (method, object, position, name, type) {
 
 module.exports = FirebaseAuth;
 
-},{"./lodash":54,"./user":61,"rsvp":40,"util":43}],45:[function(require,module,exports){
+},{"./lodash":55,"./user":67,"rsvp":41,"util":44}],46:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -44825,7 +44827,7 @@ function render(datum) {
 
 module.exports = MockFirebase;
 
-},{"./auth":44,"./lodash":54,"./query":56,"./queue":57,"./snapshot":60,"./utils":62,"./validators":63,"assert":1,"firebase-auto-ids":4,"rsvp":40}],46:[function(require,module,exports){
+},{"./auth":45,"./lodash":55,"./query":58,"./queue":59,"./snapshot":62,"./utils":68,"./validators":69,"assert":1,"firebase-auto-ids":5,"rsvp":41}],47:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -44909,7 +44911,7 @@ function extractName(path) {
 
 module.exports = MockFirestoreCollection;
 
-},{"./firestore-query":52,"./lodash":54,"./queue":57,"./utils":62,"./validators":63,"assert":1,"firebase-auto-ids":4,"rsvp":40}],47:[function(require,module,exports){
+},{"./firestore-query":53,"./lodash":55,"./queue":59,"./utils":68,"./validators":69,"assert":1,"firebase-auto-ids":5,"rsvp":41}],48:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -44941,7 +44943,7 @@ function applyDelta(data, delta) {
 
 module.exports = MockFirestoreDeltaDocumentSnapshot;
 
-},{"./firestore-document-snapshot":48,"./lodash":54}],48:[function(require,module,exports){
+},{"./firestore-document-snapshot":49,"./lodash":55}],49:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -44977,7 +44979,7 @@ MockFirestoreDocumentSnapshot.prototype.get = function (path) {
 
 module.exports = MockFirestoreDocumentSnapshot;
 
-},{"./lodash":54}],49:[function(require,module,exports){
+},{"./lodash":55}],50:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -45197,7 +45199,7 @@ function extractName(path) {
 
 module.exports = MockFirestoreDocument;
 
-},{"./firestore-document-snapshot":48,"./lodash":54,"./queue":57,"./utils":62,"./validators":63,"assert":1,"firebase-auto-ids":4,"rsvp":40}],50:[function(require,module,exports){
+},{"./firestore-document-snapshot":49,"./lodash":55,"./queue":59,"./utils":68,"./validators":69,"assert":1,"firebase-auto-ids":5,"rsvp":41}],51:[function(require,module,exports){
 'use strict';
 
 function MockFirestoreFieldValue(type) {
@@ -45221,7 +45223,7 @@ MockFirestoreFieldValue.serverTimestamp = function () {
 
 module.exports = MockFirestoreFieldValue;
 
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -45251,7 +45253,7 @@ MockFirestoreQuerySnapshot.prototype.forEach = function (callback, context) {
 
 module.exports = MockFirestoreQuerySnapshot;
 
-},{"./firestore-document-snapshot":48,"./lodash":54}],52:[function(require,module,exports){
+},{"./firestore-document-snapshot":49,"./lodash":55}],53:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -45431,7 +45433,7 @@ function extractName(path) {
 
 module.exports = MockFirestoreQuery;
 
-},{"./firestore-query-snapshot":51,"./lodash":54,"./queue":57,"./utils":62,"./validators":63,"assert":1,"firebase-auto-ids":4,"rsvp":40}],53:[function(require,module,exports){
+},{"./firestore-query-snapshot":52,"./lodash":55,"./queue":59,"./utils":68,"./validators":69,"assert":1,"firebase-auto-ids":5,"rsvp":41}],54:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -45625,7 +45627,7 @@ function extractName(path) {
 
 module.exports = MockFirestore;
 
-},{"./firestore-collection":46,"./firestore-document":49,"./firestore-field-value":50,"./lodash":54,"./queue":57,"./utils":62,"./validators":63,"assert":1,"firebase-auto-ids":4,"rsvp":40}],54:[function(require,module,exports){
+},{"./firestore-collection":47,"./firestore-document":50,"./firestore-field-value":51,"./lodash":55,"./queue":59,"./utils":68,"./validators":69,"assert":1,"firebase-auto-ids":5,"rsvp":41}],55:[function(require,module,exports){
 module.exports = {
   assign: require('lodash.assign'),
   bind: require('lodash.bind'),
@@ -45663,7 +45665,7 @@ module.exports = {
   toArray: require('lodash.toarray')
 };
 
-},{"lodash.assign":5,"lodash.assignin":6,"lodash.bind":7,"lodash.clone":8,"lodash.clonedeep":9,"lodash.clonedeepwith":10,"lodash.compact":11,"lodash.difference":12,"lodash.every":13,"lodash.filter":14,"lodash.find":15,"lodash.findindex":16,"lodash.foreach":17,"lodash.forin":18,"lodash.get":19,"lodash.has":20,"lodash.includes":21,"lodash.indexof":22,"lodash.isempty":23,"lodash.isequal":24,"lodash.isfunction":25,"lodash.isnumber":26,"lodash.isobject":27,"lodash.isstring":28,"lodash.isundefined":29,"lodash.keys":30,"lodash.map":31,"lodash.merge":32,"lodash.noop":33,"lodash.orderby":34,"lodash.reduce":35,"lodash.remove":36,"lodash.size":37,"lodash.toarray":38}],55:[function(require,module,exports){
+},{"lodash.assign":6,"lodash.assignin":7,"lodash.bind":8,"lodash.clone":9,"lodash.clonedeep":10,"lodash.clonedeepwith":11,"lodash.compact":12,"lodash.difference":13,"lodash.every":14,"lodash.filter":15,"lodash.find":16,"lodash.findindex":17,"lodash.foreach":18,"lodash.forin":19,"lodash.get":20,"lodash.has":21,"lodash.includes":22,"lodash.indexof":23,"lodash.isempty":24,"lodash.isequal":25,"lodash.isfunction":26,"lodash.isnumber":27,"lodash.isobject":28,"lodash.isstring":29,"lodash.isundefined":30,"lodash.keys":31,"lodash.map":32,"lodash.merge":33,"lodash.noop":34,"lodash.orderby":35,"lodash.reduce":36,"lodash.remove":37,"lodash.size":38,"lodash.toarray":39}],56:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -45968,7 +45970,15 @@ function createDefaultUser (provider) {
 
 module.exports = MockFirebaseSimpleLogin;
 
-},{"./lodash":54}],56:[function(require,module,exports){
+},{"./lodash":55}],57:[function(require,module,exports){
+'use strict';
+
+function MockMessaging() {
+}
+
+module.exports = MockMessaging;
+
+},{}],58:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -46155,7 +46165,7 @@ function assertQuery (method, pri, key) {
 
 module.exports = MockQuery;
 
-},{"./lodash":54,"./slice":59,"./utils":62,"./validators":63,"rsvp":40}],57:[function(require,module,exports){
+},{"./lodash":55,"./slice":61,"./utils":68,"./validators":69,"rsvp":41}],59:[function(require,module,exports){
 'use strict';
 
 var _            = require('./lodash');
@@ -46231,10 +46241,12 @@ FlushEvent.prototype.cancel = function () {
 exports.Queue = FlushQueue;
 exports.Event = FlushEvent;
 
-},{"./lodash":54,"events":2,"util":43}],58:[function(require,module,exports){
+},{"./lodash":55,"events":3,"util":44}],60:[function(require,module,exports){
 var MockFirebase = require('./firebase');
 var MockFirestore = require('./firestore');
 var MockFieldValue = require('./firestore-field-value');
+var MockMessaging = require('./messaging');
+var MockStorage = require('./storage');
 
 var EmailAuthProvider = function() {
   this.providerId = EmailAuthProvider.PROVIDER_ID;
@@ -46280,7 +46292,7 @@ var AuthCredential = function(provider) {
   this.providerId = provider;
 };
 
-function MockFirebaseSdk(createDatabase, createAuth, createFirestore) {
+function MockFirebaseSdk(createDatabase, createAuth, createFirestore, createStorage, createMessaging) {
   function MockFirebaseAuth() {
     var auth = createAuth ? createAuth() : new MockFirebase();
     delete auth.ref;
@@ -46308,17 +46320,27 @@ function MockFirebaseSdk(createDatabase, createAuth, createFirestore) {
   }
   MockFirebaseFirestore.FieldValue = MockFieldValue;
 
+  function MockFirebaseStorage() {
+    return createStorage ? createStorage() : new MockStorage();
+  }
+
+  function MockFirebaseMessaging() {
+    return createMessaging ? createMessaging() : new MockMessaging();
+  }
+
   return {
     database: MockFirebaseDatabase,
     auth: MockFirebaseAuth,
     firestore: MockFirebaseFirestore,
+    storage: MockFirebaseStorage,
+    messaging: MockFirebaseMessaging,
     initializeApp: function() {
       return {
         database: MockFirebaseDatabase,
         auth: MockFirebaseAuth,
         firestore: MockFirebaseFirestore,
-        messaging: function() {},
-        storage: function() {}
+        storage: MockFirebaseStorage,
+        messaging: MockFirebaseMessaging
       };
     }
   };
@@ -46326,7 +46348,7 @@ function MockFirebaseSdk(createDatabase, createAuth, createFirestore) {
 
 module.exports = MockFirebaseSdk;
 
-},{"./firebase":45,"./firestore":53,"./firestore-field-value":50}],59:[function(require,module,exports){
+},{"./firebase":46,"./firestore":54,"./firestore-field-value":51,"./messaging":57,"./storage":66}],61:[function(require,module,exports){
 'use strict';
 
 var _        = require('./lodash');
@@ -46530,7 +46552,7 @@ Slice.prototype._build = function(ref, rawData) {
 
 module.exports = Slice;
 
-},{"./lodash":54,"./snapshot":60,"./utils":62}],60:[function(require,module,exports){
+},{"./lodash":55,"./snapshot":62,"./utils":68}],62:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -46618,7 +46640,218 @@ function isValue (value) {
 
 module.exports = MockDataSnapshot;
 
-},{"./lodash":54}],61:[function(require,module,exports){
+},{"./lodash":55}],63:[function(require,module,exports){
+/*
+  Mock for @google-cloud/storage Bucket
+  https://cloud.google.com/nodejs/docs/reference/storage/1.6.x/Bucket
+*/
+
+'use strict';
+var Promise = require('rsvp').Promise;
+var MockStorageFile = require('./storage-file');
+
+function MockStorageBucket(storage, name) {
+  this.storage = storage;
+  this.name = name;
+  this.files = {};
+}
+
+MockStorageBucket.prototype.file = function (name) {
+  if (!this.files[name]) {
+    this.files[name] = new MockStorageFile(this, name);
+  }
+  return this.files[name];
+};
+
+MockStorageBucket.prototype.deleteFile = function (name) {
+  if (this.files[name]) {
+    delete this.files[name];
+  }
+  return Promise.resolve();
+};
+
+module.exports = MockStorageBucket;
+
+},{"./storage-file":64,"rsvp":41}],64:[function(require,module,exports){
+/*
+  Mock for @google-cloud/storage File
+  https://cloud.google.com/nodejs/docs/reference/storage/1.6.x/File
+*/
+
+'use strict';
+var Promise = require('rsvp').Promise;
+var fs = require('fs');
+
+function MockStorageFile(bucket, name) {
+  this.bucket = bucket;
+  this.name = name;
+  this._contents = null;
+  this._metadata = null;
+}
+
+MockStorageFile.prototype.get = function() {
+  return Promise.resolve([this, null]);
+};
+
+MockStorageFile.prototype.save = function(data) {
+  this._contents = data;
+  return Promise.resolve();
+};
+
+MockStorageFile.prototype.exists = function() {
+  return Promise.resolve([this._contents !== null]);
+};
+
+MockStorageFile.prototype.getSignedUrl = function() {
+  return Promise.resolve(this.name);
+};
+
+MockStorageFile.prototype.download = function(args) {
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    fs.writeFile(args.destination, self._contents, function(err) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
+
+MockStorageFile.prototype.delete = function() {
+  this._contents = null;
+  return this.bucket.deleteFile(this._path);
+};
+
+module.exports = MockStorageFile;
+
+},{"fs":2,"rsvp":41}],65:[function(require,module,exports){
+/*
+  Mock for firebase.storage.Reference
+  https://firebase.google.com/docs/reference/js/firebase.storage.Reference
+*/
+
+'use strict';
+var Promise = require('rsvp').Promise;
+
+function MockStorageReference(storage, parent, name) {
+  this.bucket = parent ? parent.bucket : name;
+  this.storage = storage;
+  this.parent = parent;
+  this.name = name;
+  this.root = parent ? parent.root : this;
+  this._children = {};
+  this._contents = null;
+
+  if (parent) {
+    this.fullPath = parent.fullPath + '/' + name;
+    parent._children[name] = this;
+  } else {
+    this.fullPath = name;
+  }
+}
+
+MockStorageReference.prototype.child = function(path) {
+  // replace multiple consecutive slashs with single slash
+  path = path.replace(/\/+/g,'/');
+
+  // replace leading slash
+  path = path.replace(/^\//g,'');
+
+  // replace trailing slash
+  path = path.replace(/\/$/g,'');
+
+  // get all paths
+  var paths = path.split('/');
+
+  // create child reference
+  var childPath = paths.shift();
+  if (!this._children[childPath]) {
+    this._children[childPath] = new MockStorageReference(this.storage, this, childPath);
+  }
+
+  if (paths.length === 0) {
+    return this._children[childPath];
+  } else {
+    return this._children[childPath].child(paths.join('/'));
+  }
+};
+
+MockStorageReference.prototype.getDownloadURL = function() {
+  return Promise.resolve(this.fullPath);
+};
+
+MockStorageReference.prototype.delete = function() {
+  this._contents = null;
+  return Promise.resolve();
+};
+
+MockStorageReference.prototype.put = function(data) {
+  this._contents = data;
+  return Promise.resolve();
+};
+
+MockStorageReference.prototype.putString = function(data) {
+  this._contents = data;
+  return Promise.resolve();
+};
+
+module.exports = MockStorageReference;
+
+},{"rsvp":41}],66:[function(require,module,exports){
+/*
+  Mock for firebase.storage.Storage and admin.storage.Storage
+  https://firebase.google.com/docs/reference/js/firebase.storage.Storage
+  https://firebase.google.com/docs/reference/admin/node/admin.storage.Storage
+*/
+
+'use strict';
+var Promise = require('rsvp').Promise;
+var MockStorageBucket = require('./storage-bucket');
+var MockStorageReference = require('./storage-reference');
+
+function MockStorage() {
+  this.buckets = {};
+  this.refs = {};
+}
+
+MockStorage.prototype.ref = function(path) {
+  // replace multiple consecutive slashs with single slash
+  path = path.replace(/\/+/g,'/');
+
+  // replace leading slash
+  path = path.replace(/^\//g,'');
+
+  // replace trailing slash
+  path = path.replace(/\/$/g,'');
+
+  // get all paths
+  var paths = path.split('/');
+
+  // create root reference
+  var rootPath = paths.shift();
+  if (!this.refs[rootPath]) {
+    this.refs[rootPath] = new MockStorageReference(this, null, rootPath);
+  }
+
+  if (paths.length === 0) {
+    return this.refs[rootPath];
+  } else {
+    return this.refs[rootPath].child(paths.join('/'));
+  }
+};
+
+MockStorage.prototype.bucket = function(name) {
+  if (!this.buckets[name]) {
+    this.buckets[name] = new MockStorageBucket(this, name);
+  }
+  return this.buckets[name];
+};
+
+module.exports = MockStorage;
+
+},{"./storage-bucket":63,"./storage-reference":65,"rsvp":41}],67:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -46730,7 +46963,7 @@ MockFirebaseUser.prototype.getIdToken = function (forceRefresh) {
 
 module.exports = MockFirebaseUser;
 
-},{"./lodash":54,"rsvp":40}],62:[function(require,module,exports){
+},{"./lodash":55,"rsvp":41}],68:[function(require,module,exports){
 'use strict';
 
 var Snapshot = require('./snapshot');
@@ -46933,7 +47166,7 @@ exports.findUndefinedProperties = function (obj) {
   return results;
 };
 
-},{"./firestore-field-value":50,"./lodash":54,"./snapshot":60}],63:[function(require,module,exports){
+},{"./firestore-field-value":51,"./lodash":55,"./snapshot":62}],69:[function(require,module,exports){
 'use strict';
 
 var assert = require('assert');
@@ -46952,21 +47185,22 @@ exports.data = function(obj){
   var undefinedProperties = findUndefinedProperties(obj);
   assert(undefinedProperties.length === 0, 'Data contains undefined properties at ' + undefinedProperties);
 };
-},{"./utils":62,"assert":1,"util":43}],64:[function(require,module,exports){
+},{"./utils":68,"assert":1,"util":44}],70:[function(require,module,exports){
 'use strict';
 
 var MockFirestoreDeltaDocumentSnapshot = require('./firestore-delta-document-snapshot');
 
-
 exports.MockFirebase = require('./firebase');
 exports.MockFirebaseSdk = require('./sdk');
 exports.MockFirestore = require('./firestore');
+exports.MockStorage = require('./storage');
+exports.MockMessaging = require('./messaging');
 exports.DeltaDocumentSnapshot = MockFirestoreDeltaDocumentSnapshot.create;
 
 /** @deprecated */
 exports.MockFirebaseSimpleLogin = require('./login');
 
-},{"./firebase":45,"./firestore":53,"./firestore-delta-document-snapshot":47,"./login":55,"./sdk":58}]},{},[64])(64)
+},{"./firebase":46,"./firestore":54,"./firestore-delta-document-snapshot":48,"./login":56,"./messaging":57,"./sdk":60,"./storage":66}]},{},[70])(70)
 });
 ;(function (window) {
   'use strict';
