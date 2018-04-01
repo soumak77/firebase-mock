@@ -20,8 +20,7 @@ Follow the steps in the [Setup Tutorial](tutorials/integration/setup.md) to crea
 Firebase Mock supports the client-side [JavaScript API](https://firebase.google.com/docs/reference/js/) and server-side [Admin API](https://firebase.google.com/docs/reference/admin/node/) plus a small set of utility methods documented fully in the [API Reference](API.md). Rather than make a server call that is actually asynchronous, Firebase Mock allows you to either trigger callbacks synchronously or asynchronously with a specified delay ([`ref.flush`](API.md#flushdelay---ref)).
 
 ## Tutorials
-
-### Client
+### Client ([firebase](https://github.com/firebase/firebase-js-sdk))
 * Authentication
   * [Basic](tutorials/client/auth/authentication.md)
   * [JWT Tokens](tutorials/client/auth/tokens.md)
@@ -32,7 +31,7 @@ Firebase Mock supports the client-side [JavaScript API](https://firebase.google.
 * [Firestore](tutorials/client/firestore.md)
 * [Storage](tutorials/client/storage.md)
 
-### Admin
+### Admin ([firebase-admin](https://github.com/firebase/firebase-admin-node))
 * Authentication
   * [Basic](tutorials/admin/authentication.md)
   * [JWT Tokens](tutorials/admin/tokens.md)
@@ -40,7 +39,7 @@ Firebase Mock supports the client-side [JavaScript API](https://firebase.google.
 * [Firestore](tutorials/admin/firestore.md)
 * [Storage](tutorials/admin/storage.md)
 
-### Functions
+### Functions ([firebase-functions](https://github.com/firebase/firebase-functions))
 * [Realtime Database](tutorials/functions/rtdb.md)
 * [Firestore](tutorials/functions/firestore.md)
 * [HTTP](tutorials/functions/http.md)
