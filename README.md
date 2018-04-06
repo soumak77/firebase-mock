@@ -46,6 +46,5 @@ Firebase Mock supports the client-side [JavaScript API](https://firebase.google.
 
 ## Alternatives
 ### [firebase-server](https://github.com/urish/firebase-server)
-* runs firebase in offline mode
-* usefully for integration and end-to-end testing
-* not a true unit testing library as it relies on external services to run the tests
+### [firebase-functions-test](https://firebase.google.com/docs/functions/unit-testing)
+
