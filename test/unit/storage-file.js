@@ -98,4 +98,33 @@ describe('StorageFile', function () {
       });
     });
   });
+
+  describe('#move', function() {
+    it('should move file using string', function() {
+      var file = new StorageFile(bucket, 'filename');
+      return file.move('newfilename').then(function() {
+        expect(bucket.files['filename']).to.not.be.ok; // jshint ignore:line
+        expect(bucket.files['newfilename']).to.be.ok; // jshint ignore:line
+      });
+    });
+
+    it('should move file using File', function() {
+      var file = new StorageFile(bucket, 'filename');
+      var newFile = new StorageFile(bucket, 'newfilename');
+      return file.move(newFile).then(function() {
+        expect(bucket.files['filename']).to.not.be.ok; // jshint ignore:line
+        expect(bucket.files['newfilename']).to.be.ok; // jshint ignore:line
+      });
+    });
+
+    it('should move file using Bucket', function() {
+      var file = new StorageFile(bucket, 'filename');
+      var newBucket = new StorageBucket(storage, 'newbucket');
+      return file.move(newBucket).then(function() {
+        expect(bucket.files['filename']).to.not.be.ok; // jshint ignore:line
+        expect(newBucket.files['filename']).to.be.ok; // jshint ignore:line
+        expect(newBucket.files['filename'].bucket).to.equal(newBucket); // jshint ignore:line
+      });
+    });
+  });
 });

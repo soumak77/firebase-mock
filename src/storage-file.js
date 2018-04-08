@@ -12,6 +12,7 @@ function MockStorageFile(bucket, name) {
   this.name = name;
   this._contents = null;
   this._metadata = null;
+  this.bucket.files[name] = this;
 }
 
 MockStorageFile.prototype.get = function() {
@@ -46,7 +47,25 @@ MockStorageFile.prototype.download = function(args) {
 
 MockStorageFile.prototype.delete = function() {
   this._contents = null;
-  return this.bucket.deleteFile(this._path);
+  return this.bucket.deleteFile(this.name);
+};
+
+MockStorageFile.prototype.move = function(destination) {
+  var oldPath = this.name;
+
+  if (typeof destination === 'string') {
+    // destination is a path string
+    return this.bucket.moveFile(oldPath, destination);
+  } else if (typeof destination.bucket !== 'undefined') {
+    // destination is a File object
+    return this.bucket.moveFile(oldPath, destination.name);
+  } else {
+    // destination is a Bucket object
+    var newFile = destination.file(this.name);
+    newFile._metadata = this._metadata;
+    newFile._contents = this._contents;
+    return this.delete();
+  }
 };
 
 module.exports = MockStorageFile;

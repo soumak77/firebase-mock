@@ -11,13 +11,11 @@ function MockStorageBucket(storage, name) {
   this.storage = storage;
   this.name = name;
   this.files = {};
+  this.storage.buckets[name] = this;
 }
 
 MockStorageBucket.prototype.file = function (name) {
-  if (!this.files[name]) {
-    this.files[name] = new MockStorageFile(this, name);
-  }
-  return this.files[name];
+  return new MockStorageFile(this, name);
 };
 
 MockStorageBucket.prototype.deleteFile = function (name) {
@@ -25,6 +23,12 @@ MockStorageBucket.prototype.deleteFile = function (name) {
     delete this.files[name];
   }
   return Promise.resolve();
+};
+
+MockStorageBucket.prototype.moveFile = function (oldPath, newPath) {
+  this.files[newPath] = this.files[oldPath];
+  this.files[newPath].name = newPath;
+  return this.deleteFile(oldPath);
 };
 
 module.exports = MockStorageBucket;
