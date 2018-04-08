@@ -1,4 +1,4 @@
-/** firebase-mock - v2.2.0
+/** firebase-mock - v2.2.1
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -43555,48 +43555,13 @@ var utils = require('./utils');
 var Auth = require('./firebase-auth');
 var validate = require('./validators');
 
-function MockAuthentication(path, data, parent, name) {
+function MockAuthentication(path) {
   this.path = path || 'Mock://';
   this.errs = {};
-  this.priority = null;
-  this.myName = parent ? name : extractName(path);
-  this.key = this.myName;
-  this.flushDelay = parent ? parent.flushDelay : false;
-  this.queue = parent ? parent.queue : new Queue();
-  this._events = {
-    value: [],
-    child_added: [],
-    child_removed: [],
-    child_changed: [],
-    child_moved: []
-  };
-  this.parent = parent || null;
-  this.children = {};
-  if (parent) parent.children[this.key] = this;
-  this.sortedDataKeys = [];
-  this.data = null;
-  this._lastAutoId = null;
+  this.flushDelay = false;
+  this.queue = new Queue();
   _.extend(this, Auth.prototype, new Auth());
 }
-
-var getServerTime, defaultClock;
-getServerTime = defaultClock = function () {
-  return new Date().getTime();
-};
-
-MockAuthentication.setClock = function (fn) {
-  getServerTime = fn;
-};
-
-MockAuthentication.restoreClock = function () {
-  getServerTime = defaultClock;
-};
-
-MockAuthentication.defaultAutoId = function () {
-  return autoId(new Date().getTime());
-};
-
-MockAuthentication.autoId = MockAuthentication.defaultAutoId;
 
 MockAuthentication.prototype.flush = function (delay) {
   this.queue.flush(delay);
@@ -43628,52 +43593,6 @@ MockAuthentication.prototype.failNext = function (methodName, err) {
   this.errs[methodName] = err;
 };
 
-MockAuthentication.prototype.forceCancel = function (error, event, callback, context) {
-  var self = this;
-  var events = this._events;
-  (event ? [event] : _.keys(events))
-    .forEach(function (eventName) {
-      events[eventName]
-        .filter(function (parts) {
-          return !event || !callback || (callback === parts[0] && context === parts[1]);
-        })
-        .forEach(function (parts) {
-          parts[2].call(parts[1], error);
-          self.off(event, callback, context);
-        });
-    });
-};
-
-MockAuthentication.prototype.fakeEvent = function (event, key, data, prevChild, priority) {
-  validate.event(event);
-  if (arguments.length < 5) priority = null;
-  if (arguments.length < 4) prevChild = null;
-  if (arguments.length < 3) data = null;
-  var ref = event === 'value' ? this : this.child(key);
-  var snapshot = new Snapshot(ref, data, priority);
-  this._defer('fakeEvent', _.toArray(arguments), function () {
-    this._events[event]
-      .map(function (parts) {
-        return {
-          fn: parts[0],
-          args: [snapshot],
-          context: parts[1]
-        };
-      })
-      .forEach(function (data) {
-        if ('child_added' === event || 'child_moved' === event) {
-          data.args.push(prevChild);
-        }
-        data.fn.apply(data.context, data.args);
-      });
-  });
-  return this;
-};
-
-MockAuthentication.prototype.toString = function () {
-  return this.path;
-};
-
 MockAuthentication.prototype._nextErr = function (type) {
   var err = this.errs[type];
   delete this.errs[type];
@@ -43701,7 +43620,7 @@ function extractName(path) {
 
 module.exports = MockAuthentication;
 
-},{"./firebase-auth":46,"./lodash":56,"./query":59,"./queue":60,"./snapshot":63,"./utils":69,"./validators":70,"assert":1,"firebase-auto-ids":5,"rsvp":41}],46:[function(require,module,exports){
+},{"./firebase-auth":46,"./lodash":56,"./query":58,"./queue":59,"./snapshot":62,"./utils":68,"./validators":69,"assert":1,"firebase-auto-ids":5,"rsvp":41}],46:[function(require,module,exports){
 'use strict';
 
 var _      = require('./lodash');
@@ -44261,7 +44180,7 @@ function validateArgument (method, object, position, name, type) {
 
 module.exports = FirebaseAuth;
 
-},{"./lodash":56,"./user":68,"rsvp":41,"util":44}],47:[function(require,module,exports){
+},{"./lodash":56,"./user":67,"rsvp":41,"util":44}],47:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -44987,7 +44906,7 @@ function render(datum) {
 
 module.exports = MockFirebase;
 
-},{"./firebase-auth":46,"./lodash":56,"./query":59,"./queue":60,"./snapshot":63,"./utils":69,"./validators":70,"assert":1,"firebase-auto-ids":5,"rsvp":41}],48:[function(require,module,exports){
+},{"./firebase-auth":46,"./lodash":56,"./query":58,"./queue":59,"./snapshot":62,"./utils":68,"./validators":69,"assert":1,"firebase-auto-ids":5,"rsvp":41}],48:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -45071,7 +44990,7 @@ function extractName(path) {
 
 module.exports = MockFirestoreCollection;
 
-},{"./firestore-query":54,"./lodash":56,"./queue":60,"./utils":69,"./validators":70,"assert":1,"firebase-auto-ids":5,"rsvp":41}],49:[function(require,module,exports){
+},{"./firestore-query":54,"./lodash":56,"./queue":59,"./utils":68,"./validators":69,"assert":1,"firebase-auto-ids":5,"rsvp":41}],49:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -45359,7 +45278,7 @@ function extractName(path) {
 
 module.exports = MockFirestoreDocument;
 
-},{"./firestore-document-snapshot":50,"./lodash":56,"./queue":60,"./utils":69,"./validators":70,"assert":1,"firebase-auto-ids":5,"rsvp":41}],52:[function(require,module,exports){
+},{"./firestore-document-snapshot":50,"./lodash":56,"./queue":59,"./utils":68,"./validators":69,"assert":1,"firebase-auto-ids":5,"rsvp":41}],52:[function(require,module,exports){
 'use strict';
 
 function MockFirestoreFieldValue(type) {
@@ -45593,7 +45512,7 @@ function extractName(path) {
 
 module.exports = MockFirestoreQuery;
 
-},{"./firestore-query-snapshot":53,"./lodash":56,"./queue":60,"./utils":69,"./validators":70,"assert":1,"firebase-auto-ids":5,"rsvp":41}],55:[function(require,module,exports){
+},{"./firestore-query-snapshot":53,"./lodash":56,"./queue":59,"./utils":68,"./validators":69,"assert":1,"firebase-auto-ids":5,"rsvp":41}],55:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -45787,7 +45706,7 @@ function extractName(path) {
 
 module.exports = MockFirestore;
 
-},{"./firestore-collection":48,"./firestore-document":51,"./firestore-field-value":52,"./lodash":56,"./queue":60,"./utils":69,"./validators":70,"assert":1,"firebase-auto-ids":5,"rsvp":41}],56:[function(require,module,exports){
+},{"./firestore-collection":48,"./firestore-document":51,"./firestore-field-value":52,"./lodash":56,"./queue":59,"./utils":68,"./validators":69,"assert":1,"firebase-auto-ids":5,"rsvp":41}],56:[function(require,module,exports){
 module.exports = {
   assign: require('lodash.assign'),
   bind: require('lodash.bind'),
@@ -45828,317 +45747,12 @@ module.exports = {
 },{"lodash.assign":6,"lodash.assignin":7,"lodash.bind":8,"lodash.clone":9,"lodash.clonedeep":10,"lodash.clonedeepwith":11,"lodash.compact":12,"lodash.difference":13,"lodash.every":14,"lodash.filter":15,"lodash.find":16,"lodash.findindex":17,"lodash.foreach":18,"lodash.forin":19,"lodash.get":20,"lodash.has":21,"lodash.includes":22,"lodash.indexof":23,"lodash.isempty":24,"lodash.isequal":25,"lodash.isfunction":26,"lodash.isnumber":27,"lodash.isobject":28,"lodash.isstring":29,"lodash.isundefined":30,"lodash.keys":31,"lodash.map":32,"lodash.merge":33,"lodash.noop":34,"lodash.orderby":35,"lodash.reduce":36,"lodash.remove":37,"lodash.size":38,"lodash.toarray":39}],57:[function(require,module,exports){
 'use strict';
 
-var _ = require('./lodash');
-
-/*******************************************************************************
- * SIMPLE LOGIN
- * @deprecated
- ******************************************************************************/
-function MockFirebaseSimpleLogin (ref, callback, userData) {
-  // allows test units to monitor the callback function to make sure
-  // it is invoked (even if one is not declared)
-  this.callback = function () { callback.apply(null, Array.prototype.slice.call(arguments, 0)); };
-  this.attempts = [];
-  this.failMethod = MockFirebaseSimpleLogin.DEFAULT_FAIL_WHEN;
-  this.ref = ref; // we don't use ref for anything
-  this.autoFlushTime = MockFirebaseSimpleLogin.DEFAULT_AUTO_FLUSH;
-  this.userData = _.cloneDeep(MockFirebaseSimpleLogin.DEFAULT_USER_DATA);
-  if (userData) _.assign(this.userData, userData);
-}
-
-/*** PUBLIC METHODS AND FIXTURES ***/
-
-MockFirebaseSimpleLogin.DEFAULT_FAIL_WHEN = function(provider, options, user) {
-  var res = null;
-  if( ['password', 'anonymous', 'twitter', 'facebook', 'google', 'github'].indexOf(provider) === -1 ) {
-    console.error('MockFirebaseSimpleLogin:login() failed: unrecognized authentication provider '+provider);
-//      res = createError();
-  }
-  else if( !user ) {
-    res = createError('auth/user-not-found', 'The specified user does not exist');
-  }
-  else if( provider === 'password' && user.password !== options.password ) {
-    res = createError('auth/invalid-password', 'The specified password is incorrect');
-  }
-  return res;
-};
-
-var USER_COUNT = 100;
-MockFirebaseSimpleLogin.DEFAULT_USER_DATA = {};
-_.forEach(['password', 'anonymous', 'facebook', 'twitter', 'google', 'github'], function(provider) {
-  var user = createDefaultUser(provider);
-  if( provider !== 'password' ) {
-    MockFirebaseSimpleLogin.DEFAULT_USER_DATA[provider] = user;
-  }
-  else {
-    var set = MockFirebaseSimpleLogin.DEFAULT_USER_DATA[provider] = {};
-    set[user.email] = user;
-  }
-});
-
-MockFirebaseSimpleLogin.DEFAULT_AUTO_FLUSH = false;
-
-MockFirebaseSimpleLogin.prototype = {
-
-  /*****************************************************
-   * Test Unit Methods
-   *****************************************************/
-
-  /**
-   * When this method is called, any outstanding login()
-   * attempts will be immediately resolved. If this method
-   * is called with an integer value, then the login attempt
-   * will resolve asynchronously after that many milliseconds.
-   *
-   * @param {int|boolean} [milliseconds]
-   * @returns {MockFirebaseSimpleLogin}
-   */
-  flush: function(milliseconds) {
-    var self = this;
-    if(_.isNumber(milliseconds) ) {
-      setTimeout(_.bind(self.flush, self), milliseconds);
-    }
-    else {
-      var attempts = self.attempts;
-      self.attempts = [];
-      _.forEach(attempts, function(x) {
-        x[0].apply(self, x.slice(1));
-      });
-    }
-    return self;
-  },
-
-  /**
-   * Automatically queue the flush() event
-   * each time login() is called. If this method
-   * is called with `true`, then the callback
-   * is invoked synchronously.
-   *
-   * If this method is called with an integer,
-   * the callback is triggered asynchronously
-   * after that many milliseconds.
-   *
-   * If this method is called with false, then
-   * autoFlush() is disabled.
-   *
-   * @param {int|boolean} [milliseconds]
-   * @returns {MockFirebaseSimpleLogin}
-   */
-  autoFlush: function(milliseconds) {
-    this.autoFlushTime = milliseconds;
-    if( this.autoFlushTime !== false ) {
-      this.flush(this.autoFlushTime);
-    }
-    return this;
-  },
-
-  /**
-   * `testMethod` is passed the {string}provider, {object}options, {object}user
-   * for each call to login(). If it returns anything other than
-   * null, then that is passed as the error message to the
-   * callback and the login call fails.
-   *
-   * <code>
-   *   // this is a simplified example of the default implementation (MockFirebaseSimpleLogin.DEFAULT_FAIL_WHEN)
-   *   auth.failWhen(function(provider, options, user) {
-   *      if( user.email !== options.email ) {
-   *         return MockFirebaseSimpleLogin.createError('auth/user-not-found');
-   *      }
-   *      else if( user.password !== options.password ) {
-   *         return MockFirebaseSimpleLogin.createError('auth/invalid-password');
-   *      }
-   *      else {
-   *         return null;
-   *      }
-   *   });
-   * </code>
-   *
-   * Multiple calls to this method replace the old failWhen criteria.
-   *
-   * @param testMethod
-   * @returns {MockFirebaseSimpleLogin}
-   */
-  failWhen: function(testMethod) {
-    this.failMethod = testMethod;
-    return this;
-  },
-
-  /**
-   * Retrieves a user account from the mock user data on this object
-   *
-   * @param provider
-   * @param options
-   */
-  getUser: function(provider, options) {
-    var data = this.userData[provider];
-    if( provider === 'password' ) {
-      data = (data||{})[options.email];
-    }
-    return data||null;
-  },
-
-  /*****************************************************
-   * Public API
-   *****************************************************/
-  login: function(provider, options) {
-    var err = this.failMethod(provider, options||{}, this.getUser(provider, options));
-    this._notify(err, err===null? this.userData[provider]: null);
-  },
-
-  logout: function() {
-    this._notify(null, null);
-  },
-
-  createUser: function(email, password, callback) {
-    if (!callback) callback = _.noop;
-    this._defer(function() {
-      var user = null, err = null;
-      if( this.userData.password.hasOwnProperty(email) ) {
-        err = createError('EMAIL_TAKEN', 'The specified email address is already in use.');
-      }
-      else {
-        user = createEmailUser(email, password);
-        this.userData.password[email] = user;
-      }
-      callback(err, user);
-    });
-  },
-
-  changePassword: function(email, oldPassword, newPassword, callback) {
-    if (!callback) callback = _.noop;
-    this._defer(function() {
-      var user = this.getUser('password', {email: email});
-      var err = this.failMethod('password', {email: email, password: oldPassword}, user);
-      if( err ) {
-        callback(err, false);
-      }
-      else {
-        user.password = newPassword;
-        callback(null, true);
-      }
-    });
-  },
-
-  sendPasswordResetEmail: function(email, callback) {
-    if (!callback) callback = _.noop;
-    this._defer(function() {
-      var user = this.getUser('password', {email: email});
-      if( !user ) {
-        callback(createError('auth/user-not-found'), false);
-      }
-      else {
-        callback(null, true);
-      }
-    });
-  },
-
-  removeUser: function(email, password, callback) {
-    if (!callback) callback = _.noop;
-    this._defer(function() {
-      var user = this.getUser('password', {email: email});
-      if( !user ) {
-        callback(createError('auth/user-not-found'), false);
-      }
-      else if( user.password !== password ) {
-        callback(createError('auth/invalid-password'), false);
-      }
-      else {
-        delete this.userData.password[email];
-        callback(null, true);
-      }
-    });
-  },
-
-  /*****************************************************
-   * Private/internal methods
-   *****************************************************/
-  _notify: function(error, user) {
-    this._defer(this.callback, error, user);
-  },
-
-  _defer: function() {
-    var args = _.toArray(arguments);
-    this.attempts.push(args);
-    if( this.autoFlushTime !== false ) {
-      this.flush(this.autoFlushTime);
-    }
-  }
-};
-
-function createError(code, message) {
-  return { code: code||'UNKNOWN_ERROR', message: 'FirebaseSimpleLogin: '+(message||code||'unspecific error') };
-}
-
-function createEmailUser (email, password) {
-  var id = USER_COUNT++;
-  return {
-    uid: 'password:'+id,
-    id: id,
-    email: email,
-    password: password,
-    provider: 'password',
-    firebaseAuthToken: 'FIREBASE_AUTH_TOKEN' //todo
-  };
-}
-
-function createDefaultUser (provider) {
-  var id = USER_COUNT++;
-
-  var out = {
-    uid: provider+':'+id,
-    id: id,
-    password: id,
-    provider: provider,
-    firebaseAuthToken: 'FIREBASE_AUTH_TOKEN' //todo
-  };
-  switch(provider) {
-    case 'password':
-      out.email = 'email@firebase.com';
-      break;
-    case 'twitter':
-      out.accessToken = 'ACCESS_TOKEN'; //todo
-      out.accessTokenSecret = 'ACCESS_TOKEN_SECRET'; //todo
-      out.displayName = 'DISPLAY_NAME';
-      out.thirdPartyUserData = {}; //todo
-      out.username = 'USERNAME';
-      break;
-    case 'google':
-      out.accessToken = 'ACCESS_TOKEN'; //todo
-      out.displayName = 'DISPLAY_NAME';
-      out.email = 'email@firebase.com';
-      out.thirdPartyUserData = {}; //todo
-      break;
-    case 'github':
-      out.accessToken = 'ACCESS_TOKEN'; //todo
-      out.displayName = 'DISPLAY_NAME';
-      out.thirdPartyUserData = {}; //todo
-      out.username = 'USERNAME';
-      break;
-    case 'facebook':
-      out.accessToken = 'ACCESS_TOKEN'; //todo
-      out.displayName = 'DISPLAY_NAME';
-      out.thirdPartyUserData = {}; //todo
-      break;
-    case 'anonymous':
-      break;
-    default:
-      throw new Error('Invalid auth provider', provider);
-  }
-
-  return out;
-}
-
-module.exports = MockFirebaseSimpleLogin;
-
-},{"./lodash":56}],58:[function(require,module,exports){
-'use strict';
-
 function MockMessaging() {
 }
 
 module.exports = MockMessaging;
 
-},{}],59:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -46325,7 +45939,7 @@ function assertQuery (method, pri, key) {
 
 module.exports = MockQuery;
 
-},{"./lodash":56,"./slice":62,"./utils":69,"./validators":70,"rsvp":41}],60:[function(require,module,exports){
+},{"./lodash":56,"./slice":61,"./utils":68,"./validators":69,"rsvp":41}],59:[function(require,module,exports){
 'use strict';
 
 var _            = require('./lodash');
@@ -46401,7 +46015,7 @@ FlushEvent.prototype.cancel = function () {
 exports.Queue = FlushQueue;
 exports.Event = FlushEvent;
 
-},{"./lodash":56,"events":3,"util":44}],61:[function(require,module,exports){
+},{"./lodash":56,"events":3,"util":44}],60:[function(require,module,exports){
 var MockAuthentication = require('./auth');
 var MockFirebase = require('./firebase');
 var MockFirestore = require('./firestore');
@@ -46510,7 +46124,7 @@ function MockFirebaseSdk(createDatabase, createAuth, createFirestore, createStor
 
 module.exports = MockFirebaseSdk;
 
-},{"./auth":45,"./firebase":47,"./firestore":55,"./firestore-field-value":52,"./messaging":58,"./storage":67}],62:[function(require,module,exports){
+},{"./auth":45,"./firebase":47,"./firestore":55,"./firestore-field-value":52,"./messaging":57,"./storage":66}],61:[function(require,module,exports){
 'use strict';
 
 var _        = require('./lodash');
@@ -46714,7 +46328,7 @@ Slice.prototype._build = function(ref, rawData) {
 
 module.exports = Slice;
 
-},{"./lodash":56,"./snapshot":63,"./utils":69}],63:[function(require,module,exports){
+},{"./lodash":56,"./snapshot":62,"./utils":68}],62:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -46802,7 +46416,7 @@ function isValue (value) {
 
 module.exports = MockDataSnapshot;
 
-},{"./lodash":56}],64:[function(require,module,exports){
+},{"./lodash":56}],63:[function(require,module,exports){
 /*
   Mock for @google-cloud/storage Bucket
   https://cloud.google.com/nodejs/docs/reference/storage/1.6.x/Bucket
@@ -46816,13 +46430,11 @@ function MockStorageBucket(storage, name) {
   this.storage = storage;
   this.name = name;
   this.files = {};
+  this.storage.buckets[name] = this;
 }
 
 MockStorageBucket.prototype.file = function (name) {
-  if (!this.files[name]) {
-    this.files[name] = new MockStorageFile(this, name);
-  }
-  return this.files[name];
+  return new MockStorageFile(this, name);
 };
 
 MockStorageBucket.prototype.deleteFile = function (name) {
@@ -46832,9 +46444,15 @@ MockStorageBucket.prototype.deleteFile = function (name) {
   return Promise.resolve();
 };
 
+MockStorageBucket.prototype.moveFile = function (oldPath, newPath) {
+  this.files[newPath] = this.files[oldPath];
+  this.files[newPath].name = newPath;
+  return this.deleteFile(oldPath);
+};
+
 module.exports = MockStorageBucket;
 
-},{"./storage-file":65,"rsvp":41}],65:[function(require,module,exports){
+},{"./storage-file":64,"rsvp":41}],64:[function(require,module,exports){
 /*
   Mock for @google-cloud/storage File
   https://cloud.google.com/nodejs/docs/reference/storage/1.6.x/File
@@ -46849,6 +46467,7 @@ function MockStorageFile(bucket, name) {
   this.name = name;
   this._contents = null;
   this._metadata = null;
+  this.bucket.files[name] = this;
 }
 
 MockStorageFile.prototype.get = function() {
@@ -46883,12 +46502,30 @@ MockStorageFile.prototype.download = function(args) {
 
 MockStorageFile.prototype.delete = function() {
   this._contents = null;
-  return this.bucket.deleteFile(this._path);
+  return this.bucket.deleteFile(this.name);
+};
+
+MockStorageFile.prototype.move = function(destination) {
+  var oldPath = this.name;
+
+  if (typeof destination === 'string') {
+    // destination is a path string
+    return this.bucket.moveFile(oldPath, destination);
+  } else if (typeof destination.bucket !== 'undefined') {
+    // destination is a File object
+    return this.bucket.moveFile(oldPath, destination.name);
+  } else {
+    // destination is a Bucket object
+    var newFile = destination.file(this.name);
+    newFile._metadata = this._metadata;
+    newFile._contents = this._contents;
+    return this.delete();
+  }
 };
 
 module.exports = MockStorageFile;
 
-},{"fs":2,"rsvp":41}],66:[function(require,module,exports){
+},{"fs":2,"rsvp":41}],65:[function(require,module,exports){
 /*
   Mock for firebase.storage.Reference
   https://firebase.google.com/docs/reference/js/firebase.storage.Reference
@@ -46961,7 +46598,7 @@ MockStorageReference.prototype.putString = function(data) {
 
 module.exports = MockStorageReference;
 
-},{"rsvp":41}],67:[function(require,module,exports){
+},{"rsvp":41}],66:[function(require,module,exports){
 /*
   Mock for firebase.storage.Storage and admin.storage.Storage
   https://firebase.google.com/docs/reference/js/firebase.storage.Storage
@@ -47005,15 +46642,12 @@ MockStorage.prototype.ref = function(path) {
 };
 
 MockStorage.prototype.bucket = function(name) {
-  if (!this.buckets[name]) {
-    this.buckets[name] = new MockStorageBucket(this, name);
-  }
-  return this.buckets[name];
+  return new MockStorageBucket(this, name);
 };
 
 module.exports = MockStorage;
 
-},{"./storage-bucket":64,"./storage-reference":66,"rsvp":41}],68:[function(require,module,exports){
+},{"./storage-bucket":63,"./storage-reference":65,"rsvp":41}],67:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -47125,7 +46759,7 @@ MockFirebaseUser.prototype.getIdToken = function (forceRefresh) {
 
 module.exports = MockFirebaseUser;
 
-},{"./lodash":56,"rsvp":41}],69:[function(require,module,exports){
+},{"./lodash":56,"rsvp":41}],68:[function(require,module,exports){
 'use strict';
 
 var Snapshot = require('./snapshot');
@@ -47328,7 +46962,7 @@ exports.findUndefinedProperties = function (obj) {
   return results;
 };
 
-},{"./firestore-field-value":52,"./lodash":56,"./snapshot":63}],70:[function(require,module,exports){
+},{"./firestore-field-value":52,"./lodash":56,"./snapshot":62}],69:[function(require,module,exports){
 'use strict';
 
 var assert = require('assert');
@@ -47347,7 +46981,7 @@ exports.data = function(obj){
   var undefinedProperties = findUndefinedProperties(obj);
   assert(undefinedProperties.length === 0, 'Data contains undefined properties at ' + undefinedProperties);
 };
-},{"./utils":69,"assert":1,"util":44}],71:[function(require,module,exports){
+},{"./utils":68,"assert":1,"util":44}],70:[function(require,module,exports){
 'use strict';
 
 var MockFirestoreDeltaDocumentSnapshot = require('./firestore-delta-document-snapshot');
@@ -47360,34 +46994,27 @@ exports.MockStorage = require('./storage');
 exports.MockMessaging = require('./messaging');
 exports.DeltaDocumentSnapshot = MockFirestoreDeltaDocumentSnapshot.create;
 
-/** @deprecated */
-exports.MockFirebaseSimpleLogin = require('./login');
-
-},{"./auth":45,"./firebase":47,"./firestore":55,"./firestore-delta-document-snapshot":49,"./login":57,"./messaging":58,"./sdk":61,"./storage":67}]},{},[71])(71)
+},{"./auth":45,"./firebase":47,"./firestore":55,"./firestore-delta-document-snapshot":49,"./messaging":57,"./sdk":60,"./storage":66}]},{},[70])(70)
 });
 ;(function (window) {
   'use strict';
   if (typeof window !== 'undefined' && window.firebasemock) {
     window.MockFirebase = window.firebasemock.MockFirebase;
     window.MockFirebaseSdk = window.firebasemock.MockFirebaseSdk;
-    window.MockFirebaseSimpleLogin = window.firebasemock.MockFirebaseSimpleLogin;
 
     var originals = false;
     window.MockFirebase.override = function () {
       originals = {
         firebasesdk: window.firebase,
         firebase: window.Firebase,
-        login: window.FirebaseSimpleLogin
       };
       window.firebase = window.firebasemock.MockFirebaseSdk();
       window.Firebase = window.firebasemock.MockFirebase;
-      window.FirebaseSimpleLogin = window.firebasemock.MockFirebaseSimpleLogin;
     };
     window.MockFirebase.restore = function () {
       if (!originals) return;
       window.firebase = originals.firebasesdk;
       window.Firebase = originals.firebase;
-      window.FirebaseSimpleLogin = originals.login;
     };
   }
 })(window);
