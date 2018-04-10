@@ -25,6 +25,31 @@ MockStorageBucket.prototype.deleteFile = function (name) {
   return Promise.resolve();
 };
 
+MockStorageBucket.prototype.getFiles = function (query) {
+  var self = this;
+  var files = [];
+  Object.keys(this.files).forEach(function(name) {
+    if (!query || !query.prefix) {
+      files.push(self.files[name].clone());
+    } else if (name.startsWith(query.prefix)) {
+      files.push(self.files[name].clone());
+    }
+  });
+  return Promise.resolve(files);
+};
+
+MockStorageBucket.prototype.deleteFiles = function (query) {
+  var self = this;
+  Object.keys(this.files).forEach(function(name) {
+    if (!query || !query.prefix) {
+      self.deleteFile(name);
+    } else if (name.startsWith(query.prefix)) {
+      self.deleteFile(name);
+    }
+  });
+  return Promise.resolve();
+};
+
 MockStorageBucket.prototype.moveFile = function (oldPath, newPath) {
   this.files[newPath] = this.files[oldPath];
   this.files[newPath].name = newPath;

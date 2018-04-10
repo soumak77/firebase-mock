@@ -12,8 +12,17 @@ function MockStorageFile(bucket, name) {
   this.name = name;
   this._contents = null;
   this._metadata = null;
-  this.bucket.files[name] = this;
+  if (!this.bucket.files[name]) {
+    this.bucket.files[name] = this;
+  }
 }
+
+MockStorageFile.prototype.clone = function() {
+  var file = new MockStorageFile(this.bucket, this.name);
+  file._contents = this._contents;
+  file._metadata = this._metadata;
+  return file;
+};
 
 MockStorageFile.prototype.get = function() {
   return Promise.resolve([this, null]);
