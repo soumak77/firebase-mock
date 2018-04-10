@@ -451,8 +451,31 @@ FirebaseAuth.prototype.verifyIdToken = function (token) {
         if (!user) {
           reject(new Error('Cannot verify token'));
         } else {
-          resolve(_.clone(user));
+          var customClaims = _.clone(user.customClaims);
+          customClaims.uid = user.uid;
+          customClaims.email = user.email;
+          customClaims.email_verified = user.emailVerified;
+          resolve(customClaims);
         }
+      }
+    });
+  });
+};
+
+FirebaseAuth.prototype.setCustomUserClaims = function (uid, claims) {
+  var err = this._nextErr('setCustomUserClaims');
+  var self = this;
+  return new Promise(function (resolve, reject) {
+    self._defer('setCustomUserClaims', _.toArray(arguments), function() {
+      err = err || self._validateExistingUid(uid);
+      if (err) {
+        reject(err);
+      } else {
+        var user = _.find(self._auth.users, function(u) {
+          return u.uid === uid;
+        });
+        user.customClaims = Object.assign({}, user.customClaims, claims);
+        resolve();
       }
     });
   });

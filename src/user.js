@@ -6,6 +6,7 @@ var Promise = require('rsvp').Promise;
 function MockFirebaseUser(ref, data) {
   this._auth = ref;
   this._idtoken = Math.random().toString();
+  this.customClaims = {};
   this.uid = data.uid;
   this.email = data.email;
   this.password = data.password;
@@ -23,6 +24,7 @@ function MockFirebaseUser(ref, data) {
 MockFirebaseUser.prototype.clone = function () {
   var user = new MockFirebaseUser(this._auth, this);
   user._idtoken = this._idtoken;
+  user.customClaims = this.customClaims;
   return user;
 };
 
@@ -44,6 +46,8 @@ MockFirebaseUser.prototype.reload = function () {
       self.providerData = user.providerData;
       self.providerId = user.providerId;
       self.refreshToken = user.refreshToken;
+      self.customClaims = user.customClaims;
+      self._idtoken = user._idtoken;
       resolve();
     }).catch(reject);
   });

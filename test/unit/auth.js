@@ -789,6 +789,19 @@ describe('Auth', function () {
       });
     });
 
+    it('should populates claims', function () {
+      return ref.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }).then(function(user) {
+        return ref.setCustomUserClaims(user.uid, {
+          admin: true
+        }).then(function() {
+          return expect(ref.verifyIdToken(user._idtoken)).to.eventually.have.property('admin', true);
+        });
+      });
+    });
+
     it('fails if no user exists with token', function () {
       return expect(ref.verifyIdToken('token')).to.be.rejected;
     });
@@ -801,6 +814,49 @@ describe('Auth', function () {
         var err = new Error('custom error');
         ref.failNext('verifyIdToken', err);
         return expect(ref.verifyIdToken(user._idtoken)).to.be.rejectedWith(Error, 'custom error');
+      });
+    });
+
+  });
+
+  describe('#setCustomUserClaims', function () {
+    beforeEach(function () {
+      ref.autoFlush();
+    });
+
+    afterEach(function () {
+      ref.autoFlush(false);
+    });
+
+    it('succeeds if user exists', function () {
+      return ref.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }).then(function(user) {
+        return ref.setCustomUserClaims(user.uid, {
+          admin: true
+        }).then(function() {
+          return expect(ref.getUser(user.uid)).to.eventually.have.property('customClaims').to.have.property('admin', true);
+        });
+      });
+    });
+
+    it('fails if no user exists with token', function () {
+      return expect(ref.setCustomUserClaims('uid', {
+        admin: true
+      })).to.be.rejected;
+    });
+
+    it('fails if failNext is set', function () {
+      return ref.createUser({
+        email: 'kato@kato.com',
+        password: 'kato'
+      }).then(function(user) {
+        var err = new Error('custom error');
+        ref.failNext('setCustomUserClaims', err);
+        return expect(ref.setCustomUserClaims('uid', {
+          admin: true
+        })).to.be.rejectedWith(Error, 'custom error');
       });
     });
 
