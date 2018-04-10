@@ -35,7 +35,8 @@ describe('StorageFile', function () {
       var file = new StorageFile(bucket, 'filename');
       return file.get().then(function(results) {
         expect(results.length).to.equal(2);
-        expect(results[0]).to.equal(file);
+        expect(results[0]).to.not.equal(file);
+        expect(results[0]).to.deep.equal(file);
       });
     });
   });
@@ -124,6 +125,34 @@ describe('StorageFile', function () {
         expect(bucket.files['filename']).to.not.be.ok; // jshint ignore:line
         expect(newBucket.files['filename']).to.be.ok; // jshint ignore:line
         expect(newBucket.files['filename'].bucket).to.equal(newBucket); // jshint ignore:line
+      });
+    });
+  });
+
+  describe('#getMetadata', function() {
+    it('should get metadata', function() {
+      var file = new StorageFile(bucket, 'filename');
+      file._metadata = {
+        metadata: {
+          public: true
+        }
+      };
+      return file.getMetadata().then(function(results) {
+        expect(results.length).to.equal(2);
+        expect(results[0]).to.have.property('metadata').to.have.property('public', true);
+      });
+    });
+  });
+
+  describe('#setMetadata', function() {
+    it('should set metadata', function() {
+      var file = new StorageFile(bucket, 'filename');
+      return file.setMetadata({
+        metadata: {
+          public: true
+        }
+      }).then(function() {
+        expect(file._metadata).to.have.property('metadata').to.have.property('public', true);
       });
     });
   });

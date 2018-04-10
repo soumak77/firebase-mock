@@ -6,6 +6,7 @@
 'use strict';
 var Promise = require('rsvp').Promise;
 var fs = require('fs');
+var _ = require('./lodash');
 
 function MockStorageFile(bucket, name) {
   this.bucket = bucket;
@@ -25,11 +26,11 @@ MockStorageFile.prototype.clone = function() {
 };
 
 MockStorageFile.prototype.get = function() {
-  return Promise.resolve([this, null]);
+  return Promise.resolve([this.clone(), null]);
 };
 
 MockStorageFile.prototype.save = function(data) {
-  this._contents = data;
+  this._contents = _.clone(data);
   return Promise.resolve();
 };
 
@@ -75,6 +76,15 @@ MockStorageFile.prototype.move = function(destination) {
     newFile._contents = this._contents;
     return this.delete();
   }
+};
+
+MockStorageFile.prototype.setMetadata = function(data) {
+  this._metadata = _.clone(data);
+  return Promise.resolve();
+};
+
+MockStorageFile.prototype.getMetadata = function() {
+  return Promise.resolve([_.clone(this._metadata), null]);
 };
 
 module.exports = MockStorageFile;
