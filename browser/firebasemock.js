@@ -1,4 +1,4 @@
-/** firebase-mock - v2.2.1
+/** firebase-mock - v2.2.2
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -44074,8 +44074,31 @@ FirebaseAuth.prototype.verifyIdToken = function (token) {
         if (!user) {
           reject(new Error('Cannot verify token'));
         } else {
-          resolve(_.clone(user));
+          var customClaims = _.clone(user.customClaims);
+          customClaims.uid = user.uid;
+          customClaims.email = user.email;
+          customClaims.email_verified = user.emailVerified;
+          resolve(customClaims);
         }
+      }
+    });
+  });
+};
+
+FirebaseAuth.prototype.setCustomUserClaims = function (uid, claims) {
+  var err = this._nextErr('setCustomUserClaims');
+  var self = this;
+  return new Promise(function (resolve, reject) {
+    self._defer('setCustomUserClaims', _.toArray(arguments), function() {
+      err = err || self._validateExistingUid(uid);
+      if (err) {
+        reject(err);
+      } else {
+        var user = _.find(self._auth.users, function(u) {
+          return u.uid === uid;
+        });
+        user.customClaims = Object.assign({}, user.customClaims, claims);
+        resolve();
       }
     });
   });
@@ -46444,6 +46467,31 @@ MockStorageBucket.prototype.deleteFile = function (name) {
   return Promise.resolve();
 };
 
+MockStorageBucket.prototype.getFiles = function (query) {
+  var self = this;
+  var files = [];
+  Object.keys(this.files).forEach(function(name) {
+    if (!query || !query.prefix) {
+      files.push(self.files[name].clone());
+    } else if (name.startsWith(query.prefix)) {
+      files.push(self.files[name].clone());
+    }
+  });
+  return Promise.resolve(files);
+};
+
+MockStorageBucket.prototype.deleteFiles = function (query) {
+  var self = this;
+  Object.keys(this.files).forEach(function(name) {
+    if (!query || !query.prefix) {
+      self.deleteFile(name);
+    } else if (name.startsWith(query.prefix)) {
+      self.deleteFile(name);
+    }
+  });
+  return Promise.resolve();
+};
+
 MockStorageBucket.prototype.moveFile = function (oldPath, newPath) {
   this.files[newPath] = this.files[oldPath];
   this.files[newPath].name = newPath;
@@ -46461,21 +46509,31 @@ module.exports = MockStorageBucket;
 'use strict';
 var Promise = require('rsvp').Promise;
 var fs = require('fs');
+var _ = require('./lodash');
 
 function MockStorageFile(bucket, name) {
   this.bucket = bucket;
   this.name = name;
   this._contents = null;
   this._metadata = null;
-  this.bucket.files[name] = this;
+  if (!this.bucket.files[name]) {
+    this.bucket.files[name] = this;
+  }
 }
 
+MockStorageFile.prototype.clone = function() {
+  var file = new MockStorageFile(this.bucket, this.name);
+  file._contents = this._contents;
+  file._metadata = this._metadata;
+  return file;
+};
+
 MockStorageFile.prototype.get = function() {
-  return Promise.resolve([this, null]);
+  return Promise.resolve([this.clone(), null]);
 };
 
 MockStorageFile.prototype.save = function(data) {
-  this._contents = data;
+  this._contents = _.clone(data);
   return Promise.resolve();
 };
 
@@ -46523,9 +46581,18 @@ MockStorageFile.prototype.move = function(destination) {
   }
 };
 
+MockStorageFile.prototype.setMetadata = function(data) {
+  this._metadata = _.clone(data);
+  return Promise.resolve();
+};
+
+MockStorageFile.prototype.getMetadata = function() {
+  return Promise.resolve([_.clone(this._metadata), null]);
+};
+
 module.exports = MockStorageFile;
 
-},{"fs":2,"rsvp":41}],65:[function(require,module,exports){
+},{"./lodash":56,"fs":2,"rsvp":41}],65:[function(require,module,exports){
 /*
   Mock for firebase.storage.Reference
   https://firebase.google.com/docs/reference/js/firebase.storage.Reference
@@ -46656,6 +46723,7 @@ var Promise = require('rsvp').Promise;
 function MockFirebaseUser(ref, data) {
   this._auth = ref;
   this._idtoken = Math.random().toString();
+  this.customClaims = {};
   this.uid = data.uid;
   this.email = data.email;
   this.password = data.password;
@@ -46673,6 +46741,7 @@ function MockFirebaseUser(ref, data) {
 MockFirebaseUser.prototype.clone = function () {
   var user = new MockFirebaseUser(this._auth, this);
   user._idtoken = this._idtoken;
+  user.customClaims = this.customClaims;
   return user;
 };
 
@@ -46694,6 +46763,8 @@ MockFirebaseUser.prototype.reload = function () {
       self.providerData = user.providerData;
       self.providerId = user.providerId;
       self.refreshToken = user.refreshToken;
+      self.customClaims = user.customClaims;
+      self._idtoken = user._idtoken;
       resolve();
     }).catch(reject);
   });
