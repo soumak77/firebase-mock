@@ -3,7 +3,6 @@
 var _ = require('./lodash');
 var assert = require('assert');
 var Promise = require('rsvp').Promise;
-var autoId = require('firebase-auto-ids');
 var CollectionReference = require('./firestore-collection');
 var DocumentReference = require('./firestore-document');
 var FieldValue = require('./firestore-field-value');
@@ -27,11 +26,6 @@ function MockFirestore(path, data, parent, name) {
   this.data = _.cloneDeep(data) || null;
 }
 
-MockFirestore.defaultAutoId = function () {
-  return autoId(new Date().getTime());
-};
-
-MockFirestore.autoId = MockFirestore.defaultAutoId;
 MockFirestore.FieldValue = FieldValue;
 
 MockFirestore.prototype.flush = function (delay) {
@@ -57,10 +51,6 @@ MockFirestore.prototype.autoFlush = function (delay) {
 
 MockFirestore.prototype.getFlushQueue = function () {
   return this.queue.getEvents();
-};
-
-MockFirestore.prototype.getData = function () {
-  return _.cloneDeep(this.data);
 };
 
 MockFirestore.prototype.toString = function () {
