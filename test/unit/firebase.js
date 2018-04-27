@@ -953,8 +953,14 @@ describe('MockFirebase', function () {
   });
 
   describe('Firebase.autoId', function () {
+    var defaultAutoId;
+
+    beforeEach(function () {
+      defaultAutoId = Firebase.autoId;
+    });
+
     afterEach(function () {
-      Firebase.autoId = Firebase.defaultAutoId;
+      Firebase.autoId = defaultAutoId;
     });
 
     it('fails to add nested data by auto id', function () {

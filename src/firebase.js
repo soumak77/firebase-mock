@@ -57,11 +57,9 @@ MockFirebase.restoreClock = function () {
   getServerTime = defaultClock;
 };
 
-MockFirebase.defaultAutoId = function () {
+MockFirebase.autoId = function () {
   return autoId(new Date().getTime());
 };
-
-MockFirebase.autoId = MockFirebase.defaultAutoId;
 
 MockFirebase.prototype.flush = function (delay) {
   this.queue.flush(delay);

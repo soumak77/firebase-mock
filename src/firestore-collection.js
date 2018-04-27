@@ -24,11 +24,9 @@ MockFirestoreCollection.prototype.toString = function () {
   return this.path;
 };
 
-MockFirestoreCollection.defaultAutoId = function () {
+MockFirestoreCollection.autoId = function () {
   return autoId(new Date().getTime());
 };
-
-MockFirestoreCollection.autoId = MockFirestoreCollection.defaultAutoId;
 
 MockFirestoreCollection.prototype.add = function (data) {
   var err = this._nextErr('add');
