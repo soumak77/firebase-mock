@@ -50,7 +50,7 @@ MockFirestoreDocument.prototype.getFlushQueue = function () {
   return this.queue.getEvents();
 };
 
-MockFirestoreDocument.prototype.getData = function () {
+MockFirestoreDocument.prototype._getData = function () {
   return _.cloneDeep(this.data);
 };
 
@@ -79,7 +79,7 @@ MockFirestoreDocument.prototype.get = function () {
   return new Promise(function (resolve, reject) {
     self._defer('get', _.toArray(arguments), function () {
       if (err === null) {
-        resolve(new DocumentSnapshot(self.id, self.ref, self.getData()));
+        resolve(new DocumentSnapshot(self.id, self.ref, self._getData()));
       } else {
         reject(err);
       }
@@ -118,7 +118,7 @@ MockFirestoreDocument.prototype._update = function (changes, opts, callback) {
   return new Promise(function (resolve, reject) {
     self._defer('update', _.toArray(arguments), function () {
       if (!err) {
-        var base = self.getData();
+        var base = self._getData();
         var data;
         if (_opts.setMerge) {
           data = _.merge(_.isObject(base) ? base : {}, changes);

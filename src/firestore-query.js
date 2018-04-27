@@ -53,7 +53,7 @@ MockFirestoreQuery.prototype._setData = function (data) {
   this.data = utils.cleanFirestoreData(_.cloneDeep(data) || null);
 };
 
-MockFirestoreQuery.prototype.getData = function () {
+MockFirestoreQuery.prototype._getData = function () {
   return _.cloneDeep(this.data);
 };
 
@@ -138,14 +138,14 @@ MockFirestoreQuery.prototype.where = function (property, operator, value) {
 };
 
 MockFirestoreQuery.prototype.orderBy = function (property, direction) {
-  var query = new MockFirestoreQuery(this.path, this.getData(), this.parent, this.id);
+  var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id);
   query.orderedProperties.push(property);
   query.orderedDirections.push(direction || 'asc');
   return query;
 };
 
 MockFirestoreQuery.prototype.limit = function (limit) {
-  var query = new MockFirestoreQuery(this.path, this.getData(), this.parent, this.id);
+  var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id);
   query.limited = limit;
   return query;
 };
