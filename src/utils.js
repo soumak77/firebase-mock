@@ -199,3 +199,10 @@ exports.findUndefinedProperties = function (obj) {
   recurse(obj, path);
   return results;
 };
+
+exports.createThenableReference = function(reference, promise) {
+  reference.then = function(success, failure) {
+    return promise.then(success).catch(failure);
+  };
+  return reference;
+};

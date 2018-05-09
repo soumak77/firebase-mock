@@ -874,6 +874,19 @@ describe('MockFirebase', function () {
       expect(ref.push.bind(ref, {someProp: undefined})).to.throw();
     });
 
+    it('should return thenable reference', function (done) {
+      var thenable = ref.push({
+        foo: 'bar'
+      });
+      thenable.then(function() {
+        expect(thenable.getData()).to.deep.equal({
+          foo: 'bar'
+        });
+        done();
+      }, done);
+      ref.flush();
+    });
+
     it('can add data by auto id', function () {
       var id = ref._newAutoId();
       sinon.stub(ref, '_newAutoId').returns(id);

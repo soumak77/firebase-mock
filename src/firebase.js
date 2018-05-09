@@ -238,9 +238,10 @@ MockFirebase.prototype.push = function (data, callback) {
   if (arguments.length && data !== null) {
     // currently, callback only invoked if child exists
     validate.data(data);
-    child.set(data, callback);
+    return utils.createThenableReference(child, child.set(data, callback));
+  } else {
+    return utils.createThenableReference(child, Promise.resolve(null));
   }
-  return child;
 };
 
 MockFirebase.prototype.once = function (event, callback, cancel, context) {
