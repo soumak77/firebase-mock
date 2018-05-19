@@ -886,6 +886,14 @@ describe('MockFirebase', function () {
       }, done);
       ref.flush();
     });
+    
+    it('should return thenable reference when no arguments are passed', function (done) {
+      var thenable = ref.push();
+      thenable.then(function(child) {
+        expect(child.parent).to.eql(ref);
+        done();
+      }, done);
+    });
 
     it('can add data by auto id', function () {
       var id = ref._newAutoId();
