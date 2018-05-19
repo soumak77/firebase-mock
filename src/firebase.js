@@ -240,7 +240,7 @@ MockFirebase.prototype.push = function (data, callback) {
     validate.data(data);
     return utils.createThenableReference(child, child.set(data, callback));
   } else {
-    return utils.createThenableReference(child, Promise.resolve(null));
+    return utils.createThenableReference(child, Promise.resolve(child));
   }
 };
 
