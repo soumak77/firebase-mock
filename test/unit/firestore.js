@@ -148,6 +148,9 @@ describe('MockFirestore', function () {
         expect(db.collection('collections').doc('a').get()).to.eventually.have.property('exists').equal(true)
       ]).then(function() {
         var batch = db.batch();
+        batch.create(db.doc('docToCreate'), {
+          name: 'abc'
+        });
         batch.update(db.doc('doc'), {
           name: 'abc'
         });
@@ -157,6 +160,7 @@ describe('MockFirestore', function () {
         batch.delete(db.collection('collections').doc('a'));
         batch.commit().then(function() {
           Promise.all([
+            expect(db.doc('docToCreate').get()).to.eventually.have.property('exists').equal(true),
             expect(db.doc('doc2').get()).to.eventually.have.property('exists').equal(true),
             expect(db.collection('collections').doc('a').get()).to.eventually.have.property('exists').equal(false)
           ]).then(function() {
