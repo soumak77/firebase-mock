@@ -131,7 +131,7 @@ describe('MockFirestoreDocument', function () {
           done('should have thrown an error');
         })
         .catch(function(error) {
-          expect(error.code).to.equal('firestore/already-exists');
+          expect(error.code).to.equal(6);
           done();
         });
 

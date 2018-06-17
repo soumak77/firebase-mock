@@ -88,9 +88,11 @@ MockFirestoreDocument.prototype.get = function () {
 };
 
 MockFirestoreDocument.prototype._validateDoesNotExist = function (data) {
+  var ALREADY_EXISTS_CODE = 6;
+
   if (data !== null) {
     var err = new Error('Cannot create a document which already exists');
-    err.code = 'firestore/already-exists';
+    err.code = ALREADY_EXISTS_CODE;
     return err;
   }
   return null;
