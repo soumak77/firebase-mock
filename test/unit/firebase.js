@@ -546,6 +546,18 @@ describe('MockFirebase', function () {
       expect(ref.getData().some).to.eql({prop: 12});
     });
 
+    it('does override its paths with data', function () {
+      ref.child('some').child('prop').set({foo: 1});
+      ref.flush();
+
+      var update = {};
+      update['some/prop'] = {bar: 2};
+      ref.update(update);
+      ref.flush();
+
+      expect(ref.getData().some.prop).to.eql({bar: 2});
+    });
+
     it('does not change unrelated data', function () {
       ref.child('some').child('prop').set(1);
       ref.child('some').child('other').child('prop').set(2);
