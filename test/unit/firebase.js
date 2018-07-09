@@ -546,7 +546,7 @@ describe('MockFirebase', function () {
       expect(ref.getData().some).to.eql({prop: 12});
     });
 
-    it('does override its paths with data', function () {
+    it('overrides the paths with existing data', function () {
       ref.child('some').child('prop').set({foo: 1});
       ref.flush();
 
