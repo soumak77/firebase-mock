@@ -125,10 +125,12 @@ describe('MockFirestore', function () {
             transaction.update(db.doc('doc'), {
               name: 'abc'
             });
+            return 'cba';
           });
-        }).then(function() {
+        }).then(function(transactionReturn) {
           db.doc('doc').get().then(function(doc2) {
             expect(doc2.get('name')).to.equal('abc');
+            expect(transactionReturn).to.equal('cba');
             done();
           }).catch(done);
         }).catch(done);

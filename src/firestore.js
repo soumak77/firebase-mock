@@ -63,8 +63,13 @@ MockFirestore.prototype.runTransaction = function(transFunc) {
     return doc.get();
   };
   return new Promise(function(resolve, reject) {
-    transFunc(batch).then(function() {
-      batch.commit().then(resolve).catch(reject);
+    Promise.resolve(transFunc(batch)).then(function(value) {
+      batch
+        .commit()
+        .then(function () {
+          resolve(value);
+        })
+        .catch(reject);
     }).catch(reject);
   });
 };
