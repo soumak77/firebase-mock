@@ -2,6 +2,7 @@
 
 var _ = require('./lodash');
 var assert = require('assert');
+var Stream = require('stream');
 var Promise = require('rsvp').Promise;
 var autoId = require('firebase-auto-ids');
 var QuerySnapshot = require('./firestore-query-snapshot');
@@ -106,6 +107,19 @@ MockFirestoreQuery.prototype.get = function () {
       }
     });
   });
+};
+
+MockFirestoreQuery.prototype.stream = function () {
+  var stream = new Stream();
+
+  this.get().then(function (snapshots) {
+    snapshots.forEach(function (snapshot) {
+      stream.emit('data', snapshot);
+    });
+    stream.emit('end');
+  });
+
+  return stream;
 };
 
 MockFirestoreQuery.prototype.where = function (property, operator, value) {
