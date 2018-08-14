@@ -349,4 +349,56 @@ describe('MockFirestoreDocument', function () {
       expect(result).to.eventually.equal(null);
     });
   });
+
+  describe('#getCollections', function () {
+    beforeEach(function () {
+      db.doc('doc/subcol/subcol-doc').set({ foo: 'bar' });
+      db.doc('doc/subcol2/subcol-doc').set({ foo: 'bar' });
+      db.doc('doc/subcol/subcol-doc/deep-col/deep-doc').set({ foo: 'bar' });
+      db.doc('doc/subcol/subcol-doc/deep-col2/deep-doc').set({ foo: 'bar' });
+      db.flush();
+    });
+    afterEach(function () {
+      db.doc('doc/subcol/subcol-doc').delete();
+      db.doc('doc/subcol2/subcol-doc').delete();
+      db.doc('doc/subcol/subcol-doc/deep-col/deep-doc').delete();
+      db.doc('doc/subcol/subcol-doc/deep-col2/deep-doc').delete();
+      db.flush();
+    });
+
+    context('when present', function () {
+      it('returns collections of document', function (done) {
+        db.doc('doc').getCollections().then(function (colRefs) {
+          expect(colRefs).to.be.an('array');
+          expect(colRefs).to.have.length(2);
+          expect(colRefs[0].path).to.equal('doc/subcol');
+          expect(colRefs[1].path).to.equal('doc/subcol2');
+          done();
+        });
+        db.flush();
+      });
+
+      it('returns deeply nested collections of document', function (done) {
+        db.doc('doc/subcol/subcol-doc').getCollections().then(function (colRefs) {
+          expect(colRefs).to.be.an('array');
+          expect(colRefs).to.have.length(2);
+          expect(colRefs[0].path).to.equal('doc/subcol/subcol-doc/deep-col');
+          expect(colRefs[1].path).to.equal('doc/subcol/subcol-doc/deep-col2');
+          done();
+        });
+        db.flush();
+      });
+    });
+
+    context('when not present', function () {
+      it('returns deeply nested collections of document', function (done) {
+        db.doc('not-existing').getCollections().then(function (colRefs) {
+          expect(colRefs).to.be.an('array');
+          expect(colRefs).to.have.length(0);
+          done();
+        });
+        db.flush();
+      });
+    });
+  });
 });
