@@ -175,7 +175,12 @@ MockFirestoreDocument.prototype.getCollections = function () {
   return new Promise(function (resolve, reject) {
     self._defer('getCollections', _.toArray(arguments), function () {
       if (err === null) {
-        resolve(_.toArray(this.children));
+        var collections = _.toArray(this.children);
+        // Filter out empty collections
+        collections = _.filter(collections, function (collection) {
+          return !_.isEmpty(collection.data);
+        });
+        resolve(collections);
       } else {
         reject(err);
       }

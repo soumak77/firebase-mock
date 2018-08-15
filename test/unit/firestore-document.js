@@ -391,8 +391,23 @@ describe('MockFirestoreDocument', function () {
     });
 
     context('when not present', function () {
-      it('returns deeply nested collections of document', function (done) {
+      it('returns empty list of collections', function (done) {
         db.doc('not-existing').getCollections().then(function (colRefs) {
+          expect(colRefs).to.be.an('array');
+          expect(colRefs).to.have.length(0);
+          done();
+        });
+        db.flush();
+      });
+
+      it('skips collections that has no documents', function (done) {
+        db.doc('doc/subcol/subcol-doc').delete();
+        db.doc('doc/subcol2/subcol-doc').delete();
+        db.doc('doc/subcol/subcol-doc/deep-col/deep-doc').delete();
+        db.doc('doc/subcol/subcol-doc/deep-col2/deep-doc').delete();
+        db.flush();
+
+        db.doc('doc').getCollections().then(function (colRefs) {
           expect(colRefs).to.be.an('array');
           expect(colRefs).to.have.length(0);
           done();
