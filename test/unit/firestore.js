@@ -198,13 +198,13 @@ describe('MockFirestore', function () {
         batch.set(db.doc('col/batch-foo'), { foo: 'fooo' });
         batch.set(db.doc('col/batch-bar'), { bar: 'barr' });
 
-        expect(function () { db.flush() }).to.throw(Error)
+        expect(function () { db.flush(); }).to.throw(Error);
 
         var promises = [
           db.doc('col/batch-foo').get(),
           db.doc('col/batch-bar').get()
-        ]
-        db.flush()
+        ];
+        db.flush();
 
         Promise.all(promises).then(function (docs) {
           expect(docs[0].exists).to.eq(false);

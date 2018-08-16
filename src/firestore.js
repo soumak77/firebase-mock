@@ -88,7 +88,7 @@ var processBatchQueue = function (queue) {
       doc.delete();
     }
   });
-}
+};
 
 MockFirestore.prototype.batch = function () {
   var self = this;
