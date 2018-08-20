@@ -190,7 +190,12 @@ MockFirebase.prototype.update = function (changes, callback) {
     self._defer('update', _.toArray(arguments), function () {
       if (!err) {
         var base = self.getData();
-        var data = _.merge(_.isObject(base) ? base : {}, utils.updateToRtdbObject(changes));
+        var data = _.isObject(base) ? base : {};
+        // operate as a multi-set
+        _.keys(changes).forEach(function (key) {
+          var val = changes[key];
+          _.set(data, key.replace(/\//g, '.'), _.isObject(val) ? utils.updateToRtdbObject(val) : val);
+        });
         data = utils.removeEmptyRtdbProperties(data);
         self._dataChanged(data);
         resolve(data);

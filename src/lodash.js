@@ -14,6 +14,7 @@ module.exports = {
   forEach: require('lodash.foreach'),
   forIn: require('lodash.forin'),
   get: require('lodash.get'),
+  set: require('lodash.set'),
   has: require('lodash.has'),
   includes: require('lodash.includes'),
   indexOf: require('lodash.indexof'),
