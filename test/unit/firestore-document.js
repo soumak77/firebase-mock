@@ -92,6 +92,53 @@ describe('MockFirestoreDocument', function () {
     });
   });
 
+  describe('#create', function () {
+    it('creates a new doc', function (done) {
+      var createDoc = db.doc('createDoc');
+
+      createDoc.create({prop: 'title'});
+
+      createDoc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.get('prop')).to.equal('title');
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
+    it('creates a new doc with null values', function (done) {
+      var createDoc = db.doc('createDoc');
+
+      createDoc.create({prop: null});
+
+      createDoc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.get('prop')).to.equal(null);
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
+    it('throws an error when a doc already exists', function (done) {
+      var createDoc = db.doc('createDoc');
+      createDoc.create({prop: 'data'});
+      db.flush();
+
+      createDoc.create({otherProp: 'more data'})
+        .then(function() {
+          done('should have thrown an error');
+        })
+        .catch(function(error) {
+          expect(error.code).to.equal(6);
+          done();
+        });
+
+      db.flush();
+    });
+  });
+
   describe('#set', function () {
     it('sets value of doc', function (done) {
       doc.set({

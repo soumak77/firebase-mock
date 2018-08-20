@@ -81,6 +81,9 @@ MockFirestore.prototype.batch = function () {
         doc.set(data);
       }
     },
+    create: function(doc, data) {
+      doc.create(data);
+    },
     update: function(doc, data) {
       doc.update(data);
     },

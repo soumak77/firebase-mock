@@ -3,7 +3,7 @@
 When writing unit tests with Firebase Mock, you'll typically want to focus on covering one of two scenarios:
 
 1. Your client receives data from Firestore using a method like `get`
-2. Your client writes data to Firestore using a method like `set` or `update`
+2. Your client writes data to Firestore using a method like `set`, `create` or `update`
 
 While your application almost certainly does both reading and writing to Firestore, each test should try to cover as small a unit of functionality as possible.
 
