@@ -71,7 +71,7 @@ MockFirestore.prototype.runTransaction = function(transFunc) {
 
 MockFirestore.prototype.batch = function () {
   var self = this;
-  return {
+  var batch = {
     set: function(doc, data, opts) {
       var _opts = _.assign({}, { merge: false }, opts);
       if (_opts.merge) {
@@ -80,15 +80,18 @@ MockFirestore.prototype.batch = function () {
       else {
         doc.set(data);
       }
+      return batch;
     },
     create: function(doc, data) {
       doc.create(data);
     },
     update: function(doc, data) {
       doc.update(data);
+      return batch;
     },
     delete: function(doc) {
       doc.delete();
+      return batch;
     },
     commit: function() {
       if (self.queue.events.length > 0) {
@@ -97,6 +100,7 @@ MockFirestore.prototype.batch = function () {
       return Promise.resolve();
     }
   };
+  return batch;
 };
 
 MockFirestore.prototype.collection = function (path) {
