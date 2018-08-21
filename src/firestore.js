@@ -82,6 +82,8 @@ var processBatchQueue = function (queue) {
       } else {
         doc.set(data);
       }
+    } else if (method === 'create') {
+      doc.create(data);
     } else if (method === 'update') {
       doc.update(data);
     } else if (method === 'delete') {
