@@ -69,31 +69,51 @@ MockFirestore.prototype.runTransaction = function(transFunc) {
   });
 };
 
-MockFirestore.prototype.batch = function () {
-  var self = this;
-  var batch = {
-    set: function(doc, data, opts) {
-      var _opts = _.assign({}, { merge: false }, opts);
-      if (_opts.merge) {
+var processBatchQueue = function (queue) {
+  _.forEach(queue, function (queueItem) {
+    var method = queueItem.method;
+    var doc = queueItem.args[0];
+    var data = queueItem.args[1];
+    var opts = queueItem.args[2];
+
+    if (method === 'set') {
+      if (opts && opts.merge === true) {
         doc._update(data, { setMerge: true });
-      }
-      else {
+      } else {
         doc.set(data);
       }
+    } else if (method === 'create') {
+      doc.create(data);
+    } else if (method === 'update') {
+      doc.update(data);
+    } else if (method === 'delete') {
+      doc.delete();
+    }
+  });
+};
+
+MockFirestore.prototype.batch = function () {
+  var self = this;
+  var queue = [];
+  var batch = {
+    set: function(doc, data, opts) {
+      queue.push({ method: 'set', args: [doc, data, opts] });
       return batch;
     },
     create: function(doc, data) {
-      doc.create(data);
+      queue.push({ method: 'create', args: [doc, data] });
+      return batch;
     },
     update: function(doc, data) {
-      doc.update(data);
+      queue.push({ method: 'update', args: [doc, data] });
       return batch;
     },
     delete: function(doc) {
-      doc.delete();
+      queue.push({ method: 'delete', args: [doc] });
       return batch;
     },
     commit: function() {
+      processBatchQueue(queue);
       if (self.queue.events.length > 0) {
         self.flush();
       }

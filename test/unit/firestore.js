@@ -219,5 +219,33 @@ describe('MockFirestore', function () {
 
       return awaitChecks;
     });
+
+    context('when "batch.commit" is not called', function () {
+      afterEach(function () {
+        db.doc('col/batch-foo').delete();
+        db.doc('col/batch-bar').delete();
+        db.flush();
+      });
+
+      it('does not create documents', function (done) {
+        var batch = db.batch();
+        batch.set(db.doc('col/batch-foo'), { foo: 'fooo' });
+        batch.set(db.doc('col/batch-bar'), { bar: 'barr' });
+
+        expect(function () { db.flush(); }).to.throw('No deferred tasks to be flushed');
+
+        var promises = [
+          db.doc('col/batch-foo').get(),
+          db.doc('col/batch-bar').get()
+        ];
+        db.flush();
+
+        Promise.all(promises).then(function (docs) {
+          expect(docs[0].exists).to.eq(false);
+          expect(docs[1].exists).to.eq(false);
+          done();
+        });
+      });
+    });
   });
 });
