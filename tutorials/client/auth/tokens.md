@@ -19,7 +19,7 @@ mocksdk.auth().autoFlush();
 mocksdk.auth().createUser({
   uid: '123',
   email: 'test@test.com',
-  password 'abc123'
+  password: 'abc123'
 }).then(function(user) {
   // set user as current user for client logic
   mocksdk.auth().changeAuthState(user);

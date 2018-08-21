@@ -93,15 +93,22 @@ var processBatchQueue = function (queue) {
 MockFirestore.prototype.batch = function () {
   var self = this;
   var queue = [];
-  return {
+  var batch = {
     set: function(doc, data, opts) {
       queue.push({ method: 'set', args: [doc, data, opts] });
+      return batch;
+    },
+    create: function(doc, data) {
+      queue.push({ method: 'create', args: [doc, data] });
+      return batch;
     },
     update: function(doc, data) {
       queue.push({ method: 'update', args: [doc, data] });
+      return batch;
     },
     delete: function(doc) {
       queue.push({ method: 'delete', args: [doc] });
+      return batch;
     },
     commit: function() {
       processBatchQueue(queue);
@@ -111,6 +118,7 @@ MockFirestore.prototype.batch = function () {
       return Promise.resolve();
     }
   };
+  return batch;
 };
 
 MockFirestore.prototype.collection = function (path) {

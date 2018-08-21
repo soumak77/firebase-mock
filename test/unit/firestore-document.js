@@ -92,6 +92,53 @@ describe('MockFirestoreDocument', function () {
     });
   });
 
+  describe('#create', function () {
+    it('creates a new doc', function (done) {
+      var createDoc = db.doc('createDoc');
+
+      createDoc.create({prop: 'title'});
+
+      createDoc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.get('prop')).to.equal('title');
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
+    it('creates a new doc with null values', function (done) {
+      var createDoc = db.doc('createDoc');
+
+      createDoc.create({prop: null});
+
+      createDoc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.get('prop')).to.equal(null);
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
+    it('throws an error when a doc already exists', function (done) {
+      var createDoc = db.doc('createDoc');
+      createDoc.create({prop: 'data'});
+      db.flush();
+
+      createDoc.create({otherProp: 'more data'})
+        .then(function() {
+          done('should have thrown an error');
+        })
+        .catch(function(error) {
+          expect(error.code).to.equal(6);
+          done();
+        });
+
+      db.flush();
+    });
+  });
+
   describe('#set', function () {
     it('sets value of doc', function (done) {
       doc.set({
@@ -347,6 +394,73 @@ describe('MockFirestoreDocument', function () {
       result = doc.get();
       db.flush();
       expect(result).to.eventually.equal(null);
+    });
+  });
+
+  describe('#getCollections', function () {
+    beforeEach(function () {
+      db.doc('doc/subcol/subcol-doc').set({ foo: 'bar' });
+      db.doc('doc/subcol2/subcol-doc').set({ foo: 'bar' });
+      db.doc('doc/subcol/subcol-doc/deep-col/deep-doc').set({ foo: 'bar' });
+      db.doc('doc/subcol/subcol-doc/deep-col2/deep-doc').set({ foo: 'bar' });
+      db.flush();
+    });
+    afterEach(function () {
+      db.doc('doc/subcol/subcol-doc').delete();
+      db.doc('doc/subcol2/subcol-doc').delete();
+      db.doc('doc/subcol/subcol-doc/deep-col/deep-doc').delete();
+      db.doc('doc/subcol/subcol-doc/deep-col2/deep-doc').delete();
+      db.flush();
+    });
+
+    context('when present', function () {
+      it('returns collections of document', function (done) {
+        db.doc('doc').getCollections().then(function (colRefs) {
+          expect(colRefs).to.be.an('array');
+          expect(colRefs).to.have.length(2);
+          expect(colRefs[0].path).to.equal('doc/subcol');
+          expect(colRefs[1].path).to.equal('doc/subcol2');
+          done();
+        });
+        db.flush();
+      });
+
+      it('returns deeply nested collections of document', function (done) {
+        db.doc('doc/subcol/subcol-doc').getCollections().then(function (colRefs) {
+          expect(colRefs).to.be.an('array');
+          expect(colRefs).to.have.length(2);
+          expect(colRefs[0].path).to.equal('doc/subcol/subcol-doc/deep-col');
+          expect(colRefs[1].path).to.equal('doc/subcol/subcol-doc/deep-col2');
+          done();
+        });
+        db.flush();
+      });
+    });
+
+    context('when not present', function () {
+      it('returns empty list of collections', function (done) {
+        db.doc('not-existing').getCollections().then(function (colRefs) {
+          expect(colRefs).to.be.an('array');
+          expect(colRefs).to.have.length(0);
+          done();
+        });
+        db.flush();
+      });
+
+      it('skips collections that has no documents', function (done) {
+        db.doc('doc/subcol/subcol-doc').delete();
+        db.doc('doc/subcol2/subcol-doc').delete();
+        db.doc('doc/subcol/subcol-doc/deep-col/deep-doc').delete();
+        db.doc('doc/subcol/subcol-doc/deep-col2/deep-doc').delete();
+        db.flush();
+
+        db.doc('doc').getCollections().then(function (colRefs) {
+          expect(colRefs).to.be.an('array');
+          expect(colRefs).to.have.length(0);
+          done();
+        });
+        db.flush();
+      });
     });
   });
 });

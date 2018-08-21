@@ -87,6 +87,40 @@ MockFirestoreDocument.prototype.get = function () {
   });
 };
 
+MockFirestoreDocument.prototype._validateDoesNotExist = function (data) {
+  var ALREADY_EXISTS_CODE = 6;
+
+  if (data !== null) {
+    var err = new Error('Cannot create a document which already exists');
+    err.code = ALREADY_EXISTS_CODE;
+    return err;
+  }
+  return null;
+};
+
+MockFirestoreDocument.prototype.create = function (data, callback) {
+  var err = this._nextErr('create');
+  data = _.cloneDeep(data);
+
+  var self = this;
+  return new Promise(function (resolve, reject) {
+    self._defer('create', _.toArray(arguments), function () {
+
+      var base = self._getData();
+      err = err || self._validateDoesNotExist(base);
+        if (err === null) {
+        self._dataChanged(data);
+        resolve();
+      } else {
+          if (callback) {
+            callback(err);
+        }
+          reject(err);
+      }
+    });
+  });
+};
+
 MockFirestoreDocument.prototype.set = function (data, opts, callback) {
   var _opts = _.assign({}, { merge: false }, opts);
   if (_opts.merge) {
@@ -158,6 +192,29 @@ MockFirestoreDocument.prototype.delete = function (callback) {
       if (err === null) {
         self._dataChanged(null);
         resolve(null);
+      } else {
+        reject(err);
+      }
+    });
+  });
+};
+
+/**
+ * Fetches the subcollections that are direct children of the document.
+ * @see https://cloud.google.com/nodejs/docs/reference/firestore/0.15.x/DocumentReference#getCollections
+ */
+MockFirestoreDocument.prototype.getCollections = function () {
+  var err = this._nextErr('getCollections');
+  var self = this;
+  return new Promise(function (resolve, reject) {
+    self._defer('getCollections', _.toArray(arguments), function () {
+      if (err === null) {
+        var collections = _.toArray(this.children);
+        // Filter out empty collections
+        collections = _.filter(collections, function (collection) {
+          return !_.isEmpty(collection.data);
+        });
+        resolve(collections);
       } else {
         reject(err);
       }

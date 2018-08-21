@@ -148,6 +148,9 @@ describe('MockFirestore', function () {
         expect(db.collection('collections').doc('a').get()).to.eventually.have.property('exists').equal(true)
       ]).then(function() {
         var batch = db.batch();
+        batch.create(db.doc('docToCreate'), {
+          name: 'abc'
+        });
         batch.update(db.doc('doc'), {
           name: 'abc'
         });
@@ -157,6 +160,7 @@ describe('MockFirestore', function () {
         batch.delete(db.collection('collections').doc('a'));
         batch.commit().then(function() {
           Promise.all([
+            expect(db.doc('docToCreate').get()).to.eventually.have.property('exists').equal(true),
             expect(db.doc('doc2').get()).to.eventually.have.property('exists').equal(true),
             expect(db.collection('collections').doc('a').get()).to.eventually.have.property('exists').equal(false)
           ]).then(function() {
@@ -186,6 +190,36 @@ describe('MockFirestore', function () {
       db.flush();
     });
 
+    it('supports method chaining', function () {
+      var doc1 = db.doc('doc1');
+      var doc2 = db.doc('doc2');
+      var doc3 = db.doc('doc3');
+      var doc4 = db.doc('doc4');
+
+      doc3.set({value: -1});
+      doc4.set({value: 4});
+
+      db.batch()
+        .set(doc1, {value: 1})
+        .set(doc2, {value: 2})
+        .update(doc3, {value: 3})
+        .delete(doc4)
+        .commit();
+
+      var awaitChecks = Promise
+        .all([doc1.get(), doc2.get(), doc3.get(), doc4.get()])
+        .then(function(snaps) {
+          expect(snaps[0].data()).to.deep.equal({value: 1});
+          expect(snaps[1].data()).to.deep.equal({value: 2});
+          expect(snaps[2].data()).to.deep.equal({value: 3});
+          expect(snaps[3].exists).to.equal(false);
+        });
+
+      db.flush();
+
+      return awaitChecks;
+    });
+    
     context('when "batch.commit" is not called', function () {
       afterEach(function () {
         db.doc('col/batch-foo').delete();

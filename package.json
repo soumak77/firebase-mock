@@ -1,6 +1,6 @@
 {
   "name": "firebase-mock",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "Firebase mock library for writing unit tests",
   "main": "./src",
   "scripts": {
@@ -61,6 +61,7 @@
     "lodash.orderby": "^4.6.0",
     "lodash.reduce": "^4.6.0",
     "lodash.remove": "^4.7.0",
+    "lodash.set": "^4.3.2",
     "lodash.size": "^4.2.0",
     "lodash.toarray": "^4.4.0",
     "rsvp": "^3.6.2"
