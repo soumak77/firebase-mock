@@ -57,6 +57,15 @@ MockFirestore.prototype.toString = function () {
   return this.path;
 };
 
+MockFirestore.prototype.getAll = function(/* ...docs */) {
+  var docs = Array.from(arguments);
+  return Promise.all(
+    docs.map(function(doc) {
+      return doc.get();
+    })
+  );
+};
+
 MockFirestore.prototype.runTransaction = function(transFunc) {
   var batch = this.batch();
   batch.get = function(doc) {

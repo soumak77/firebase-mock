@@ -248,4 +248,26 @@ describe('MockFirestore', function () {
       });
     });
   });
+
+  describe('#getAll', function() {
+    it('gets the value of all passed documents', function() {
+      var doc1 = db.doc('doc1');
+      var doc2 = db.doc('doc2');
+      var doc3 = db.doc('doc3');
+
+      doc1.set({value: 1});
+      doc2.set({value: 2});
+
+      var getAll = db
+        .getAll(doc1, doc2, doc3);
+
+      db.flush();
+
+      return getAll.then(function(snaps) {
+        expect(snaps[0].data()).to.deep.equal({value: 1});
+        expect(snaps[1].data()).to.deep.equal({value: 2});
+        expect(snaps[2].exists).to.equal(false);
+      });
+    });
+  });
 });
