@@ -219,7 +219,7 @@ describe('MockFirestore', function () {
 
       return awaitChecks;
     });
-    
+
     context('when "batch.commit" is not called', function () {
       afterEach(function () {
         db.doc('col/batch-foo').delete();
@@ -232,7 +232,7 @@ describe('MockFirestore', function () {
         batch.set(db.doc('col/batch-foo'), { foo: 'fooo' });
         batch.set(db.doc('col/batch-bar'), { bar: 'barr' });
 
-        expect(function () { db.flush(); }).to.throw(Error);
+        expect(function () { db.flush(); }).to.throw('No deferred tasks to be flushed');
 
         var promises = [
           db.doc('col/batch-foo').get(),
