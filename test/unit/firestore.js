@@ -125,16 +125,26 @@ describe('MockFirestore', function () {
             transaction.update(db.doc('doc'), {
               name: 'abc'
             });
-            return 'cba';
           });
-        }).then(function(transactionReturn) {
+        }).then(function() {
           db.doc('doc').get().then(function(doc2) {
             expect(doc2.get('name')).to.equal('abc');
-            expect(transactionReturn).to.equal('cba');
             done();
           }).catch(done);
         }).catch(done);
       }).catch(done);
+    });
+
+    it('returns the return value of the passed function', function () {
+      db.autoFlush();
+
+      return db.runTransaction(function(transaction) {
+        return transaction.get(db.doc('doc')).then(function() {
+          return 'cba';
+        });
+      }).then(function(transactionReturn) {
+        expect(transactionReturn).to.equal('cba');
+      });
     });
   });
 
