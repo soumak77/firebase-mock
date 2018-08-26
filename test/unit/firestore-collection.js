@@ -268,6 +268,37 @@ describe('MockFirestoreCollection', function () {
     });
   });
 
+  describe('#stream', function () {
+    function makeSnapComparable(snap) {
+      return {
+        id: snap.id,
+        data: snap.data(),
+      };
+    }
+
+    it('returns a stream that emits all results', function (done) {
+      collection.get().then(function (snaps) {
+        var streamDocs = [];
+
+        collection.stream()
+          .on('data', function(snap) {
+            streamDocs.push(makeSnapComparable(snap));
+          })
+          .on('end', function () {
+            try {
+              expect(streamDocs).to.eql(snaps.docs.map(makeSnapComparable));
+              done();
+            } catch (err) {
+              done(err);
+            }
+          });
+
+        db.flush();
+      }).catch(done);
+      db.flush();
+    });
+  });
+
   describe('#orderBy', function () {
     it('allow calling orderBy() on collection', function() {
       expect(function() {
