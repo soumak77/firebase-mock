@@ -134,6 +134,18 @@ describe('MockFirestore', function () {
         }).catch(done);
       }).catch(done);
     });
+
+    it('returns the return value of the passed function', function () {
+      db.autoFlush();
+
+      return db.runTransaction(function(transaction) {
+        return transaction.get(db.doc('doc')).then(function() {
+          return 'cba';
+        });
+      }).then(function(transactionReturn) {
+        expect(transactionReturn).to.equal('cba');
+      });
+    });
   });
 
   describe('#batch', function () {
