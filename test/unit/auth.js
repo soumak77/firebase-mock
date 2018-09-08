@@ -79,8 +79,7 @@ describe('Auth', function () {
     it('gets a copy of the user by email', function () {
       ref.createUser({
         uid: 'bd',
-        email: 'ben@example.com',
-        password: '123'
+        email: 'ben@example.com'
       });
       var found = ref.getUserByEmail('ben@example.com');
       return Promise.all([
@@ -331,6 +330,16 @@ describe('Auth', function () {
       });
     });
 
+    it('creates a new user without a password', function () {
+      ref.createUser({
+        email: 'new1@new1.com'
+      }, spy);
+      ref.flush();
+      expect(spy).to.have.been.calledWithMatch(null, {
+        uid: 'simplelogin:1'
+      });
+    });
+
     it('creates a new user and returns promise', function (done) {
       var promise = ref.createUser({
         email: 'new1@new1.com',
@@ -392,14 +401,6 @@ describe('Auth', function () {
         password: 'foo'
       }))
       .to.throw('must contain the key "email"');
-    });
-
-    it('fails if password is not a string', function () {
-      expect(ref.createUser.bind(ref, {
-        email: 'email@domain.com',
-        password: true
-      }))
-      .to.throw('must contain the key "password"');
     });
 
     it('fails if user already exists', function () {

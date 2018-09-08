@@ -258,8 +258,7 @@ FirebaseAuth.prototype.createUserWithEmailAndPassword = function (email, passwor
 
 FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
   validateCredentials('createUser', credentials, [
-    'email',
-    'password'
+    'email'
   ]);
   return this._createUser('createUser', credentials, onComplete);
 };
