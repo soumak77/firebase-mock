@@ -1,4 +1,4 @@
-/** firebase-mock - v2.2.6
+/** firebase-mock - v2.2.7
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -49849,8 +49849,7 @@ FirebaseAuth.prototype.createUserWithEmailAndPassword = function (email, passwor
 
 FirebaseAuth.prototype.createUser = function (credentials, onComplete) {
   validateCredentials('createUser', credentials, [
-    'email',
-    'password'
+    'email'
   ]);
   return this._createUser('createUser', credentials, onComplete);
 };
