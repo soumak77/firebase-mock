@@ -546,6 +546,15 @@ describe('MockFirebase', function () {
       expect(ref.getData().some).to.eql({prop: 12});
     });
 
+    it('can work with nested paths beginning with /', function () {
+      var update = {};
+      update['some/prop/withoutSlash'] = 12;
+      update['/some/prop/withSlash'] = 12;
+      ref.update(update);
+      ref.flush();
+      expect(ref.getData().some.prop).to.eql({withoutSlash: 12, withSlash: 12});
+    });
+
     it('overrides the paths with existing data', function () {
       ref.child('some').child('prop').set({foo: 1});
       ref.flush();
