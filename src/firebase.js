@@ -146,6 +146,7 @@ MockFirebase.prototype.toString = function () {
 };
 
 MockFirebase.prototype.child = function (childPath) {
+  if (childPath === '/') return this;
   assert(childPath, 'A child path is required');
   var parts = _.compact(childPath.split('/'));
   var childKey = parts.shift();
