@@ -1,4 +1,4 @@
-/** firebase-mock - v2.2.9
+/** firebase-mock - v2.2.10
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -50319,6 +50319,7 @@ MockFirebase.prototype.toString = function () {
 };
 
 MockFirebase.prototype.child = function (childPath) {
+  if (childPath === '/') return this;
   assert(childPath, 'A child path is required');
   var parts = _.compact(childPath.split('/'));
   var childKey = parts.shift();
