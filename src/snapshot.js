@@ -16,7 +16,10 @@ function MockDataSnapshot (ref, data, priority) {
 
 MockDataSnapshot.prototype.child = function (key) {
   var ref = this.ref.child(key);
-  var data = this.hasChild(key) ? this._snapshotdata[key] : null;
+  var data = null;
+  if (_.isObject(this._snapshotdata) && !_.isUndefined(this._snapshotdata[key])) {
+    data = this._snapshotdata[key];
+  }
   var priority = this.ref.child(key).priority;
   return new MockDataSnapshot(ref, data, priority);
 };
