@@ -1,4 +1,4 @@
-/** firebase-mock - v2.2.8
+/** firebase-mock - v2.2.9
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -50367,7 +50367,7 @@ MockFirebase.prototype.update = function (changes, callback) {
         // operate as a multi-set
         _.keys(changes).forEach(function (key) {
           var val = changes[key];
-          _.set(data, key.replace(/\//g, '.'), _.isObject(val) ? utils.updateToRtdbObject(val) : val);
+          _.set(data, key.replace(/^\//, '').replace(/\//g, '.'), _.isObject(val) ? utils.updateToRtdbObject(val) : val);
         });
         data = utils.removeEmptyRtdbProperties(data);
         self._dataChanged(data);
