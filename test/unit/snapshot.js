@@ -63,6 +63,18 @@ describe('DataSnapshot', function () {
       expect(child.val()).to.equal('val');
     });
 
+    it('uses child data for false values', function () {
+      var parent = new Snapshot(ref, {key: false});
+      var child = parent.child('key');
+      expect(child.val()).to.equal(false);
+    });
+
+    it('uses child data for 0 values', function () {
+      var parent = new Snapshot(ref, {key: 0});
+      var child = parent.child('key');
+      expect(child.val()).to.equal(0);
+    });
+
     it('uses null when there is no child data', function () {
       var parent = new Snapshot(ref);
       var child = parent.child('key');
