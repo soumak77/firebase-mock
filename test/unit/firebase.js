@@ -319,6 +319,10 @@ describe('MockFirebase', function () {
       expect(ref.ref).to.equal(ref);
     });
 
+    it('child / returns same reference', function () {
+      expect(ref.child('/')).to.equal(ref);
+    });
+
   });
 
   describe('#set', function () {
