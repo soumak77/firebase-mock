@@ -1,4 +1,4 @@
-/** firebase-mock - v2.2.7
+/** firebase-mock - v2.2.8
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -52442,7 +52442,10 @@ function MockDataSnapshot (ref, data, priority) {
 
 MockDataSnapshot.prototype.child = function (key) {
   var ref = this.ref.child(key);
-  var data = this.hasChild(key) ? this._snapshotdata[key] : null;
+  var data = null;
+  if (_.isObject(this._snapshotdata) && !_.isUndefined(this._snapshotdata[key])) {
+    data = this._snapshotdata[key];
+  }
   var priority = this.ref.child(key).priority;
   return new MockDataSnapshot(ref, data, priority);
 };
