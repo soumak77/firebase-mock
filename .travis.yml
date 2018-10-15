@@ -4,6 +4,7 @@ node_js:
 - "4.5"
 - "5.12"
 - "6.4"
+- "8"
 before_script:
 - gulp lint
 script:
