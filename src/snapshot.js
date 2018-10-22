@@ -15,6 +15,7 @@ function MockDataSnapshot (ref, data, priority) {
 }
 
 MockDataSnapshot.prototype.child = function (path) {
+  if (typeof path === 'number') path = String(path);
   // Strip leading or trailing /
   path = path.replace(/^\/|\/$/g, '');
   var ref = this.ref.child(path);
