@@ -119,6 +119,18 @@ describe('DataSnapshot', function () {
       expect(child.getPriority()).to.equal(10);
     });
 
+    it('allows array indexes', function () {
+      var parent = new Snapshot(ref, ['foo', 'bar']);
+      var child = parent.child(0);
+      expect(child.val()).to.equal('foo');
+    });
+
+    it('allows array indexes in multiple paths', function () {
+      var parent = new Snapshot(ref, { key: { array: ['foo', 'bar'] }});
+      var child = parent.child('key/array/1');
+      expect(child.val()).to.equal('bar');
+    });
+
   });
 
   describe('#exists', function () {
