@@ -63,6 +63,18 @@ describe('DataSnapshot', function () {
       expect(child.val()).to.equal('val');
     });
 
+    it('uses child data starting with /', function () {
+      var parent = new Snapshot(ref, {key: 'val'});
+      var child = parent.child('/key');
+      expect(child.val()).to.equal('val');
+    });
+
+    it('uses child data ending with /', function () {
+      var parent = new Snapshot(ref, {key: 'val'});
+      var child = parent.child('key/');
+      expect(child.val()).to.equal('val');
+    });
+
     it('uses child data for false values', function () {
       var parent = new Snapshot(ref, {key: false});
       var child = parent.child('key');
@@ -72,6 +84,24 @@ describe('DataSnapshot', function () {
     it('uses child data for 0 values', function () {
       var parent = new Snapshot(ref, {key: 0});
       var child = parent.child('key');
+      expect(child.val()).to.equal(0);
+    });
+
+    it('uses child data when accessing with multiple paths', function () {
+      var parent = new Snapshot(ref, { key: { value: 'val' }});
+      var child = parent.child('key/value');
+      expect(child.val()).to.equal('val');
+    });
+
+    it('uses child data when accessing with multiple paths for false values', function () {
+      var parent = new Snapshot(ref, { key: { value: false }});
+      var child = parent.child('key/value');
+      expect(child.val()).to.equal(false);
+    });
+
+    it('uses child data when accessing with multiple paths for 0 values', function () {
+      var parent = new Snapshot(ref, { key: { value: 0 }});
+      var child = parent.child('key/value');
       expect(child.val()).to.equal(0);
     });
 
@@ -87,6 +117,18 @@ describe('DataSnapshot', function () {
       ref.flush();
       var child = parent.child('key');
       expect(child.getPriority()).to.equal(10);
+    });
+
+    it('allows array indexes', function () {
+      var parent = new Snapshot(ref, ['foo', 'bar']);
+      var child = parent.child(0);
+      expect(child.val()).to.equal('foo');
+    });
+
+    it('allows array indexes in multiple paths', function () {
+      var parent = new Snapshot(ref, { key: { array: ['foo', 'bar'] }});
+      var child = parent.child('key/array/1');
+      expect(child.val()).to.equal('bar');
     });
 
   });
@@ -135,6 +177,24 @@ describe('DataSnapshot', function () {
       var snapshot = new Snapshot(ref, {foo: 'bar'});
       expect(snapshot.hasChild('foo')).to.equal(true);
       expect(snapshot.hasChild('bar')).to.equal(false);
+    });
+
+    it('tests for the key starting with /', function () {
+      var snapshot = new Snapshot(ref, {foo: 'bar'});
+      expect(snapshot.hasChild('/foo')).to.equal(true);
+      expect(snapshot.hasChild('/bar')).to.equal(false);
+    });
+
+    it('tests for the key ending with /', function () {
+      var snapshot = new Snapshot(ref, {foo: 'bar'});
+      expect(snapshot.hasChild('foo/')).to.equal(true);
+      expect(snapshot.hasChild('bar/')).to.equal(false);
+    });
+
+    it('tests for the key with multiple paths', function () {
+      var snapshot = new Snapshot(ref, {key: {foo: 'bar'}});
+      expect(snapshot.hasChild('key/foo')).to.equal(true);
+      expect(snapshot.hasChild('key/bar')).to.equal(false);
     });
 
   });

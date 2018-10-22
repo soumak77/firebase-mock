@@ -14,14 +14,34 @@ function MockDataSnapshot (ref, data, priority) {
   };
 }
 
-MockDataSnapshot.prototype.child = function (key) {
-  var ref = this.ref.child(key);
+MockDataSnapshot.prototype.child = function (path) {
+  if (typeof path === 'number') path = String(path);
+  // Strip leading or trailing /
+  path = path.replace(/^\/|\/$/g, '');
+  var ref = this.ref.child(path);
   var data = null;
+  
+  var key;
+  var firstPathIdx = path.indexOf('/');
+  if (firstPathIdx === -1) {
+    // Single path
+    key = path;
+    path = null;
+  } else {
+    // Multiple paths
+    key = path.slice(0, firstPathIdx);
+    path = path.slice(firstPathIdx + 1);
+  }
   if (_.isObject(this._snapshotdata) && !_.isUndefined(this._snapshotdata[key])) {
     data = this._snapshotdata[key];
   }
-  var priority = this.ref.child(key).priority;
-  return new MockDataSnapshot(ref, data, priority);
+  var snapshot = new MockDataSnapshot(ref, data, ref.priority);
+  if (path === null) {
+    return snapshot;
+  } else {
+    // Look for child
+    return snapshot.child(path);
+  }
 };
 
 MockDataSnapshot.prototype.val = function () {
@@ -40,7 +60,7 @@ MockDataSnapshot.prototype.forEach = function (callback, context) {
 };
 
 MockDataSnapshot.prototype.hasChild = function (path) {
-  return !!(this._snapshotdata && this._snapshotdata[path]);
+  return this.child(path).exists();
 };
 
 MockDataSnapshot.prototype.hasChildren = function () {
