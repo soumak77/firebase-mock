@@ -189,5 +189,3 @@ function extractName(path) {
 }
 
 module.exports = MockFirestoreQuery;
-Octotree is enabled on this page. Click this button or press cmd shift s (or ctrl shift s) to show it.
-Support us  •  Feedback?
