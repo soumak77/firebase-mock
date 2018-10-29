@@ -125,30 +125,29 @@ MockFirestoreQuery.prototype.stream = function () {
 MockFirestoreQuery.prototype.where = function (property, operator, value) {
   var query;
 
-  // check if unsupported operator
-  if (operator !== '==') {
+  const operatorAllowedArray = ['=', '==', '<', '>', '<=', '>='];
+
+  let isOperatorAllowed = _.indexOf(operatorAllowedArray, operator) > -1 ;
+
+  if(!isOperatorAllowed){
     console.warn('Using unsupported where() operator for firebase-mock, returning entire dataset');
-    return this;
-  } else {
-    if (_.size(this.data) !== 0) {
-      var results = {};
-      _.forEach(this.data, function(data, key) {
-        switch (operator) {
-          case '==':
-            if (_.isEqual(_.get(data, property), value)) {
-              results[key] = _.cloneDeep(data);
-            }
-            break;
-          default:
-            results[key] = _.cloneDeep(data);
-            break;
-        }
-      });
-      return new MockFirestoreQuery(this.path, results, this.parent, this.id);
-    } else {
-      return new MockFirestoreQuery(this.path, null, this.parent, this.id);
-    }
+     return this;
   }
+
+  let results = null;
+ 
+  if (_.size(this.data) !== 0) {
+        results = {};
+      _.forEach(this.data, function(data, key) {
+        let dataValue = _.get(data, property);
+        let conditionString = dataValue + ' ' +  operator + value;
+
+        let isTrue = eval(conditionString);
+        if (isTrue)
+          results[key] = _.cloneDeep(data);
+      });
+  }
+  return new MockFirestoreQuery(this.path, results, this.parent, this.id);
 };
 
 MockFirestoreQuery.prototype.orderBy = function (property, direction) {
