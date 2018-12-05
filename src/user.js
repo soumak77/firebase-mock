@@ -16,7 +16,7 @@ function MockFirebaseUser(ref, data) {
   this.emailVerified = !!data.emailVerified;
   this.isAnonymous = !!data.isAnonymous;
   this.metadata = data.metadata;
-  this.providerData = data.providerData;
+  this.providerData = data.providerData || [];
   this.providerId = data.providerId;
   this.refreshToken = data.refreshToken;
 }
@@ -110,5 +110,27 @@ MockFirebaseUser.prototype.getIdToken = function (forceRefresh) {
     resolve(self._idtoken);
   });
 };
+
+MockFirebaseUser.prototype.toJSON = function() {
+  const json = {
+    uid: this.uid,
+    email: this.email,
+    emailVerified: this.emailVerified,
+    displayName: this.displayName,
+    photoURL: this.photoURL,
+    phoneNumber: this.phoneNumber,
+    disabled: this.disabled,
+    metadata: this.metadata && this.metadata.toJSON(),
+    passwordHash: this.passwordHash,
+    passwordSalt: this.passwordSalt,
+    customClaims: JSON.parse(JSON.stringify(this.customClaims)),
+    tokensValidAfterTime: this.tokensValidAfterTime,
+  };
+  json.providerData = [];
+  for (const entry of this.providerData) {
+    json.providerData.push(entry.toJSON());
+  }
+  return json;
+}
 
 module.exports = MockFirebaseUser;
