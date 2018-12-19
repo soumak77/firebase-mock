@@ -110,13 +110,19 @@ MockFirestoreQuery.prototype.get = function () {
 };
 
 MockFirestoreQuery.prototype.stream = function () {
-  var stream = new Stream();
+  var stream = new Stream.Transform({
+    objectMode: true,
+    transform: function (chunk, encoding, done) {
+      this.push(chunk);
+      done();
+    }
+  });
 
   this.get().then(function (snapshots) {
     snapshots.forEach(function (snapshot) {
-      stream.emit('data', snapshot);
+      stream.write(snapshot);
     });
-    stream.emit('end');
+    stream.end();
   });
 
   return stream;
