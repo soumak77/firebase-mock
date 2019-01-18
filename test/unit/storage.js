@@ -22,6 +22,12 @@ describe('Storage', function () {
       var bucket = storage.bucket('name');
       expect(bucket.name).to.equal('name');
     });
+
+    it('should not recreate bucket with the same name', function() {
+      var bucket1 = storage.bucket('name');
+      var bucket2 = storage.bucket('name');
+      expect(bucket1).to.eq(bucket2);
+    });
   });
 
   describe('#ref', function() {
