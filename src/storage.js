@@ -41,7 +41,7 @@ MockStorage.prototype.ref = function(path) {
 };
 
 MockStorage.prototype.bucket = function(name) {
-  return new MockStorageBucket(this, name);
+  return this.buckets[name] ? this.buckets[name] : new MockStorageBucket(this, name);
 };
 
 module.exports = MockStorage;

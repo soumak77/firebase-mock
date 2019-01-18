@@ -82,6 +82,33 @@ describe('StorageFile', function () {
         expect(fs.existsSync(filePath)).to.equal(true);
       });
     });
+
+    it('should send file as a buffer', function() {
+      var file = new StorageFile(bucket, 'filename');
+      var content = Buffer.from("file_content");
+
+      return file
+        .save(content)
+        .then(function() {
+          return file.download();
+        })
+        .then(function(buffer) {
+          expect(buffer[0]).to.deep.equal(content);
+        });
+    });
+
+    it('should access file from different refs via same bucket', function() {
+      var content = Buffer.from("file_content");
+
+      return bucket.file('filename')
+        .save(content)
+        .then(function() {
+          return bucket.file('filename').download();
+        })
+        .then(function(buffer) {
+          expect(buffer[0]).to.deep.equal(content);
+        });
+    });
   });
 
   describe('#delete', function() {
