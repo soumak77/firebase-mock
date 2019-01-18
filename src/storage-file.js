@@ -44,14 +44,21 @@ MockStorageFile.prototype.getSignedUrl = function() {
 
 MockStorageFile.prototype.download = function(args) {
   var self = this;
-  return new Promise(function(resolve, reject) {
-    fs.writeFile(args.destination, self._contents, function(err) {
-      if (err) {
-        reject(err);
-      } else {
-        resolve();
-      }
+
+  if (args && args.destination) {
+    return new Promise(function(resolve, reject) {
+      fs.writeFile(args.destination, self._contents, function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
     });
+  }
+
+  return new Promise(function(resolve, reject) {
+    resolve(self._contents);
   });
 };
 
