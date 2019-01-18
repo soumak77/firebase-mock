@@ -96,6 +96,19 @@ describe('StorageFile', function () {
           expect(buffer).to.deep.equal(content);
         });
     });
+
+    it('should access file from different refs via same bucket', function() {
+      var content = Buffer.from("file_content");
+
+      return bucket.file('filename')
+        .save(content)
+        .then(function() {
+          return bucket.file('filename').download();
+        })
+        .then(function(buffer) {
+          expect(buffer).to.deep.equal(content);
+        });
+    });
   });
 
   describe('#delete', function() {

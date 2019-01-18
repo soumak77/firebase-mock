@@ -15,7 +15,7 @@ function MockStorageBucket(storage, name) {
 }
 
 MockStorageBucket.prototype.file = function (name) {
-  return new MockStorageFile(this, name);
+  return this.files[name] ? this.files[name] : new MockStorageFile(this, name);
 };
 
 MockStorageBucket.prototype.deleteFile = function (name) {
