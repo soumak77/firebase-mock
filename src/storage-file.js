@@ -58,7 +58,7 @@ MockStorageFile.prototype.download = function(args) {
   }
 
   return new Promise(function(resolve, reject) {
-    resolve(self._contents);
+    resolve([self._contents]);
   });
 };
 

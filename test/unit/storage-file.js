@@ -93,7 +93,7 @@ describe('StorageFile', function () {
           return file.download();
         })
         .then(function(buffer) {
-          expect(buffer).to.deep.equal(content);
+          expect(buffer[0]).to.deep.equal(content);
         });
     });
 
@@ -106,7 +106,7 @@ describe('StorageFile', function () {
           return bucket.file('filename').download();
         })
         .then(function(buffer) {
-          expect(buffer).to.deep.equal(content);
+          expect(buffer[0]).to.deep.equal(content);
         });
     });
   });
