@@ -23,9 +23,14 @@ function MockFirestoreQuery(path, data, parent, name) {
   this.orderedDirections = [];
   this.limited = 0;
   this._setData(data);
+  this.onSnapshotSubscribers = [];
 }
 
 MockFirestoreQuery.prototype.flush = function (delay) {
+  var self = this;
+  _.forEach(this.onSnapshotSubscribers, function (subscriber) {
+    self._defer('onSnapshot', _.toArray(arguments), subscriber);
+  });
   this.queue.flush(delay);
   return this;
 };
@@ -67,37 +72,11 @@ MockFirestoreQuery.prototype.get = function () {
   var self = this;
   return new Promise(function (resolve, reject) {
     self._defer('get', _.toArray(arguments), function () {
-      var results = {};
+      var results = self._results();
       var limit = 0;
 
       if (err === null) {
         if (_.size(self.data) !== 0) {
-          if (self.orderedProperties.length === 0) {
-            _.forEach(self.data, function(data, key) {
-              if (self.limited <= 0 || limit < self.limited) {
-                results[key] = _.cloneDeep(data);
-                limit++;
-              }
-            });
-          } else {
-            var queryable = [];
-            _.forEach(self.data, function(data, key) {
-              queryable.push({
-                data: data,
-                key: key
-              });
-            });
-
-            queryable = _.orderBy(queryable, _.map(self.orderedProperties, function(p) { return 'data.' + p; }), self.orderedDirections);
-
-            queryable.forEach(function(q) {
-              if (self.limited <= 0 || limit < self.limited) {
-                results[q.key] = _.cloneDeep(q.data);
-                limit++;
-              }
-            });
-          }
-
           resolve(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id), results));
         } else {
           resolve(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id)));
@@ -162,6 +141,83 @@ MockFirestoreQuery.prototype.limit = function (limit) {
   var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id);
   query.limited = limit;
   return query;
+};
+
+MockFirestoreQuery.prototype.onSnapshot = function (optionsOrObserverOrOnNext, observerOrOnNextOrOnError, onErrorArg) {
+  var err = this._nextErr('onSnapshot');
+  var self = this;
+  var onNext = optionsOrObserverOrOnNext;
+  var onError = observerOrOnNextOrOnError;
+
+  if (_.has(optionsOrObserverOrOnNext, 'includeMetadataChanges')) {
+    // Note this doesn't truly mimic the firestore metadata changes behavior, however
+    // since everything is syncronous, there isn't any difference in behavior.
+    onNext = observerOrOnNextOrOnError;
+    onError = onErrorArg;
+  }
+  var context = {
+    data: self._results(),
+  };
+  var onSnapshot = function () {
+    // compare the current state to the one from when this function was created
+    // and send the data to the callback if different.
+    if (err === null) {
+      this.get().then(function (querySnapshot) {
+        var results = self._results();
+        if (JSON.stringify(results) !== JSON.stringify(context.data)) {
+          onNext(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id), results));
+          // onNext(new QuerySnapshot(self.id, self.ref, results));
+          context.data = results;
+        }
+      });
+    } else {
+      onError(err);
+    }
+  };
+  this.onSnapshotSubscribers.push(onSnapshot);
+
+  // return the unsubscribe function
+  return function () {
+    self.onSnapshotSubscribers.pop(onSnapshot);
+  };
+};
+
+MockFirestoreQuery.prototype._results = function () {
+  var results = {};
+  var limit = 0;
+
+  if (_.size(this.data) === 0) {
+    return results;
+  }
+
+  var self = this;
+  if (this.orderedProperties.length === 0) {
+    _.forEach(this.data, function(data, key) {
+      if (self.limited <= 0 || limit < self.limited) {
+        results[key] = _.cloneDeep(data);
+        limit++;
+      }
+    });
+  } else {
+    var queryable = [];
+    _.forEach(self.data, function(data, key) {
+      queryable.push({
+        data: data,
+        key: key
+      });
+    });
+
+    queryable = _.orderBy(queryable, _.map(self.orderedProperties, function(p) { return 'data.' + p; }), self.orderedDirections);
+
+    queryable.forEach(function(q) {
+      if (self.limited <= 0 || limit < self.limited) {
+        results[q.key] = _.cloneDeep(q.data);
+        limit++;
+      }
+    });
+  }
+
+  return results;
 };
 
 MockFirestoreQuery.prototype._defer = function (sourceMethod, sourceArgs, callback) {

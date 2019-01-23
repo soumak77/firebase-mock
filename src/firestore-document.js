@@ -23,9 +23,14 @@ function MockFirestoreDocument(path, data, parent, name, CollectionReference) {
   if (parent) parent.children[this.id] = this;
   this.data = null;
   this._dataChanged(_.cloneDeep(data) || null);
+  this.onSnapshotSubscribers = [];
 }
 
 MockFirestoreDocument.prototype.flush = function (delay) {
+  var self = this;
+  _.forEach(this.onSnapshotSubscribers, function (subscriber) {
+    self._defer('onSnapshot', _.toArray(arguments), subscriber);
+  });
   this.queue.flush(delay);
   return this;
 };
@@ -198,6 +203,42 @@ MockFirestoreDocument.prototype.delete = function (callback) {
     });
   });
 };
+
+MockFirestoreDocument.prototype.onSnapshot = function (optionsOrObserverOrOnNext, observerOrOnNextOrOnError, onErrorArg) {
+  var err = this._nextErr('onSnapshot');
+  var self = this;
+  var onNext = optionsOrObserverOrOnNext;
+  var onError = observerOrOnNextOrOnError;
+
+  if (_.has(optionsOrObserverOrOnNext, 'includeMetadataChanges')) {
+    // Note this doesn't truly mimic the firestore metadata changes behavior, however
+    // since everything is syncronous, there isn't any difference in behavior.
+    onNext = observerOrOnNextOrOnError;
+    onError = onErrorArg;
+  }
+  var context = {
+    data: self._getData(),
+  };
+  var onSnapshot = function () {
+    // compare the current state to the one from when this function was created
+    // and send the data to the callback if different.
+    if (err === null) {
+      if (JSON.stringify(this.data) !== JSON.stringify(context.data)) {
+        onNext(new DocumentSnapshot(self.id, self.ref, self._getData()));
+        context.data = this._getData();
+      }
+    } else {
+      onError(err);
+    }
+  };
+  this.onSnapshotSubscribers.push(onSnapshot);
+
+  // return the unsubscribe function
+  return function () {
+    self.onSnapshotSubscribers.pop(onSnapshot);
+  };
+};
+
 
 /**
  * Fetches the subcollections that are direct children of the document.
