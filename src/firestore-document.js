@@ -209,8 +209,9 @@ MockFirestoreDocument.prototype.onSnapshot = function (optionsOrObserverOrOnNext
   var self = this;
   var onNext = optionsOrObserverOrOnNext;
   var onError = observerOrOnNextOrOnError;
+  var includeMetadataChanges = optionsOrObserverOrOnNext.includeMetadataChanges;
 
-  if (_.has(optionsOrObserverOrOnNext, 'includeMetadataChanges')) {
+  if (includeMetadataChanges) {
     // Note this doesn't truly mimic the firestore metadata changes behavior, however
     // since everything is syncronous, there isn't any difference in behavior.
     onNext = observerOrOnNextOrOnError;
@@ -223,7 +224,7 @@ MockFirestoreDocument.prototype.onSnapshot = function (optionsOrObserverOrOnNext
     // compare the current state to the one from when this function was created
     // and send the data to the callback if different.
     if (err === null) {
-      if (JSON.stringify(this.data) !== JSON.stringify(context.data)) {
+      if (JSON.stringify(this.data) !== JSON.stringify(context.data) || includeMetadataChanges) {
         onNext(new DocumentSnapshot(self.id, self.ref, self._getData()));
         context.data = this._getData();
       }
