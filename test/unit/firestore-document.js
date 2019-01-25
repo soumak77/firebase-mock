@@ -471,7 +471,7 @@ describe('MockFirestoreDocument', function () {
         done();
       });
       doc.update({newTitle: 'A new title'}, {setMerge: true});
-      doc.flush();
+      db.flush();
     });
 
     it('returns error if error occured', function (done) {
@@ -483,6 +483,7 @@ describe('MockFirestoreDocument', function () {
         expect(err).to.equal(error);
         done();
       });
+      doc.update({name: 'A'}, {setMerge: true});
       doc.flush();
     });
 

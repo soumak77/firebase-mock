@@ -412,6 +412,7 @@ describe('MockFirestoreCollection', function () {
         expect(err).to.equal(error);
         done();
       });
+      collection.doc('a').update({name: 'A'}, {setMerge: true});
       collection.flush();
     });
 

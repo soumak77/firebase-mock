@@ -23,14 +23,9 @@ function MockFirestoreDocument(path, data, parent, name, CollectionReference) {
   if (parent) parent.children[this.id] = this;
   this.data = null;
   this._dataChanged(_.cloneDeep(data) || null);
-  this.onSnapshotSubscribers = [];
 }
 
 MockFirestoreDocument.prototype.flush = function (delay) {
-  var self = this;
-  _.forEach(this.onSnapshotSubscribers, function (subscriber) {
-    self._defer('onSnapshot', _.toArray(arguments), subscriber);
-  });
   this.queue.flush(delay);
   return this;
 };
@@ -224,20 +219,18 @@ MockFirestoreDocument.prototype.onSnapshot = function (optionsOrObserverOrOnNext
     // compare the current state to the one from when this function was created
     // and send the data to the callback if different.
     if (err === null) {
-      if (JSON.stringify(this.data) !== JSON.stringify(context.data) || includeMetadataChanges) {
+      if (JSON.stringify(self.data) !== JSON.stringify(context.data) || includeMetadataChanges) {
         onNext(new DocumentSnapshot(self.id, self.ref, self._getData()));
-        context.data = this._getData();
+        context.data = self._getData();
       }
     } else {
       onError(err);
     }
   };
-  this.onSnapshotSubscribers.push(onSnapshot);
+  var unsubscribe = this.queue.onPostFlush(onSnapshot);
 
   // return the unsubscribe function
-  return function () {
-    self.onSnapshotSubscribers.pop(onSnapshot);
-  };
+  return unsubscribe;
 };
 
 

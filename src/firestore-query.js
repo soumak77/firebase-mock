@@ -23,14 +23,9 @@ function MockFirestoreQuery(path, data, parent, name) {
   this.orderedDirections = [];
   this.limited = 0;
   this._setData(data);
-  this.onSnapshotSubscribers = [];
 }
 
 MockFirestoreQuery.prototype.flush = function (delay) {
-  var self = this;
-  _.forEach(this.onSnapshotSubscribers, function (subscriber) {
-    self._defer('onSnapshot', _.toArray(arguments), subscriber);
-  });
   this.queue.flush(delay);
   return this;
 };
@@ -163,7 +158,7 @@ MockFirestoreQuery.prototype.onSnapshot = function (optionsOrObserverOrOnNext, o
     // compare the current state to the one from when this function was created
     // and send the data to the callback if different.
     if (err === null) {
-      this.get().then(function (querySnapshot) {
+      self.get().then(function (querySnapshot) {
         var results = self._results();
         if (JSON.stringify(results) !== JSON.stringify(context.data) || includeMetadataChanges) {
           onNext(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id), results));
@@ -175,12 +170,10 @@ MockFirestoreQuery.prototype.onSnapshot = function (optionsOrObserverOrOnNext, o
       onError(err);
     }
   };
-  this.onSnapshotSubscribers.push(onSnapshot);
+  var unsubscribe = this.queue.onPostFlush(onSnapshot);
 
   // return the unsubscribe function
-  return function () {
-    self.onSnapshotSubscribers.pop(onSnapshot);
-  };
+  return unsubscribe;
 };
 
 MockFirestoreQuery.prototype._results = function () {
