@@ -228,6 +228,15 @@ describe('MockFirestoreCollection', function () {
       ]);
     });
 
+    it('returns matched documents for operator "array-contains"', function() {
+      var results1 = collection.where('array', 'array-contains', 'a').get();
+      db.flush();
+
+      return Promise.all([
+        expect(results1).to.eventually.have.property('size').to.equal(2),
+      ]);
+    });
+
     it('returns all documents when using unsupported operator', function() {
       var expected = 6;
 

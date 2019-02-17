@@ -316,6 +316,40 @@ describe('MockFirestoreDocument', function () {
       db.flush();
     });
 
+    it('updates an array property when using FieldValue.arrayRemove()', function (done) {
+      doc.set({
+        titles: ['title1', 'title2']
+      });
+      doc.update({
+        titles: Firestore.FieldValue.arrayRemove('title2')
+      });
+
+      doc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.data()).to.deep.equal({titles: ['title1']});
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
+    it('updates an array property when using FieldValue.arrayUnion()', function (done) {
+      doc.set({
+        titles: ['title1']
+      });
+      doc.update({
+        titles: Firestore.FieldValue.arrayUnion('title2')
+      });
+
+      doc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.data()).to.deep.equal({titles: ['title1', 'title2']});
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
     it('does not merge nested properties recursively by default', function (done) {
       doc.set({
         nested: {
