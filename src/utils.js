@@ -108,7 +108,7 @@ exports.removeEmptyRtdbProperties = function removeEmptyRtdbProperties(obj) {
   }
 };
 
-exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties(obj) {
+exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties(obj, current) {
   var t = typeof obj;
   if (t === 'boolean' || t === 'string' || t === 'number' || t === 'undefined') {
     return obj;
@@ -124,6 +124,14 @@ exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties
       }
       if (FieldValue.serverTimestamp().isEqual(value)) {
         obj[s] = new Date();
+      }
+      if (FieldValue.arrayRemove().isEqual(value)) {
+        const replacement = Array.isArray(value.arg) ? value.arg : [value.arg];
+        obj[s] = current[s].filter(function(e) {return replacement.indexOf(e) === -1});
+      }
+      if (FieldValue.arrayUnion().isEqual(value)) {
+        const replacement = Array.isArray(value.arg) ? value.arg : [value.arg];
+        obj[s] = _.union(current[s], replacement);
       }
     }
   }
