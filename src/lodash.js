@@ -33,5 +33,6 @@ module.exports = {
   reduce: require('lodash.reduce'),
   remove: require('lodash.remove'),
   size: require('lodash.size'),
-  toArray: require('lodash.toarray')
+  toArray: require('lodash.toarray'),
+  union: require('lodash.union'),
 };

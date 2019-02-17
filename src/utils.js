@@ -45,7 +45,7 @@ exports.getMeta = function getMeta(data, key, defaultVal) {
 
 exports.assertKey = function assertKey(method, key, argNum) {
   if (!argNum) argNum = 'first';
-  if (typeof(key) !== 'string' || key.match(/[.#$\/\[\]]/)) {
+  if (typeof (key) !== 'string' || key.match(/[.#$\/\[\]]/)) {
     throw new Error(method + ' failed: ' + argNum + ' was an invalid key "' + (key + '') + '. Firebase keys must be non-empty strings and can\'t contain ".", "#", "$", "/", "[", or "]"');
   }
 };
@@ -108,22 +108,39 @@ exports.removeEmptyRtdbProperties = function removeEmptyRtdbProperties(obj) {
   }
 };
 
-exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties(obj) {
+exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties(obj, current) {
   var t = typeof obj;
   if (t === 'boolean' || t === 'string' || t === 'number' || t === 'undefined') {
     return obj;
   }
+
+  if (Array.isArray(obj)) {
+    return obj;
+  }
+
   if (obj instanceof Date) return obj;
 
   var keys = getKeys(obj);
   if (keys.length > 0) {
     for (var s in obj) {
-      var value = removeEmptyFirestoreProperties(obj[s]);
+      var value = removeEmptyFirestoreProperties(obj[s], current && current[s]);
       if (FieldValue.delete().isEqual(value)) {
         delete obj[s];
       }
       if (FieldValue.serverTimestamp().isEqual(value)) {
         obj[s] = new Date();
+      }
+      if (FieldValue.arrayRemove().isEqual(value)) {
+        const replacement = Array.isArray(value.arg) ? value.arg : [value.arg];
+        if (Array.isArray(current[s])) {
+          obj[s] = current[s].filter(e => replacement.indexOf(e) === -1);
+        } else {
+          obj[s] = [];
+        }
+      }
+      if (FieldValue.arrayUnion().isEqual(value)) {
+        const replacement = Array.isArray(value.arg) ? value.arg : [value.arg];
+        obj[s] = _.union(current[s], replacement);
       }
     }
   }
@@ -144,7 +161,7 @@ exports.updateToRtdbObject = function updateToRtdbObject(update) {
     var o = result;
     do {
       var key = parts.shift();
-      if(key) {
+      if (key) {
         var newObject = o[key] || {};
         o[key] = parts.length > 0 ? newObject : value;
         o = newObject;
@@ -162,7 +179,7 @@ exports.updateToFirestoreObject = function updateToFirestoreObject(update) {
     var o = result;
     do {
       var key = parts.shift();
-      if(key) {
+      if (key) {
         var newObject = o[key] || {};
         o[key] = parts.length > 0 ? newObject : value;
         o = newObject;
@@ -200,8 +217,8 @@ exports.findUndefinedProperties = function (obj) {
   return results;
 };
 
-exports.createThenableReference = function(reference, promise) {
-  reference.then = function(success, failure) {
+exports.createThenableReference = function (reference, promise) {
+  reference.then = function (success, failure) {
     return promise.then(success).catch(failure);
   };
   return reference;
