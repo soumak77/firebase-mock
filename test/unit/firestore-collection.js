@@ -334,6 +334,58 @@ describe('MockFirestoreCollection', function () {
     });
   });
 
+  describe('#startAfter', function () {
+    var doc2Snap;
+
+    beforeEach(function () {
+        db.autoFlush();
+
+        collection = db.collection('startAfter');
+        var doc2 = collection.doc();
+
+        collection.add({a: 1});
+        doc2.set({a: 2});
+        collection.add({a: 3});
+        collection.add({a: 4});
+        collection.add({a: 5});
+
+        return doc2.get().then(function (snap) {
+          doc2Snap = snap;
+        });
+    });
+
+    it('returns data after the specified value', function () {
+      return collection
+        .orderBy('a')
+        .startAfter(doc2Snap)
+        .get()
+        .then(function(snaps) {
+          expect(snaps.size).to.equal(3);
+          expect(snaps.docs.map(function (d) { return d.data().a; })).to.deep.equal([3, 4, 5]);
+        });
+    });
+
+    it('works with limit', function () {
+      return collection
+        .orderBy('a')
+        .startAfter(doc2Snap)
+        .limit(2)
+        .get()
+        .then(function(snaps) {
+          expect(snaps.size).to.equal(2);
+          expect(snaps.docs.map(function (d) { return  d.data().a; })).to.deep.equal([3, 4]);
+        });
+    });
+
+    it('throws with no order', function () {
+      expect(
+        function () {
+          collection.startAfter(doc2Snap);
+        }
+      ).to.throw();
+    });
+  });
+
   describe('#limit', function () {
     it('allow calling limit() on collection', function() {
       expect(function() {

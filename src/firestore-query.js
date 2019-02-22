@@ -5,6 +5,7 @@ var assert = require('assert');
 var Stream = require('stream');
 var Promise = require('rsvp').Promise;
 var autoId = require('firebase-auto-ids');
+var DocumentSnapshot = require('./firestore-document-snapshot');
 var QuerySnapshot = require('./firestore-query-snapshot');
 var Queue = require('./queue').Queue;
 var utils = require('./utils');
@@ -22,6 +23,7 @@ function MockFirestoreQuery(path, data, parent, name) {
   this.orderedProperties = [];
   this.orderedDirections = [];
   this.limited = 0;
+  this.buildStartFinder = function () { return function () { return true; }; };
   this._setData(data);
 }
 
@@ -69,12 +71,26 @@ MockFirestoreQuery.prototype.get = function () {
     self._defer('get', _.toArray(arguments), function () {
       var results = {};
       var limit = 0;
+      var atStart = false;
+      var atEnd = false;
+      var startFinder = this.buildStartFinder();
+
+      var inRange = function(data, key) {
+        if (atEnd) {
+          return false;
+        } else if (atStart) {
+          return true;
+        } else {
+          atStart = startFinder(data, key);
+          return atStart;
+        }
+      };
 
       if (err === null) {
         if (_.size(self.data) !== 0) {
           if (self.orderedProperties.length === 0) {
             _.forEach(self.data, function(data, key) {
-              if (self.limited <= 0 || limit < self.limited) {
+              if (inRange(data, key) && (self.limited <= 0 || limit < self.limited)) {
                 results[key] = _.cloneDeep(data);
                 limit++;
               }
@@ -91,7 +107,7 @@ MockFirestoreQuery.prototype.get = function () {
             queryable = _.orderBy(queryable, _.map(self.orderedProperties, function(p) { return 'data.' + p; }), self.orderedDirections);
 
             queryable.forEach(function(q) {
-              if (self.limited <= 0 || limit < self.limited) {
+              if (inRange(q.data, q.key) && (self.limited <= 0 || limit < self.limited)) {
                 results[q.key] = _.cloneDeep(q.data);
                 limit++;
               }
@@ -123,12 +139,11 @@ MockFirestoreQuery.prototype.stream = function () {
 };
 
 MockFirestoreQuery.prototype.where = function (property, operator, value) {
-  var query;
+  var query = this.clone();
 
   // check if unsupported operator
   if (operator !== '==') {
     console.warn('Using unsupported where() operator for firebase-mock, returning entire dataset');
-    return this;
   } else {
     if (_.size(this.data) !== 0) {
       var results = {};
@@ -144,23 +159,66 @@ MockFirestoreQuery.prototype.where = function (property, operator, value) {
             break;
         }
       });
-      return new MockFirestoreQuery(this.path, results, this.parent, this.id);
+      query._setData(results);
     } else {
-      return new MockFirestoreQuery(this.path, null, this.parent, this.id);
+      query._setData(null);
     }
   }
+
+  return query;
 };
 
 MockFirestoreQuery.prototype.orderBy = function (property, direction) {
-  var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id);
+  var query = this.clone();
+
   query.orderedProperties.push(property);
   query.orderedDirections.push(direction || 'asc');
+
   return query;
 };
 
 MockFirestoreQuery.prototype.limit = function (limit) {
-  var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id);
+  var query = this.clone();
   query.limited = limit;
+  return query;
+};
+
+MockFirestoreQuery.prototype.startAfter = function (doc) {
+  if (!(doc instanceof DocumentSnapshot)) {
+    console.warn('Using unsupported startAfter() parameter for firebase-mock, returning entire dataset');
+    return this;
+  }
+
+  if (this.orderedProperties.length === 0) {
+    throw new Error('Query must be ordered to paginate');
+  }
+
+  var query = this.clone();
+
+  query.buildStartFinder = function () {
+    var next = false;
+
+    return function (data, key) {
+      if (next) {
+        return true;
+      } else {
+        next = key === doc.ref.id;
+        return false;
+      }
+    };
+  };
+
+  return query;
+};
+
+MockFirestoreQuery.prototype.clone = function () {
+  var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id);
+
+  query.orderedProperties = Array.from(this.orderedProperties);
+  query.orderedDirections = Array.from(this.orderedDirections);
+  query.limited = this.limited;
+  query.buildStartFinder = this.buildStartFinder;
+
   return query;
 };
 
