@@ -262,6 +262,9 @@ describe('MockFirestore', function () {
   });
 
   describe('#getAll', function() {
+    it('requires one argument', function() {
+      expect(db.getAll).to.throw('Function requires at least 1 argument');
+    });
     it('gets the value of all passed documents', function() {
       var doc1 = db.doc('doc1');
       var doc2 = db.doc('doc2');
@@ -279,6 +282,23 @@ describe('MockFirestore', function () {
         expect(snaps[0].data()).to.deep.equal({value: 1});
         expect(snaps[1].data()).to.deep.equal({value: 2});
         expect(snaps[2].exists).to.equal(false);
+      });
+    });
+    it('gets the value of all passed documents honoring the read options', function() {
+      var doc1 = db.doc('doc1');
+      var doc2 = db.doc('doc2');
+
+      doc1.set({value: 1});
+      doc2.set({value: 2});
+
+      var getAll = db
+        .getAll(doc1, doc2, { fieldMask: ['value'] });
+
+      db.flush();
+
+      return getAll.then(function(snaps) {
+        expect(snaps[0].data()).to.deep.equal({value: 1});
+        expect(snaps[1].data()).to.deep.equal({value: 2});
       });
     });
   });
