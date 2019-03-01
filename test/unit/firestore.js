@@ -262,6 +262,9 @@ describe('MockFirestore', function () {
   });
 
   describe('#getAll', function() {
+    it('requires one argument', function() {
+      expect(db.getAll).to.throw('Function requires at least 1 argument');
+    });
     it('gets the value of all passed documents', function() {
       var doc1 = db.doc('doc1');
       var doc2 = db.doc('doc2');

@@ -59,6 +59,9 @@ MockFirestore.prototype.toString = function () {
 
 MockFirestore.prototype.getAll = function(/* ...docs */) {
   var docs = Array.from(arguments);
+  if (_.isEmpty(docs)) {
+    throw new Error('Firestore.getAll: Function requires at least 1 argument.');
+  }
   return Promise.all(
     docs.map(function(doc) {
       return doc.get();
