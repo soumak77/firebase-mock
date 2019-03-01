@@ -6,8 +6,10 @@ var Promise = require('rsvp').Promise;
 var autoId = require('firebase-auto-ids');
 var DocumentSnapshot = require('./firestore-document-snapshot');
 var Queue = require('./queue').Queue;
+var Timestamp = require('./timestamp');
 var utils = require('./utils');
 var validate = require('./validators');
+var WriteResult = require('./write-result');
 
 function MockFirestoreDocument(path, data, parent, name, CollectionReference) {
   this.ref = this;
@@ -108,9 +110,11 @@ MockFirestoreDocument.prototype.create = function (data, callback) {
 
       var base = self._getData();
       err = err || self._validateDoesNotExist(base);
-        if (err === null) {
+      if (err === null) {
+        var time = Timestamp.fromDate(new Date());
+        var result = new WriteResult(time);
         self._dataChanged(data);
-        resolve();
+        resolve(result);
       } else {
           if (callback) {
             callback(err);

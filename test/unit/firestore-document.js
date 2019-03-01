@@ -96,7 +96,9 @@ describe('MockFirestoreDocument', function () {
     it('creates a new doc', function (done) {
       var createDoc = db.doc('createDoc');
 
-      createDoc.create({prop: 'title'});
+      createDoc.create({prop: 'title'}).then(function (result) {
+        expect(result).to.have.property('writeTime');
+      }).catch(done);
 
       createDoc.get().then(function (snap) {
         expect(snap.exists).to.equal(true);
