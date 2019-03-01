@@ -65,6 +65,23 @@ MockFirestoreCollection.prototype.doc = function (path) {
   return child;
 };
 
+MockFirestoreCollection.prototype.listDocuments = function () {
+  var err = this._nextErr('listDocuments');
+  var self = this;
+  return new Promise(function (resolve, reject) {
+    self._defer('listDocuments', _.toArray(arguments), function () {
+      if (err === null) {
+        var docs = _.map(self.data, function (value, key) {
+          return self.doc(key);
+        });
+        resolve(docs);
+      } else {
+        reject(err);
+      }
+    });
+  });
+};
+
 MockFirestoreCollection.prototype._hasChild = function (key) {
   return _.isObject(this.data) && _.has(this.data, key);
 };
