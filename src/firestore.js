@@ -62,6 +62,10 @@ MockFirestore.prototype.getAll = function(/* ...docs */) {
   if (_.isEmpty(docs)) {
     throw new Error('Firestore.getAll: Function requires at least 1 argument.');
   }
+  // ReadOptions is not honored but at least ignored
+  if (!_.isUndefined(docs[docs.length - 1].fieldMask)) {
+    docs.pop();
+  }
   return Promise.all(
     docs.map(function(doc) {
       return doc.get();
