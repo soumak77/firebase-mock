@@ -356,4 +356,31 @@ describe('MockFirestoreCollection', function () {
       ]);
     });
   });
+  describe('#listDocuments', function () {
+    it('retrieves all data for existing collection', function(done) {
+      db.autoFlush();
+      var keys = Object.keys(require('./data.json').collections);
+      collection.listDocuments().then(function(refs) {
+        expect(refs.length).to.equal(6);
+        refs.forEach(function(ref) {
+          expect(keys).to.contain(ref.id);
+        });
+        done();
+      }).catch(done);
+    });
+
+    it('retrieves data added to collection', function(done) {
+      db.autoFlush();
+      db.collection('group').add({
+        name: 'test'
+      });
+      db.collection('group').listDocuments().then(function(refs) {
+        expect(refs.length).to.equal(1);
+        refs[0].get().then(function(doc) {
+          expect(doc.data().name).to.equal('test');
+          done();
+        }).catch(done);
+      }).catch(done);
+    });
+  });
 });
