@@ -44,17 +44,12 @@ MockFirebase.ServerValue = {
   }
 };
 
-var getServerTime, defaultClock;
-getServerTime = defaultClock = function () {
-  return new Date().getTime();
-};
-
 MockFirebase.setClock = function (fn) {
-  getServerTime = fn;
+  utils.setServerClock(fn);
 };
 
 MockFirebase.restoreClock = function () {
-  getServerTime = defaultClock;
+  utils.restoreServerClock();
 };
 
 MockFirebase.autoId = function () {
@@ -449,7 +444,7 @@ MockFirebase.prototype._dataChanged = function (unparsedData) {
   var data = utils.cleanData(unparsedData);
 
   if (utils.isServerTimestamp(data)) {
-    data = getServerTime();
+    data = utils.getServerTime();
   }
 
   if (pri !== this.priority) {
@@ -475,7 +470,7 @@ MockFirebase.prototype._dataChanged = function (unparsedData) {
       keysToChange.forEach(function (key) {
         var childData = unparsedData[key];
         if (utils.isServerTimestamp(childData)) {
-          childData = getServerTime();
+          childData = utils.getServerTime();
         }
         self._updateOrAdd(key, childData, events);
       });
@@ -493,7 +488,7 @@ MockFirebase.prototype._dataChanged = function (unparsedData) {
 
 MockFirebase.prototype._priChanged = function (newPriority) {
   if (utils.isServerTimestamp(newPriority)) {
-    newPriority = getServerTime();
+    newPriority = utils.getServerTime();
   }
   this.priority = newPriority;
   if (this.parent) {
