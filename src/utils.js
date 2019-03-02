@@ -75,6 +75,24 @@ exports.priorityComparator = function priorityComparator(a, b) {
   return 0;
 };
 
+var serverClock, defaultClock;
+
+serverClock = defaultClock = function () {
+  return new Date().getTime();
+};
+
+exports.getServerTime = function getServerTime() {
+  return serverClock();
+};
+
+exports.setServerClock = function setServerTime(fn) {
+  serverClock = fn;
+};
+
+exports.restoreServerClock = function restoreServerTime() {
+  serverClock = defaultClock;
+};
+
 exports.isServerTimestamp = function isServerTimestamp(data) {
   return _.isObject(data) && data['.sv'] === 'timestamp';
 };
