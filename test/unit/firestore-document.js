@@ -10,6 +10,7 @@ chai.use(require('sinon-chai'));
 var expect = chai.expect;
 var _ = require('../../src/lodash');
 var Firestore = require('../../').MockFirestore;
+var Firebase = require('../../').MockFirebase;
 
 describe('MockFirestoreDocument', function () {
 
@@ -94,10 +95,14 @@ describe('MockFirestoreDocument', function () {
 
   describe('#create', function () {
     it('creates a new doc', function (done) {
+      Firebase.setClock(function() {
+        return 1234567890123;
+      });
       var createDoc = db.doc('createDoc');
 
       createDoc.create({prop: 'title'}).then(function (result) {
         expect(result).to.have.property('writeTime');
+        expect(result.writeTime.seconds).to.equal(1234567890);
       }).catch(done);
 
       createDoc.get().then(function (snap) {

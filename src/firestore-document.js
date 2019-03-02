@@ -111,7 +111,7 @@ MockFirestoreDocument.prototype.create = function (data, callback) {
       var base = self._getData();
       err = err || self._validateDoesNotExist(base);
       if (err === null) {
-        var time = Timestamp.fromDate(new Date());
+        var time = Timestamp.fromMillis(utils.getServerTime());
         var result = new WriteResult(time);
         self._dataChanged(data);
         resolve(result);

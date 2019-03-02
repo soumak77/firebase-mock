@@ -6,8 +6,12 @@ function Timestamp(seconds, nanoseconds) {
 }
 
 Timestamp.fromDate = function(date) {
-  var sec = Math.floor(date.getTime() / 1000);
-  var ns = (date.getTime() % 1000) * 1000 * 1000;
+  return Timestamp.fromMillis(date.getTime());
+};
+
+Timestamp.fromMillis = function(ms) {
+  var sec = Math.floor(ms / 1000);
+  var ns = (ms % 1000) * 1000 * 1000;
   return new Timestamp(sec, ns);
 };
 

@@ -13,6 +13,13 @@ describe('Timestamp', function () {
       expect(timestamp.nanoseconds).to.equal(123000000);
     });
   });
+  describe('fromMillis', function () {
+    it('should convert from milliseconds', function () {
+      var timestamp = Timestamp.fromMillis(1234567890123);
+      expect(timestamp.seconds).to.equal(1234567890);
+      expect(timestamp.nanoseconds).to.equal(123000000);
+    });
+  });
   describe('#toDate', function () {
     it('should convert to date', function () {
       var ts = new Timestamp(1234567890, 123456789);
