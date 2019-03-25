@@ -250,9 +250,27 @@ FirebaseAuth.prototype.signOut = function () {
 };
 
 FirebaseAuth.prototype.createUserWithEmailAndPassword = function (email, password) {
-  return this._createUser('createUserWithEmailAndPassword', {
-    email: email,
-    password: password
+  var err = this._nextErr('createUserWithEmailAndPassword');
+  var self = this;
+  return new Promise(function (resolve, reject) {
+    self._defer('createUserWithEmailAndPassword', _.toArray(arguments), function () {
+      err = err || self._validateNewEmail(email);
+      if (!err) {
+        var user = new User(this, {
+          uid: self._nextUid(),
+          email: email,
+          password: password,
+          phoneNumber: null,
+          emailVerified: null,
+          displayName: null,
+          photoURL: null
+        });
+        self._auth.users.push(user);
+        resolve({user: user.clone()});
+      } else {
+        reject(err);
+      }
+    });
   });
 };
 

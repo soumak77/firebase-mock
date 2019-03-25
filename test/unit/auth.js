@@ -437,8 +437,7 @@ describe('Auth', function () {
       var promise = ref.createUserWithEmailAndPassword('new1@new1.com', 'new1');
       ref.flush();
       return Promise.all([
-        expect(promise).to.eventually.have.property('uid', 'simplelogin:1'),
-        expect(promise).to.eventually.have.property('email', 'new1@new1.com')
+        expect(promise).to.eventually.have.property('user')
       ]);
     });
 
