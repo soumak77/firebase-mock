@@ -266,7 +266,6 @@ FirebaseAuth.prototype.createUserWithEmailAndPassword = function (email, passwor
           photoURL: null
         });
         self._auth.users.push(user);
-        self.currentUser = user;
         resolve({user: user.clone()});
       } else {
         reject(err);
