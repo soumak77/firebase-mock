@@ -199,6 +199,21 @@ describe('MockFirestoreDocument', function () {
 
       db.flush();
     });
+
+    it('sets value of doc with ref', function (done) {
+      var ref = db.doc('ref');
+      ref.create();
+      doc.set({
+        ref: ref
+      });
+      doc.get().then(function(snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.get('ref')).to.have.property('ref');
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
   });
 
   describe('#set with {merge: true}', function () {

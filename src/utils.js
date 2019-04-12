@@ -128,12 +128,9 @@ exports.removeEmptyRtdbProperties = function removeEmptyRtdbProperties(obj) {
 };
 
 exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties(obj) {
-  var t = typeof obj;
-  if (t === 'boolean' || t === 'string' || t === 'number' || t === 'undefined') {
+  if (!_.isPlainObject(obj)) {
     return obj;
   }
-  if (obj instanceof Date) return obj;
-  if (obj instanceof Timestamp) return obj;
 
   var keys = getKeys(obj);
   if (keys.length > 0) {
