@@ -332,6 +332,48 @@ describe('MockFirestoreCollection', function () {
         done();
       }).catch(done);
     });
+
+    it('returns documents ordered by name using FieldPath', function(done) {
+      var results1 = collection.orderBy(new Firestore.FieldPath('name')).get();
+      var results2 = collection.orderBy(new Firestore.FieldPath('name'), 'desc').get();
+      db.flush();
+
+      Promise.all([results1, results2]).then(function(snaps) {
+        var names = [];
+        snaps[0].forEach(function(doc) {
+          names.push(doc.data().name);
+        });
+        expect(names).to.deep.equal([1, 2, 3, 'a', 'b', 'c']);
+
+        names = [];
+        snaps[1].forEach(function(doc) {
+          names.push(doc.data().name);
+        });
+        expect(names).to.deep.equal([1, 2, 3, 'c', 'b', 'a']);
+        done();
+      }).catch(done);
+    });
+
+    it('returns documents ordered by id', function(done) {
+      var results1 = collection.orderBy(Firestore.FieldPath.documentId()).get();
+      var results2 = collection.orderBy(Firestore.FieldPath.documentId(), 'desc').get();
+      db.flush();
+
+      Promise.all([results1, results2]).then(function(snaps) {
+        var names = [];
+        snaps[0].forEach(function(doc) {
+          names.push(doc.data().name);
+        });
+        expect(names).to.deep.equal([1, 2, 3, 'a', 'b', 'c']);
+
+        names = [];
+        snaps[1].forEach(function(doc) {
+          names.push(doc.data().name);
+        });
+        expect(names).to.deep.equal([1, 2, 3, 'c', 'b', 'a']);
+        done();
+      }).catch(done);
+    });
   });
 
   describe('#limit', function () {

@@ -5,6 +5,7 @@ var assert = require('assert');
 var Promise = require('rsvp').Promise;
 var CollectionReference = require('./firestore-collection');
 var DocumentReference = require('./firestore-document');
+var FieldPath = require('./firestore-field-path');
 var FieldValue = require('./firestore-field-value');
 var Queue = require('./queue').Queue;
 var utils = require('./utils');
@@ -26,6 +27,7 @@ function MockFirestore(path, data, parent, name) {
   this.data = _.cloneDeep(data) || null;
 }
 
+MockFirestore.FieldPath = FieldPath;
 MockFirestore.FieldValue = FieldValue;
 
 MockFirestore.prototype.flush = function (delay) {

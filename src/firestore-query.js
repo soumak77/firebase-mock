@@ -5,6 +5,7 @@ var assert = require('assert');
 var Stream = require('stream');
 var Promise = require('rsvp').Promise;
 var autoId = require('firebase-auto-ids');
+var FieldPath = require('./firestore-field-path');
 var QuerySnapshot = require('./firestore-query-snapshot');
 var Queue = require('./queue').Queue;
 var utils = require('./utils');
@@ -88,8 +89,20 @@ MockFirestoreQuery.prototype.get = function () {
               });
             });
 
-            queryable = _.orderBy(queryable, _.map(self.orderedProperties, function(p) { return 'data.' + p; }), self.orderedDirections);
-
+            var orderBy = _.flatten(_.map(self.orderedProperties, function(p) {
+              if (p instanceof FieldPath) {
+                if (FieldPath.documentId().isEqual(p)) {
+                  return 'id';
+                } else {
+                  return _.map(p._fieldNames, function(p) {
+                    return 'data.' + p;
+                  });
+                }
+              } else {
+                return 'data.' + p;
+              }
+            }));
+            queryable = _.orderBy(queryable, orderBy, self.orderedDirections);
             queryable.forEach(function(q) {
               if (self.limited <= 0 || limit < self.limited) {
                 results[q.key] = _.cloneDeep(q.data);
