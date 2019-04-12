@@ -22,6 +22,7 @@ module.exports = {
   isEqual: require('lodash.isequal'),
   isFunction: require('lodash.isfunction'),
   isNumber: require('lodash.isnumber'),
+  isPlainObject: require('lodash.isplainobject'),
   isObject: require('lodash.isobject'),
   isString: require('lodash.isstring'),
   isUndefined: require('lodash.isundefined'),
