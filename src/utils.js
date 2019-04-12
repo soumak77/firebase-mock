@@ -1,6 +1,7 @@
 'use strict';
 
 var Snapshot = require('./snapshot');
+var Timestamp = require('./timestamp');
 var FieldValue = require('./firestore-field-value');
 var _ = require('./lodash');
 
@@ -132,6 +133,7 @@ exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties
     return obj;
   }
   if (obj instanceof Date) return obj;
+  if (obj instanceof Timestamp) return obj;
 
   var keys = getKeys(obj);
   if (keys.length > 0) {
@@ -141,7 +143,7 @@ exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties
         delete obj[s];
       }
       if (FieldValue.serverTimestamp().isEqual(value)) {
-        obj[s] = new Date();
+        obj[s] = Timestamp.fromMillis(exports.getServerTime());
       }
     }
   }

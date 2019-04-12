@@ -7,6 +7,7 @@ var removeEmptyRtdbProperties = require('../../src/utils').removeEmptyRtdbProper
 var removeEmptyFirestoreProperties = require('../../src/utils').removeEmptyFirestoreProperties;
 var updateToRtdbObject = require('../../src/utils').updateToRtdbObject;
 var updateToFirestoreObject = require('../../src/utils').updateToFirestoreObject;
+var Timestamp = require('../../src/timestamp');
 
 describe('utils', function () {
   describe('removeEmptyRtdbProperties', function () {
@@ -79,6 +80,11 @@ describe('utils', function () {
     it('should make no changes, when obj is a Date', function () {
       var date = new Date();
       expect(removeEmptyFirestoreProperties(date)).to.eql(date);
+    });
+
+    it('should make no changes, when obj is a Timestamp', function () {
+      var ts = new Timestamp(123, 123);
+      expect(removeEmptyFirestoreProperties(ts)).to.eql(ts);
     });
 
     it('should make no changes, when obj is a NaN', function () {

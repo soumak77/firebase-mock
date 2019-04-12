@@ -7,6 +7,7 @@ var autoId = require('firebase-auto-ids');
 var Query = require('./query');
 var Snapshot = require('./snapshot');
 var Queue = require('./queue').Queue;
+var Timestamp = require('./timestamp');
 var utils = require('./utils');
 var Auth = require('./firebase-auth');
 var validate = require('./validators');
@@ -186,11 +187,11 @@ MockFirebase.prototype.update = function (changes, callback) {
     self._defer('update', _.toArray(arguments), function () {
       if (!err) {
         var base = self.getData();
-        var data = _.isObject(base) ? base : {};
+        var data = _.isPlainObject(base) ? base : {};
         // operate as a multi-set
         _.keys(changes).forEach(function (key) {
           var val = changes[key];
-          _.set(data, key.replace(/^\//, '').replace(/\//g, '.'), _.isObject(val) ? utils.updateToRtdbObject(val) : val);
+          _.set(data, key.replace(/^\//, '').replace(/\//g, '.'), _.isPlainObject(val) ? utils.updateToRtdbObject(val) : val);
         });
         data = utils.removeEmptyRtdbProperties(data);
         self._dataChanged(data);
@@ -444,7 +445,7 @@ MockFirebase.prototype._dataChanged = function (unparsedData) {
   var data = utils.cleanData(unparsedData);
 
   if (utils.isServerTimestamp(data)) {
-    data = utils.getServerTime();
+    data = Timestamp.fromMillis(utils.getServerTime());
   }
 
   if (pri !== this.priority) {
@@ -452,8 +453,8 @@ MockFirebase.prototype._dataChanged = function (unparsedData) {
   }
   if (!_.isEqual(data, this.data)) {
     // _.keys() in Lodash 3 automatically coerces non-object to object
-    var oldKeys = _.isObject(this.data) ? _.keys(this.data).sort() : [];
-    var newKeys = _.isObject(data) ? _.keys(data).sort() : [];
+    var oldKeys = _.isPlainObject(this.data) ? _.keys(this.data).sort() : [];
+    var newKeys = _.isPlainObject(data) ? _.keys(data).sort() : [];
     var keysToRemove = _.difference(oldKeys, newKeys);
     var keysToChange = _.difference(newKeys, keysToRemove);
     var events = [];
@@ -462,7 +463,7 @@ MockFirebase.prototype._dataChanged = function (unparsedData) {
       self._removeChild(key, events);
     });
 
-    if (!_.isObject(data)) {
+    if (!_.isPlainObject(data)) {
       events.push(false);
       this.data = data;
     }
@@ -470,14 +471,14 @@ MockFirebase.prototype._dataChanged = function (unparsedData) {
       keysToChange.forEach(function (key) {
         var childData = unparsedData[key];
         if (utils.isServerTimestamp(childData)) {
-          childData = utils.getServerTime();
+          childData = Timestamp.fromMillis(utils.getServerTime());
         }
         self._updateOrAdd(key, childData, events);
       });
     }
 
     // update order of my child keys
-    if (_.isObject(this.data))
+    if (_.isPlainObject(this.data))
       this._resort();
 
     // trigger parent notifications after all children have
@@ -488,7 +489,7 @@ MockFirebase.prototype._dataChanged = function (unparsedData) {
 
 MockFirebase.prototype._priChanged = function (newPriority) {
   if (utils.isServerTimestamp(newPriority)) {
-    newPriority = utils.getServerTime();
+    newPriority = Timestamp.fromMillis(utils.getServerTime());
   }
   this.priority = newPriority;
   if (this.parent) {
@@ -573,7 +574,7 @@ MockFirebase.prototype._triggerAll = function (events) {
 };
 
 MockFirebase.prototype._updateOrAdd = function (key, data, events) {
-  var exists = _.isObject(this.data) && this.data.hasOwnProperty(key);
+  var exists = _.isPlainObject(this.data) && this.data.hasOwnProperty(key);
   if (!exists) {
     return this._addChild(key, data, events);
   }
@@ -583,7 +584,7 @@ MockFirebase.prototype._updateOrAdd = function (key, data, events) {
 };
 
 MockFirebase.prototype._addChild = function (key, data, events) {
-  if (!_.isObject(this.data)) {
+  if (!_.isPlainObject(this.data)) {
     this.data = {};
   }
   this._addKey(key);
@@ -610,7 +611,7 @@ MockFirebase.prototype._removeChild = function (key, events) {
 
 MockFirebase.prototype._updateChild = function (key, data, events) {
   var cdata = utils.cleanData(data);
-  if (_.isObject(this.data) && _.has(this.data, key) && !_.isEqual(this.data[key], cdata)) {
+  if (_.isPlainObject(this.data) && _.has(this.data, key) && !_.isEqual(this.data[key], cdata)) {
     this.data[key] = cdata;
     var c = this.child(key);
     c._dataChanged(data);
@@ -629,7 +630,7 @@ MockFirebase.prototype._nextErr = function (type) {
 };
 
 MockFirebase.prototype._hasChild = function (key) {
-  return _.isObject(this.data) && _.has(this.data, key);
+  return _.isPlainObject(this.data) && _.has(this.data, key);
 };
 
 MockFirebase.prototype._childData = function (key) {
@@ -695,7 +696,7 @@ function extractName(path) {
 }
 
 function render(datum) {
-  if (datum && _.isObject(datum)) {
+  if (datum && _.isPlainObject(datum)) {
     var keys = _.keys(datum);
 
     if (_.every(keys, RegExp.prototype.test.bind(/^\d+$/))) {
