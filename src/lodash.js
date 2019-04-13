@@ -11,7 +11,6 @@ module.exports = {
   filter: require('lodash.filter'),
   find: require('lodash.find'),
   findIndex: require('lodash.findindex'),
-  flatten: require('lodash.flatten'),
   forEach: require('lodash.foreach'),
   forIn: require('lodash.forin'),
   get: require('lodash.get'),

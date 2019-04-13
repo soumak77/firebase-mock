@@ -41,7 +41,6 @@
     "lodash.filter": "^4.6.0",
     "lodash.find": "^4.6.0",
     "lodash.findindex": "^4.6.0",
-    "lodash.flatten": "^4.4.0",
     "lodash.foreach": "^4.5.0",
     "lodash.forin": "^4.4.0",
     "lodash.get": "^4.4.2",
