@@ -215,6 +215,8 @@ describe('MockFirestoreCollection', function () {
       var results5 = collection.where('name_type', '==', 'number').get();
       var results6 = collection.where('name_type', '==', 'abc').get();
       var results7 = collection.where('value', '==', 3).get();
+      var results8 = collection.where(Firestore.FieldPath.documentId(), '==', '3').get();
+      var results9 = collection.where(new Firestore.FieldPath('name'), '==', 3).get();
       db.flush();
 
       return Promise.all([
@@ -224,7 +226,9 @@ describe('MockFirestoreCollection', function () {
         expect(results4).to.eventually.have.property('size').to.equal(3),
         expect(results5).to.eventually.have.property('size').to.equal(3),
         expect(results6).to.eventually.have.property('size').to.equal(0),
-        expect(results7).to.eventually.have.property('size').to.equal(0)
+        expect(results7).to.eventually.have.property('size').to.equal(0),
+        expect(results8).to.eventually.have.property('size').to.equal(1),
+        expect(results9).to.eventually.have.property('size').to.equal(1)
       ]);
     });
 
@@ -259,11 +263,13 @@ describe('MockFirestoreCollection', function () {
     it('allow using complex path', function() {
       var results1 = collection.where('complex.name', '==', 'a').get();
       var results2 = collection.where('complex.name', '==', 1).get();
+      var results3 = collection.where(new Firestore.FieldPath('complex', 'name'), '==', 1).get();
       db.flush();
 
       return Promise.all([
         expect(results1).to.eventually.have.property('size').to.equal(1),
-        expect(results2).to.eventually.have.property('size').to.equal(1)
+        expect(results2).to.eventually.have.property('size').to.equal(1),
+        expect(results3).to.eventually.have.property('size').to.equal(1)
       ]);
     });
   });
@@ -315,6 +321,48 @@ describe('MockFirestoreCollection', function () {
     it('returns documents is desired order', function(done) {
       var results1 = collection.orderBy('name').get();
       var results2 = collection.orderBy('name', 'desc').get();
+      db.flush();
+
+      Promise.all([results1, results2]).then(function(snaps) {
+        var names = [];
+        snaps[0].forEach(function(doc) {
+          names.push(doc.data().name);
+        });
+        expect(names).to.deep.equal([1, 2, 3, 'a', 'b', 'c']);
+
+        names = [];
+        snaps[1].forEach(function(doc) {
+          names.push(doc.data().name);
+        });
+        expect(names).to.deep.equal([1, 2, 3, 'c', 'b', 'a']);
+        done();
+      }).catch(done);
+    });
+
+    it('returns documents ordered by name using FieldPath', function(done) {
+      var results1 = collection.orderBy(new Firestore.FieldPath('name')).get();
+      var results2 = collection.orderBy(new Firestore.FieldPath('name'), 'desc').get();
+      db.flush();
+
+      Promise.all([results1, results2]).then(function(snaps) {
+        var names = [];
+        snaps[0].forEach(function(doc) {
+          names.push(doc.data().name);
+        });
+        expect(names).to.deep.equal([1, 2, 3, 'a', 'b', 'c']);
+
+        names = [];
+        snaps[1].forEach(function(doc) {
+          names.push(doc.data().name);
+        });
+        expect(names).to.deep.equal([1, 2, 3, 'c', 'b', 'a']);
+        done();
+      }).catch(done);
+    });
+
+    it('returns documents ordered by id', function(done) {
+      var results1 = collection.orderBy(Firestore.FieldPath.documentId()).get();
+      var results2 = collection.orderBy(Firestore.FieldPath.documentId(), 'desc').get();
       db.flush();
 
       Promise.all([results1, results2]).then(function(snaps) {

@@ -1,6 +1,7 @@
 var MockAuthentication = require('./auth');
 var MockFirebase = require('./firebase');
 var MockFirestore = require('./firestore');
+var MockFieldPath = require('./firestore-field-path');
 var MockFieldValue = require('./firestore-field-value');
 var MockMessaging = require('./messaging');
 var MockStorage = require('./storage');
@@ -76,6 +77,7 @@ function MockFirebaseSdk(createDatabase, createAuth, createFirestore, createStor
   function MockFirebaseFirestore() {
     return createFirestore ? createFirestore() : new MockFirestore();
   }
+  MockFirebaseFirestore.FieldPath = MockFieldPath;
   MockFirebaseFirestore.FieldValue = MockFieldValue;
 
   function MockFirebaseStorage() {

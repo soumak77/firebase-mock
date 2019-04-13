@@ -89,6 +89,12 @@ describe('DocumentSnapshot', function () {
       };
       expect(new Snapshot('docid', ref, data).get('hello')).to.equal(123);
     });
+    it('returns data if field path exists', function () {
+      var data = {
+        hello: 123
+      };
+      expect(new Snapshot('docid', ref, data).get(new Firestore.FieldPath('hello'))).to.equal(123);
+    });
     it('returns data with complex path', function () {
       var data = {
         hello: {
@@ -96,6 +102,18 @@ describe('DocumentSnapshot', function () {
         }
       };
       expect(new Snapshot('docid', ref, data).get('hello.world')).to.equal(123);
+    });
+    it('returns data with complex field path', function () {
+      var data = {
+        hello: {
+          world: 123
+        }
+      };
+      expect(new Snapshot('docid', ref, data).get(new Firestore.FieldPath('hello', 'world'))).to.equal(123);
+    });
+    it('returns document id', function () {
+      var data = {};
+      expect(new Snapshot('docid', ref, data).get(Firestore.FieldPath.documentId())).to.equal('docid');
     });
   });
 

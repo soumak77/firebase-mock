@@ -100,6 +100,10 @@ describe('MockFirebaseSdk', function () {
     it('FieldValue.serverTimestamp', function () {
       expect(firebase.firestore.FieldValue.serverTimestamp).to.be.a('function');
     });
+
+    it('FieldPath.documentId', function () {
+      expect(firebase.firestore.FieldPath.documentId).to.be.a('function');
+    });
   });
 
   describe('#auth', function() {
