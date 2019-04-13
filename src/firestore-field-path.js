@@ -3,14 +3,18 @@
 var _ = require('./lodash');
 
 function MockFirestoreFieldPath() {
-  this._fieldNames = Array.prototype.slice.call(arguments);
+  this._path = [].slice.call(arguments);
 }
 
 MockFirestoreFieldPath.prototype.isEqual = function (other) {
-  if (other instanceof MockFirestoreFieldPath && _.isEqual(this._fieldNames, other._fieldNames)) {
+  if (other instanceof MockFirestoreFieldPath && _.isEqual(this._path, other._path)) {
     return true;
   }
   return false;
+};
+
+MockFirestoreFieldPath.prototype._toString = function () {
+  return this._path.join('.');
 };
 
 MockFirestoreFieldPath.documentId = function () {

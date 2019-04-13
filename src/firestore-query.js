@@ -89,19 +89,7 @@ MockFirestoreQuery.prototype.get = function () {
               });
             });
 
-            var orderBy = _.flatten(_.map(self.orderedProperties, function(p) {
-              if (p instanceof FieldPath) {
-                if (FieldPath.documentId().isEqual(p)) {
-                  return 'id';
-                } else {
-                  return _.map(p._fieldNames, function(p) {
-                    return 'data.' + p;
-                  });
-                }
-              } else {
-                return 'data.' + p;
-              }
-            }));
+            var orderBy = _.map(self.orderedProperties, getPropertyPath);
             queryable = _.orderBy(queryable, orderBy, self.orderedDirections);
             queryable.forEach(function(q) {
               if (self.limited <= 0 || limit < self.limited) {
@@ -200,6 +188,16 @@ MockFirestoreQuery.prototype._nextErr = function (type) {
 
 function extractName(path) {
   return ((path || '').match(/\/([^.$\[\]#\/]+)$/) || [null, null])[1];
+}
+
+function getPropertyPath(p) {
+  if (FieldPath.documentId().isEqual(p)) {
+    return 'key';
+  } else if (p instanceof FieldPath) {
+    return 'data.' + p._path.join('.');
+  } else {
+    return 'data.' + p;
+  }
 }
 
 module.exports = MockFirestoreQuery;
