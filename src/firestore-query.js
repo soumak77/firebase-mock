@@ -125,6 +125,7 @@ MockFirestoreQuery.prototype.stream = function () {
 
 MockFirestoreQuery.prototype.where = function (property, operator, value) {
   var query;
+  var path = getPropertyPath(property);
 
   // check if unsupported operator
   if (operator !== '==') {
@@ -134,9 +135,10 @@ MockFirestoreQuery.prototype.where = function (property, operator, value) {
     if (_.size(this.data) !== 0) {
       var results = {};
       _.forEach(this.data, function(data, key) {
+        var queryable = { data: data, key: key };
         switch (operator) {
           case '==':
-            if (_.isEqual(_.get(data, property), value)) {
+            if (_.isEqual(_.get(queryable, path), value)) {
               results[key] = _.cloneDeep(data);
             }
             break;
