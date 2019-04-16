@@ -334,7 +334,7 @@ describe('MockFirestoreCollection', function () {
       }).catch(done);
     });
 
-    it('returns documents ordered by date', function(done) {
+    it('returns documents ordered by timestamp', function(done) {
       db.collection('group').doc().create({
         name: 'a',
         date: Timestamp.fromMillis(1000)
@@ -343,6 +343,36 @@ describe('MockFirestoreCollection', function () {
       db.collection('group').add({
         name: 'b',
         date: Timestamp.fromMillis(2000)
+      }).catch(done);
+      db.flush();
+
+      db.collection('group').orderBy('date', 'asc').get().then(function (snap) {
+        expect(snap.size).to.equal(2);
+        expect(snap.docs[0].data().name).to.equal('a');
+        expect(snap.docs[0].data().date).to.have.property('seconds');
+        expect(snap.docs[1].data().name).to.equal('b');
+        expect(snap.docs[1].data().date).to.have.property('seconds');
+
+        db.collection('group').orderBy('date', 'desc').get().then(function (snap) {
+          expect(snap.size).to.equal(2);
+          expect(snap.docs[0].data().name).to.equal('b');
+          expect(snap.docs[1].data().name).to.equal('a');
+          done();
+        }).catch(done);
+        db.flush();
+      }).catch(done);
+      db.flush();
+    });
+
+    it('returns documents ordered by date', function(done) {
+      db.collection('group').doc().create({
+        name: 'a',
+        date: new Date(1000)
+      }).catch(done);
+      db.flush();
+      db.collection('group').add({
+        name: 'b',
+        date: new Date(2000)
       }).catch(done);
       db.flush();
 
