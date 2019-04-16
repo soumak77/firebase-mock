@@ -2,6 +2,7 @@ module.exports = {
   assign: require('lodash.assign'),
   bind: require('lodash.bind'),
   clone: require('lodash.clone'),
+  cloneWith: require('lodash.clonewith'),
   cloneDeep: require('lodash.clonedeep'),
   cloneDeepWith: require('lodash.clonedeepwith'),
   compact: require('lodash.compact'),

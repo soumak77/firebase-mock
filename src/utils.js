@@ -96,7 +96,7 @@ exports.restoreServerClock = function restoreServerTime() {
 
 exports.isServerTimestamp = function isServerTimestamp(data) {
   return _.isObject(data) && data['.sv'] === 'timestamp';
-}
+};
 
 exports.removeEmptyRtdbProperties = function removeEmptyRtdbProperties(obj) {
   var t = typeof obj;
@@ -138,9 +138,10 @@ exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties
       var value = removeEmptyFirestoreProperties(obj[s]);
       if (FieldValue.delete().isEqual(value)) {
         delete obj[s];
-      }
-      if (FieldValue.serverTimestamp().isEqual(value)) {
-        obj[s] = Timestamp.fromMillis(exports.getServerTime());
+      } else if (FieldValue.serverTimestamp().isEqual(value)) {
+        obj[s] = new Date(exports.getServerTime());
+      } else if (value instanceof Timestamp) {
+        obj[s] = value.toDate();
       }
     }
   }
@@ -222,4 +223,10 @@ exports.createThenableReference = function(reference, promise) {
     return promise.then(success).catch(failure);
   };
   return reference;
+};
+
+exports.cloneCustomizer = function(value) {
+  if (value instanceof Date) {
+    return Timestamp.fromMillis(value.getTime());
+  }
 };

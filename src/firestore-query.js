@@ -75,7 +75,7 @@ MockFirestoreQuery.prototype.get = function () {
           if (self.orderedProperties.length === 0) {
             _.forEach(self.data, function(data, key) {
               if (self.limited <= 0 || limit < self.limited) {
-                results[key] = _.cloneDeep(data);
+                results[key] = _.cloneDeepWith(data, utils.cloneCustomizer);
                 limit++;
               }
             });
@@ -92,7 +92,7 @@ MockFirestoreQuery.prototype.get = function () {
 
             queryable.forEach(function(q) {
               if (self.limited <= 0 || limit < self.limited) {
-                results[q.key] = _.cloneDeep(q.data);
+                results[q.key] = _.cloneDeepWith(q.data, utils.cloneCustomizer);
                 limit++;
               }
             });

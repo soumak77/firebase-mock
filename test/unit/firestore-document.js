@@ -303,7 +303,7 @@ describe('MockFirestoreDocument', function () {
 
       doc.get().then(function (snap) {
         expect(snap.exists).to.equal(true);
-        expect(snap.get('date').getTime()).to.equal(nextDate.getTime());
+        expect(snap.get('date').toDate().getTime()).to.equal(nextDate.getTime());
         done();
       }).catch(done);
 
@@ -432,7 +432,7 @@ describe('MockFirestoreDocument', function () {
 
       doc.get()
         .then(function (snap) {
-          expect(snap.get('date').getTime()).to.equal(nextDate.getTime());
+          expect(snap.get('date').toDate().getTime()).to.equal(nextDate.getTime());
           done();
         })
         .catch(done);

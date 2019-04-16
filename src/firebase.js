@@ -695,7 +695,7 @@ function extractName(path) {
 }
 
 function render(datum) {
-  if (datum && _.isPlainObject(datum)) {
+  if (datum && _.isObject(datum)) {
     var keys = _.keys(datum);
 
     if (_.every(keys, RegExp.prototype.test.bind(/^\d+$/))) {
@@ -714,10 +714,10 @@ function render(datum) {
         return array;
       }
     } else {
-      return _.cloneDeep(datum);
+      return _.cloneDeepWith(datum, utils.cloneCustomizer);
     }
   } else {
-    return _.clone(datum);
+    return _.cloneWith(datum, utils.cloneCustomizer);
   }
 }
 
