@@ -75,7 +75,7 @@ describe('MockFirebase', function () {
     it('parses server timestamps', function () {
       ref.set(Firebase.ServerValue.TIMESTAMP);
       ref.flush();
-      expect(ref.getData()).to.have.property('seconds', 0);
+      expect(ref.getData()).to.equal(new Date().getTime());
     });
 
     it('parses server timestamps in child data', function () {
@@ -84,13 +84,13 @@ describe('MockFirebase', function () {
         foo: Firebase.ServerValue.TIMESTAMP
       });
       ref.flush();
-      expect(child.getData()).to.have.property('seconds', 0);
+      expect(child.getData()).to.equal(new Date().getTime());
     });
 
     it('parses server timestamps in priorities', function () {
       ref.setPriority(Firebase.ServerValue.TIMESTAMP);
       ref.flush();
-      expect(ref.priority).to.have.property('seconds', 0);
+      expect(ref).to.have.property('priority', new Date().getTime());
     });
 
     describe('Firebase#setClock', function () {
@@ -98,12 +98,12 @@ describe('MockFirebase', function () {
       afterEach(Firebase.restoreClock);
 
       it('sets a timestamp factory function', function () {
-        var customClock = sinon.stub().returns(10000);
+        var customClock = sinon.stub().returns(10);
         Firebase.setClock(customClock);
         ref.set(Firebase.ServerValue.TIMESTAMP);
         ref.flush();
         expect(customClock.callCount).to.equal(1);
-        expect(ref.getData()).to.have.property('seconds', 10);
+        expect(ref.getData()).to.equal(10);
       });
 
     });
@@ -116,7 +116,7 @@ describe('MockFirebase', function () {
         ref.set(Firebase.ServerValue.TIMESTAMP);
         ref.flush();
         expect(spy.called).to.equal(false);
-        expect(ref.getData()).to.have.property('seconds', 0);
+        expect(ref.getData()).to.equal(new Date().getTime());
       });
 
     });

@@ -96,7 +96,7 @@ exports.restoreServerClock = function restoreServerTime() {
 
 exports.isServerTimestamp = function isServerTimestamp(data) {
   return _.isObject(data) && data['.sv'] === 'timestamp';
-};
+}
 
 exports.removeEmptyRtdbProperties = function removeEmptyRtdbProperties(obj) {
   var t = typeof obj;
