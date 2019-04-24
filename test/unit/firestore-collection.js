@@ -328,7 +328,7 @@ describe('MockFirestoreCollection', function () {
         snaps[1].forEach(function(doc) {
           names.push(doc.data().name);
         });
-        expect(names).to.deep.equal([1, 2, 3, 'c', 'b', 'a']);
+        expect(names).to.deep.equal([3, 2, 1, 'c', 'b', 'a']);
         done();
       }).catch(done);
     });

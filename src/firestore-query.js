@@ -67,38 +67,33 @@ MockFirestoreQuery.prototype.get = function () {
   var self = this;
   return new Promise(function (resolve, reject) {
     self._defer('get', _.toArray(arguments), function () {
-      var results = {};
       var limit = 0;
+      var keyOrder = [];
+      var data = _.cloneDeep(self.data) || {};
+      _.forEach(data, function(data, key) {
+        keyOrder.push(key);
+      });
 
       if (err === null) {
         if (_.size(self.data) !== 0) {
-          if (self.orderedProperties.length === 0) {
+          if (self.orderedProperties.length !== 0) {
+            var ordered = [];
             _.forEach(self.data, function(data, key) {
-              if (self.limited <= 0 || limit < self.limited) {
-                results[key] = _.cloneDeep(data);
-                limit++;
-              }
-            });
-          } else {
-            var queryable = [];
-            _.forEach(self.data, function(data, key) {
-              queryable.push({
-                data: data,
-                key: key
-              });
+              ordered.push({ data: data, key: key });
             });
 
-            queryable = _.orderBy(queryable, _.map(self.orderedProperties, function(p) { return 'data.' + p; }), self.orderedDirections);
+            ordered = _.orderBy(ordered, _.map(self.orderedProperties, function(p) { return 'data.' + p; }), self.orderedDirections);
 
-            queryable.forEach(function(q) {
-              if (self.limited <= 0 || limit < self.limited) {
-                results[q.key] = _.cloneDeep(q.data);
-                limit++;
-              }
+            keyOrder = [];
+            _.forEach(ordered, function(item) {
+              keyOrder.push(item.key);
             });
           }
+          if (self.limited > 0) {
+            keyOrder = keyOrder.slice(0, self.limited);
+          }
 
-          resolve(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id), results));
+          resolve(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id), data, keyOrder));
         } else {
           resolve(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id)));
         }
