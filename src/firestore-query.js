@@ -67,33 +67,14 @@ MockFirestoreQuery.prototype.get = function () {
   var self = this;
   return new Promise(function (resolve, reject) {
     self._defer('get', _.toArray(arguments), function () {
+      var _results = self._results();
+      var results = _results.results;
+      var keyOrder = _results.keyOrder;
       var limit = 0;
-      var keyOrder = [];
-      var data = _.cloneDeep(self.data) || {};
-      _.forEach(data, function(data, key) {
-        keyOrder.push(key);
-      });
 
       if (err === null) {
         if (_.size(self.data) !== 0) {
-          if (self.orderedProperties.length !== 0) {
-            var ordered = [];
-            _.forEach(self.data, function(data, key) {
-              ordered.push({ data: data, key: key });
-            });
-
-            ordered = _.orderBy(ordered, _.map(self.orderedProperties, function(p) { return 'data.' + p; }), self.orderedDirections);
-
-            keyOrder = [];
-            _.forEach(ordered, function(item) {
-              keyOrder.push(item.key);
-            });
-          }
-          if (self.limited > 0) {
-            keyOrder = keyOrder.slice(0, self.limited);
-          }
-
-          resolve(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id), data, keyOrder));
+          resolve(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id), results, keyOrder));
         } else {
           resolve(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id)));
         }
@@ -157,6 +138,76 @@ MockFirestoreQuery.prototype.limit = function (limit) {
   var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id);
   query.limited = limit;
   return query;
+};
+
+MockFirestoreQuery.prototype.onSnapshot = function (optionsOrObserverOrOnNext, observerOrOnNextOrOnError, onErrorArg) {
+  var err = this._nextErr('onSnapshot');
+  var self = this;
+  var onNext = optionsOrObserverOrOnNext;
+  var onError = observerOrOnNextOrOnError;
+  var includeMetadataChanges = optionsOrObserverOrOnNext.includeMetadataChanges;
+
+  if (includeMetadataChanges) {
+    // Note this doesn't truly mimic the firestore metadata changes behavior, however
+    // since everything is syncronous, there isn't any difference in behavior.
+    onNext = observerOrOnNextOrOnError;
+    onError = onErrorArg;
+  }
+  var context = {
+    data: self._results(),
+  };
+  var onSnapshot = function () {
+    // compare the current state to the one from when this function was created
+    // and send the data to the callback if different.
+    if (err === null) {
+      self.get().then(function (querySnapshot) {
+        var results = self._results();
+        if (JSON.stringify(results) !== JSON.stringify(context.data) || includeMetadataChanges) {
+          onNext(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id), results.results, results.keyOrder));
+          // onNext(new QuerySnapshot(self.id, self.ref, results));
+          context.data = results;
+        }
+      });
+    } else {
+      onError(err);
+    }
+  };
+  var unsubscribe = this.queue.onPostFlush(onSnapshot);
+
+  // return the unsubscribe function
+  return unsubscribe;
+};
+
+MockFirestoreQuery.prototype._results = function () {
+  var limit = 0;
+  var keyOrder = [];
+  var results = _.cloneDeep(this.data) || {};
+  _.forEach(results, function(data, key) {
+    keyOrder.push(key);
+  });
+
+
+  if (_.size(this.data) === 0) {
+    return results;
+  }
+
+  var ordered = [];
+  _.forEach(this.data, function(data, key) {
+    ordered.push({ data: data, key: key });
+  });
+
+  ordered = _.orderBy(ordered, _.map(this.orderedProperties, function(p) { return 'data.' + p; }), this.orderedDirections);
+
+  keyOrder = [];
+  _.forEach(ordered, function(item) {
+    keyOrder.push(item.key);
+  });
+
+  if (this.limited > 0) {
+    keyOrder = keyOrder.slice(0, this.limited);
+  }
+
+  return {results: results, keyOrder: keyOrder};
 };
 
 MockFirestoreQuery.prototype._defer = function (sourceMethod, sourceArgs, callback) {
