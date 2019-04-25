@@ -10,7 +10,7 @@ var Queue = require('./queue').Queue;
 var utils = require('./utils');
 var validate = require('./validators');
 
-function MockFirestoreQuery(path, data, parent, name) {
+function MockFirestoreQuery(path, data, parent, name, parentQuery) {
   this.errs = {};
   this.path = path || 'Mock://';
   this.id = parent ? name : extractName(path);
@@ -19,9 +19,9 @@ function MockFirestoreQuery(path, data, parent, name) {
   this.parent = parent || null;
   this.firestore = parent ? parent.firestore : null;
   this.children = {};
-  this.orderedProperties = [];
-  this.orderedDirections = [];
-  this.limited = 0;
+  this.orderedProperties = parentQuery ? _.clone(parentQuery.orderedProperties) : [];
+  this.orderedDirections = parentQuery ? _.clone(parentQuery.orderedDirections) : [];
+  this.limited = parentQuery ? parentQuery.limited : 0;
   this._setData(data);
 }
 
@@ -70,7 +70,6 @@ MockFirestoreQuery.prototype.get = function () {
       var _results = self._results();
       var results = _results.results;
       var keyOrder = _results.keyOrder;
-      var limit = 0;
 
       if (err === null) {
         if (_.size(self.data) !== 0) {
@@ -120,22 +119,23 @@ MockFirestoreQuery.prototype.where = function (property, operator, value) {
             break;
         }
       });
-      return new MockFirestoreQuery(this.path, results, this.parent, this.id);
+      return new MockFirestoreQuery(this.path, results, this.parent, this.id, this);
     } else {
-      return new MockFirestoreQuery(this.path, null, this.parent, this.id);
+      return new MockFirestoreQuery(this.path, null, this.parent, this.id, this);
     }
   }
 };
 
 MockFirestoreQuery.prototype.orderBy = function (property, direction) {
-  var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id);
+  var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id, this);
   query.orderedProperties.push(property);
   query.orderedDirections.push(direction || 'asc');
+
   return query;
 };
 
 MockFirestoreQuery.prototype.limit = function (limit) {
-  var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id);
+  var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id, this);
   query.limited = limit;
   return query;
 };
@@ -183,7 +183,6 @@ MockFirestoreQuery.prototype.onSnapshot = function (optionsOrObserverOrOnNext, o
 };
 
 MockFirestoreQuery.prototype._results = function () {
-  var limit = 0;
   var keyOrder = [];
   var results = _.cloneDeep(this.data) || {};
   _.forEach(results, function(data, key) {

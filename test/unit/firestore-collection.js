@@ -355,6 +355,15 @@ describe('MockFirestoreCollection', function () {
         expect(results4).to.eventually.have.property('size').to.equal(6)
       ]);
     });
+
+    it('returns limited amount of documents when not last chained call', function() {
+      var results = collection.limit(1).where('name_type', '==', 'string').get();
+      db.flush();
+
+      return Promise.all([
+        expect(results).to.eventually.have.property('size').to.equal(1),
+      ]);
+    });
   });
 
   describe('#onSnapshot', function () {
