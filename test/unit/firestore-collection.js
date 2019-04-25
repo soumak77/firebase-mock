@@ -356,4 +356,72 @@ describe('MockFirestoreCollection', function () {
       ]);
     });
   });
+
+  describe('#onSnapshot', function () {
+    it('returns value after collection is updated', function (done) {
+      collection.onSnapshot(function(snap) {
+        var names = [];
+        snap.docs.forEach(function(doc) {
+          names.push(doc.data().name);
+        });
+        expect(names).to.contain('A');
+        expect(names).not.to.contain('a');
+        done();
+      });
+      collection.doc('a').update({name: 'A'}, {setMerge: true});
+      collection.flush();
+    });
+
+    it('calls callback after multiple updates', function (done) {
+      var callCount = 0;
+      collection.onSnapshot(function(snap) {
+        callCount += 1;
+        var names = [];
+        snap.docs.forEach(function(doc) {
+          names.push(doc.data().name);
+        });
+        if (callCount === 1) {
+          expect(names).to.contain('A');
+        } else if (callCount === 2) {
+          expect(names).not.to.contain('a');
+          done();
+        }
+      });
+      collection.doc('a').update({name: 'A'}, {setMerge: true});
+      collection.flush();
+      collection.doc('a').update({name: 'AA'}, {setMerge: true});
+      collection.flush();
+    });
+
+    it('should unsubscribe', function (done) {
+      var unsubscribe = collection.onSnapshot(function(snap) {
+        throw new Error("This should be unsubscribed.");
+      });
+      unsubscribe();
+      collection.doc('a').update({name: 'A'}, {setMerge: true});
+      collection.flush();
+      done();
+    });
+
+    it('Calls onError if error', function (done) {
+      var error = new Error("An error occured.");
+      collection.errs.onSnapshot = error;
+      var callCount = 0;
+      collection.onSnapshot(function(snap) {
+        throw new Error("This should not be called.");
+      }, function(err) {
+        // onSnapshot always returns when first called and then
+        // after data changes so we get 2 calls here.
+        if (callCount == 0) {
+          callCount++;
+          return;
+        }
+        expect(err).to.equal(error);
+        done();
+      });
+      collection.doc('a').update({name: 'A'}, {setMerge: true});
+      collection.flush();
+    });
+
+  });
 });
