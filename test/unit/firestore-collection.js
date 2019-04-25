@@ -406,9 +406,16 @@ describe('MockFirestoreCollection', function () {
     it('Calls onError if error', function (done) {
       var error = new Error("An error occured.");
       collection.errs.onSnapshot = error;
+      var callCount = 0;
       collection.onSnapshot(function(snap) {
         throw new Error("This should not be called.");
       }, function(err) {
+        // onSnapshot always returns when first called and then
+        // after data changes so we get 2 calls here.
+        if (callCount == 0) {
+          callCount++;
+          return;
+        }
         expect(err).to.equal(error);
         done();
       });

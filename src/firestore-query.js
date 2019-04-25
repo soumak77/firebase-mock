@@ -172,6 +172,10 @@ MockFirestoreQuery.prototype.onSnapshot = function (optionsOrObserverOrOnNext, o
       onError(err);
     }
   };
+
+  // onSnapshot should always return when initially called, then
+  // every time data changes.
+  onSnapshot();
   var unsubscribe = this.queue.onPostFlush(onSnapshot);
 
   // return the unsubscribe function
