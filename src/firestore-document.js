@@ -6,8 +6,10 @@ var Promise = require('rsvp').Promise;
 var autoId = require('firebase-auto-ids');
 var DocumentSnapshot = require('./firestore-document-snapshot');
 var Queue = require('./queue').Queue;
+var Timestamp = require('./timestamp');
 var utils = require('./utils');
 var validate = require('./validators');
+var WriteResult = require('./write-result');
 
 function MockFirestoreDocument(path, data, parent, name, CollectionReference) {
   this.ref = this;
@@ -108,9 +110,12 @@ MockFirestoreDocument.prototype.create = function (data, callback) {
 
       var base = self._getData();
       err = err || self._validateDoesNotExist(base);
-        if (err === null) {
+      if (err === null) {
+        var serverTime = utils.getServerTime();
+        var result = new WriteResult(Timestamp.fromMillis(serverTime));
+        data = utils.removeEmptyFirestoreProperties(data, serverTime);
         self._dataChanged(data);
-        resolve();
+        resolve(result);
       } else {
           if (callback) {
             callback(err);
@@ -132,6 +137,7 @@ MockFirestoreDocument.prototype.set = function (data, opts, callback) {
   return new Promise(function (resolve, reject) {
     self._defer('set', _.toArray(arguments), function () {
       if (err === null) {
+        data = utils.removeEmptyFirestoreProperties(data, utils.getServerTime());
         self._dataChanged(data);
         resolve();
       } else {
@@ -166,7 +172,7 @@ MockFirestoreDocument.prototype._update = function (changes, opts, callback) {
             data = _.assign(_.isObject(base) ? base : {}, utils.updateToFirestoreObject(changes));
           }
         }
-        data = utils.removeEmptyFirestoreProperties(data);
+        data = utils.removeEmptyFirestoreProperties(data, utils.getServerTime());
         self._dataChanged(data);
         resolve(data);
       } else {

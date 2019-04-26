@@ -10,6 +10,7 @@ chai.use(require('sinon-chai'));
 var expect = chai.expect;
 var _ = require('../../src/lodash');
 var Firestore = require('../../').MockFirestore;
+var Firebase = require('../../').MockFirebase;
 
 describe('MockFirestoreDocument', function () {
 
@@ -94,9 +95,15 @@ describe('MockFirestoreDocument', function () {
 
   describe('#create', function () {
     it('creates a new doc', function (done) {
+      Firebase.setClock(function() {
+        return 1234567890123;
+      });
       var createDoc = db.doc('createDoc');
 
-      createDoc.create({prop: 'title'});
+      createDoc.create({prop: 'title'}).then(function (result) {
+        expect(result).to.have.property('writeTime');
+        expect(result.writeTime.seconds).to.equal(1234567890);
+      }).catch(done);
 
       createDoc.get().then(function (snap) {
         expect(snap.exists).to.equal(true);
@@ -115,6 +122,20 @@ describe('MockFirestoreDocument', function () {
       createDoc.get().then(function (snap) {
         expect(snap.exists).to.equal(true);
         expect(snap.get('prop')).to.equal(null);
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
+    it('creates a new doc with server time values', function (done) {
+      var createDoc = db.doc('createDoc');
+
+      createDoc.create({serverTime: Firestore.FieldValue.serverTimestamp()});
+
+      createDoc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.get('serverTime')).to.have.property('seconds');
         done();
       }).catch(done);
 
@@ -160,6 +181,34 @@ describe('MockFirestoreDocument', function () {
       doc.get().then(function(snap) {
         expect(snap.exists).to.equal(true);
         expect(snap.get('prop')).to.equal(null);
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
+    it('sets value of doc with server timestamp', function (done) {
+      doc.set({
+        serverTime: Firestore.FieldValue.serverTimestamp()
+      });
+      doc.get().then(function(snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.get('serverTime')).to.have.property('seconds');
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
+    it('sets value of doc with ref', function (done) {
+      var ref = db.doc('ref');
+      ref.create();
+      doc.set({
+        ref: ref
+      });
+      doc.get().then(function(snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.get('ref')).to.have.property('ref');
         done();
       }).catch(done);
 
@@ -254,7 +303,7 @@ describe('MockFirestoreDocument', function () {
 
       doc.get().then(function (snap) {
         expect(snap.exists).to.equal(true);
-        expect(snap.get('date').getTime()).to.equal(nextDate.getTime());
+        expect(snap.get('date').toDate().getTime()).to.equal(nextDate.getTime());
         done();
       }).catch(done);
 
@@ -293,6 +342,20 @@ describe('MockFirestoreDocument', function () {
         expect(snap.exists).to.equal(true);
         expect(snap.get('title')).to.equal('title2');
         expect(snap.get('nextTitle')).to.equal(null);
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
+    it('updates value of doc with server time value', function (done) {
+      doc.update({
+        serverTime: Firestore.FieldValue.serverTimestamp()
+      });
+
+      doc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.get('serverTime')).to.have.property('seconds');
         done();
       }).catch(done);
 
@@ -369,7 +432,7 @@ describe('MockFirestoreDocument', function () {
 
       doc.get()
         .then(function (snap) {
-          expect(snap.get('date').getTime()).to.equal(nextDate.getTime());
+          expect(snap.get('date').toDate().getTime()).to.equal(nextDate.getTime());
           done();
         })
         .catch(done);

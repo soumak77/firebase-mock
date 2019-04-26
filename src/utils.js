@@ -1,6 +1,7 @@
 'use strict';
 
 var Snapshot = require('./snapshot');
+var Timestamp = require('./timestamp');
 var FieldValue = require('./firestore-field-value');
 var _ = require('./lodash');
 
@@ -75,6 +76,24 @@ exports.priorityComparator = function priorityComparator(a, b) {
   return 0;
 };
 
+var serverClock, defaultClock;
+
+serverClock = defaultClock = function () {
+  return new Date().getTime();
+};
+
+exports.getServerTime = function getServerTime() {
+  return serverClock();
+};
+
+exports.setServerClock = function setServerTime(fn) {
+  serverClock = fn;
+};
+
+exports.restoreServerClock = function restoreServerTime() {
+  serverClock = defaultClock;
+};
+
 exports.isServerTimestamp = function isServerTimestamp(data) {
   return _.isObject(data) && data['.sv'] === 'timestamp';
 };
@@ -108,22 +127,21 @@ exports.removeEmptyRtdbProperties = function removeEmptyRtdbProperties(obj) {
   }
 };
 
-exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties(obj) {
-  var t = typeof obj;
-  if (t === 'boolean' || t === 'string' || t === 'number' || t === 'undefined') {
+exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties(obj, serverTime) {
+  if (!_.isPlainObject(obj)) {
     return obj;
   }
-  if (obj instanceof Date) return obj;
 
   var keys = getKeys(obj);
   if (keys.length > 0) {
     for (var s in obj) {
-      var value = removeEmptyFirestoreProperties(obj[s]);
+      var value = removeEmptyFirestoreProperties(obj[s], serverTime);
       if (FieldValue.delete().isEqual(value)) {
         delete obj[s];
-      }
-      if (FieldValue.serverTimestamp().isEqual(value)) {
-        obj[s] = new Date();
+      } else if (FieldValue.serverTimestamp().isEqual(value)) {
+        obj[s] = new Date(serverTime);
+      } else if (value instanceof Timestamp) {
+        obj[s] = value.toDate();
       }
     }
   }
@@ -205,4 +223,10 @@ exports.createThenableReference = function(reference, promise) {
     return promise.then(success).catch(failure);
   };
   return reference;
+};
+
+exports.cloneCustomizer = function(value) {
+  if (value instanceof Date) {
+    return Timestamp.fromMillis(value.getTime());
+  }
 };
