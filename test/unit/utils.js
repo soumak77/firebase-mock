@@ -56,56 +56,56 @@ describe('utils', function () {
 
 
   describe('removeEmptyFirestoreProperties', function () {
-
+    var serverTime = Date.now();
     it('should return null, when the obj is empty', function () {
-      expect(removeEmptyFirestoreProperties({})).to.eql({});
+      expect(removeEmptyFirestoreProperties({}), serverTime).to.eql({});
     });
 
     it('should make no changes, when obj does not contain an empty property', function () {
-      expect(removeEmptyFirestoreProperties({a: 1})).to.eql({a: 1});
+      expect(removeEmptyFirestoreProperties({a: 1}, serverTime)).to.eql({a: 1});
     });
 
     it('should make no changes, when obj is a bool', function () {
-      expect(removeEmptyFirestoreProperties(true)).to.eql(true);
+      expect(removeEmptyFirestoreProperties(true, serverTime)).to.eql(true);
     });
 
     it('should make no changes, when obj is a string', function () {
-      expect(removeEmptyFirestoreProperties('hi')).to.eql('hi');
+      expect(removeEmptyFirestoreProperties('hi', serverTime)).to.eql('hi');
     });
 
     it('should make no changes, when obj is a number', function () {
-      expect(removeEmptyFirestoreProperties(123)).to.eql(123);
+      expect(removeEmptyFirestoreProperties(123, serverTime)).to.eql(123);
     });
 
     it('should make no changes, when obj is a Date', function () {
       var date = new Date();
-      expect(removeEmptyFirestoreProperties(date)).to.eql(date);
+      expect(removeEmptyFirestoreProperties(date, serverTime)).to.eql(date);
     });
 
     it('should make no changes, when obj is a Timestamp', function () {
       var ts = new Timestamp(123, 123);
-      expect(removeEmptyFirestoreProperties(ts)).to.eql(ts);
+      expect(removeEmptyFirestoreProperties(ts, serverTime)).to.eql(ts);
     });
 
     it('should make no changes, when obj is a NaN', function () {
-      expect(removeEmptyFirestoreProperties(NaN)).to.eql(NaN);
+      expect(removeEmptyFirestoreProperties(NaN, serverTime)).to.eql(NaN);
     });
 
     it('should make no changes, when obj is a undefined', function () {
-      expect(removeEmptyFirestoreProperties(undefined)).to.eql(undefined);
+      expect(removeEmptyFirestoreProperties(undefined, serverTime)).to.eql(undefined);
     });
 
     it('should remove property, when it is null', function () {
-      expect(removeEmptyFirestoreProperties({a: 1, b: null})).to.eql({a: 1, b: null});
+      expect(removeEmptyFirestoreProperties({a: 1, b: null}, serverTime)).to.eql({a: 1, b: null});
     });
     it('should remove property, when it is an empty object', function () {
-      expect(removeEmptyFirestoreProperties({a: 1, b: {}})).to.eql({a: 1, b: {}});
+      expect(removeEmptyFirestoreProperties({a: 1, b: {}}, serverTime)).to.eql({a: 1, b: {}});
     });
     it('should remove property, when it is an empty array', function () {
-      expect(removeEmptyFirestoreProperties({a: 1, b: []})).to.eql({a: 1, b: []});
+      expect(removeEmptyFirestoreProperties({a: 1, b: []}, serverTime)).to.eql({a: 1, b: []});
     });
     it('should return null, when all properties are null ', function () {
-      expect(removeEmptyFirestoreProperties({a: {b: null}})).to.eql({a: {b: null}});
+      expect(removeEmptyFirestoreProperties({a: {b: null}}, serverTime)).to.eql({a: {b: null}});
     });
   });
 

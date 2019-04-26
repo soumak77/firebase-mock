@@ -127,7 +127,7 @@ exports.removeEmptyRtdbProperties = function removeEmptyRtdbProperties(obj) {
   }
 };
 
-exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties(obj) {
+exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties(obj, serverTime) {
   if (!_.isPlainObject(obj)) {
     return obj;
   }
@@ -135,11 +135,11 @@ exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties
   var keys = getKeys(obj);
   if (keys.length > 0) {
     for (var s in obj) {
-      var value = removeEmptyFirestoreProperties(obj[s]);
+      var value = removeEmptyFirestoreProperties(obj[s], serverTime);
       if (FieldValue.delete().isEqual(value)) {
         delete obj[s];
       } else if (FieldValue.serverTimestamp().isEqual(value)) {
-        obj[s] = new Date(exports.getServerTime());
+        obj[s] = new Date(serverTime);
       } else if (value instanceof Timestamp) {
         obj[s] = value.toDate();
       }
