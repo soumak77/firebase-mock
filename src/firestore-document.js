@@ -108,14 +108,14 @@ MockFirestoreDocument.prototype.create = function (data, callback) {
 
       var base = self._getData();
       err = err || self._validateDoesNotExist(base);
-        if (err === null) {
+      if (err === null) {
         self._dataChanged(data);
         resolve();
       } else {
-          if (callback) {
-            callback(err);
+        if (callback) {
+          callback(err);
         }
-          reject(err);
+        reject(err);
       }
     });
   });
@@ -153,12 +153,13 @@ MockFirestoreDocument.prototype._update = function (changes, opts, callback) {
     self._defer('update', _.toArray(arguments), function () {
       if (!err) {
         var base = self._getData();
+        var original = _.cloneDeep(base);
         var data;
         if (_opts.setMerge) {
           data = _.merge(_.isObject(base) ? base : {}, changes);
         } else {
           // check if changes contain no nested objects
-          if (_.every(Object.keys(changes), function(key) { return !_.isObject(changes[key]); })) {
+          if (_.every(Object.keys(changes), function (key) { return !_.isObject(changes[key]); })) {
             // allow data to be merged, which allows merging of nested data
             data = _.merge(_.isObject(base) ? base : {}, utils.updateToFirestoreObject(changes));
           } else {
@@ -166,7 +167,7 @@ MockFirestoreDocument.prototype._update = function (changes, opts, callback) {
             data = _.assign(_.isObject(base) ? base : {}, utils.updateToFirestoreObject(changes));
           }
         }
-        data = utils.removeEmptyFirestoreProperties(data);
+        data = utils.removeEmptyFirestoreProperties(data, original);
         self._dataChanged(data);
         resolve(data);
       } else {
