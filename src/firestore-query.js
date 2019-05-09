@@ -10,7 +10,7 @@ var Queue = require('./queue').Queue;
 var utils = require('./utils');
 var validate = require('./validators');
 
-function MockFirestoreQuery(path, data, parent, name) {
+function MockFirestoreQuery(path, data, parent, name, parentQuery) {
   this.errs = {};
   this.path = path || 'Mock://';
   this.id = parent ? name : extractName(path);
@@ -19,9 +19,9 @@ function MockFirestoreQuery(path, data, parent, name) {
   this.parent = parent || null;
   this.firestore = parent ? parent.firestore : null;
   this.children = {};
-  this.orderedProperties = [];
-  this.orderedDirections = [];
-  this.limited = 0;
+  this.orderedProperties = parentQuery ? _.clone(parentQuery.orderedProperties) : [];
+  this.orderedDirections = parentQuery ? _.clone(parentQuery.orderedDirections) : [];
+  this.limited = parentQuery ? parentQuery.limited : 0;
   this._setData(data);
 }
 
@@ -67,38 +67,13 @@ MockFirestoreQuery.prototype.get = function () {
   var self = this;
   return new Promise(function (resolve, reject) {
     self._defer('get', _.toArray(arguments), function () {
-      var results = {};
-      var limit = 0;
+      var _results = self._results();
+      var results = _results.results;
+      var keyOrder = _results.keyOrder;
 
       if (err === null) {
         if (_.size(self.data) !== 0) {
-          if (self.orderedProperties.length === 0) {
-            _.forEach(self.data, function(data, key) {
-              if (self.limited <= 0 || limit < self.limited) {
-                results[key] = _.cloneDeep(data);
-                limit++;
-              }
-            });
-          } else {
-            var queryable = [];
-            _.forEach(self.data, function(data, key) {
-              queryable.push({
-                data: data,
-                key: key
-              });
-            });
-
-            queryable = _.orderBy(queryable, _.map(self.orderedProperties, function(p) { return 'data.' + p; }), self.orderedDirections);
-
-            queryable.forEach(function(q) {
-              if (self.limited <= 0 || limit < self.limited) {
-                results[q.key] = _.cloneDeep(q.data);
-                limit++;
-              }
-            });
-          }
-
-          resolve(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id), results));
+          resolve(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id), results, keyOrder));
         } else {
           resolve(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id)));
         }
@@ -150,24 +125,98 @@ MockFirestoreQuery.prototype.where = function (property, operator, value) {
             break;
         }
       });
-      return new MockFirestoreQuery(this.path, results, this.parent, this.id);
+      return new MockFirestoreQuery(this.path, results, this.parent, this.id, this);
     } else {
-      return new MockFirestoreQuery(this.path, null, this.parent, this.id);
+      return new MockFirestoreQuery(this.path, null, this.parent, this.id, this);
     }
   }
 };
 
 MockFirestoreQuery.prototype.orderBy = function (property, direction) {
-  var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id);
+  var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id, this);
   query.orderedProperties.push(property);
   query.orderedDirections.push(direction || 'asc');
+
   return query;
 };
 
 MockFirestoreQuery.prototype.limit = function (limit) {
-  var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id);
+  var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id, this);
   query.limited = limit;
   return query;
+};
+
+MockFirestoreQuery.prototype.onSnapshot = function (optionsOrObserverOrOnNext, observerOrOnNextOrOnError, onErrorArg) {
+  var err = this._nextErr('onSnapshot');
+  var self = this;
+  var onNext = optionsOrObserverOrOnNext;
+  var onError = observerOrOnNextOrOnError;
+  var includeMetadataChanges = optionsOrObserverOrOnNext.includeMetadataChanges;
+
+  if (includeMetadataChanges) {
+    // Note this doesn't truly mimic the firestore metadata changes behavior, however
+    // since everything is syncronous, there isn't any difference in behavior.
+    onNext = observerOrOnNextOrOnError;
+    onError = onErrorArg;
+  }
+  var context = {
+    data: self._results(),
+  };
+  var onSnapshot = function () {
+    // compare the current state to the one from when this function was created
+    // and send the data to the callback if different.
+    if (err === null) {
+      self.get().then(function (querySnapshot) {
+        var results = self._results();
+        if (JSON.stringify(results) !== JSON.stringify(context.data) || includeMetadataChanges) {
+          onNext(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id), results.results, results.keyOrder));
+          // onNext(new QuerySnapshot(self.id, self.ref, results));
+          context.data = results;
+        }
+      });
+    } else {
+      onError(err);
+    }
+  };
+
+  // onSnapshot should always return when initially called, then
+  // every time data changes.
+  onSnapshot();
+  var unsubscribe = this.queue.onPostFlush(onSnapshot);
+
+  // return the unsubscribe function
+  return unsubscribe;
+};
+
+MockFirestoreQuery.prototype._results = function () {
+  var keyOrder = [];
+  var results = _.cloneDeep(this.data) || {};
+  _.forEach(results, function(data, key) {
+    keyOrder.push(key);
+  });
+
+
+  if (_.size(this.data) === 0) {
+    return results;
+  }
+
+  var ordered = [];
+  _.forEach(this.data, function(data, key) {
+    ordered.push({ data: data, key: key });
+  });
+
+  ordered = _.orderBy(ordered, _.map(this.orderedProperties, function(p) { return 'data.' + p; }), this.orderedDirections);
+
+  keyOrder = [];
+  _.forEach(ordered, function(item) {
+    keyOrder.push(item.key);
+  });
+
+  if (this.limited > 0) {
+    keyOrder = keyOrder.slice(0, this.limited);
+  }
+
+  return {results: results, keyOrder: keyOrder};
 };
 
 MockFirestoreQuery.prototype._defer = function (sourceMethod, sourceArgs, callback) {

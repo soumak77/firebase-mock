@@ -4,7 +4,7 @@
     "access": "public"
   },
   "version": "2.3.1",
-  "description": "Firebase mock library for writing unit tests",
+  "description": "Fork of firebase-mock: Firebase mock library for writing unit tests",
   "main": "./src",
   "scripts": {
     "test": "gulp lint && gulp test",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/soumak77/firebase-mock.git"
+    "url": "git://github.com/key-data-systems/firebase-mock.git"
   },
   "keywords": [
     "firebase",
@@ -23,13 +23,13 @@
   "author": "Brian Soumakian",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/soumak77/firebase-mock/issues"
+    "url": "https://github.com/key-data-systems/firebase-mock/issues"
   },
   "files": [
     "src/",
     "browser/"
   ],
-  "homepage": "https://github.com/soumak77/firebase-mock",
+  "homepage": "https://github.com/key-data-systems/firebase-mock",
   "dependencies": {
     "firebase-auto-ids": "~1.1.0",
     "lodash.assign": "^4.2.0",
@@ -96,7 +96,7 @@
     "karma-sinon": "^1.0.5",
     "mocha": "^5.2.0",
     "phantomjs-prebuilt": "^2.1.16",
-    "prettier" : "^1.17.0",
+    "prettier": "^1.17.0",
     "semver": "^5.5.0",
     "sinon": "^4.5.0",
     "sinon-chai": "~2.14.0",

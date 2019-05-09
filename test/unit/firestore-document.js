@@ -508,4 +508,66 @@ describe('MockFirestoreDocument', function () {
       });
     });
   });
+
+  describe('#onSnapshot', function () {
+    it('returns value after document is updated', function (done) {
+      doc.onSnapshot(function(snap) {
+        expect(snap.get('newTitle')).to.equal('A new title');
+        done();
+      });
+      doc.update({newTitle: 'A new title'}, {setMerge: true});
+      db.flush();
+    });
+
+    it('returns error if error occured', function (done) {
+      var error = new Error("An error occured.");
+      doc.errs.onSnapshot = error;
+      doc.onSnapshot(function(snap) {
+        throw new Error("This should not be called.");
+      }, function(err) {
+        expect(err).to.equal(error);
+        done();
+      });
+      doc.update({name: 'A'}, {setMerge: true});
+      doc.flush();
+    });
+
+    it('does not returns value when not updated', function (done) {
+      var callCount = 0;
+      doc.onSnapshot(function(snap) {
+        callCount += 1;
+      });
+      doc.update({newTitle: 'A new title'}, {setMerge: true});
+      doc.flush();
+      expect(callCount).to.equal(1);
+      doc.get();
+      doc.flush();
+      expect(callCount).to.equal(1);
+      done();
+    });
+
+    it('unsubscribes', function (done) {
+      var callCount = 0;
+      var unsubscribe = doc.onSnapshot(function(snap) {
+        callCount += 1;
+      });
+      doc.update({newTitle: 'A new title'}, {setMerge: true});
+      doc.flush();
+      expect(callCount).to.equal(1);
+      doc.update({newTitle: 'A newer title'}, {setMerge: true});
+      unsubscribe();
+      doc.flush();
+      expect(callCount).to.equal(1);
+      done();
+    });
+
+    it('accepts option includeMetadataChanges', function (done) {
+      doc.onSnapshot({includeMetadataChanges: true}, function(snap) {
+        expect(snap.get('newTitle')).to.equal('A new title');
+        done();
+      });
+      doc.update({newTitle: 'A new title'}, {setMerge: true});
+      doc.flush();
+    });
+  });
 });
