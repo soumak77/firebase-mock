@@ -1,5 +1,5 @@
-/** @pie-kds/firebase-mock - v2.3.1
-https://github.com/soumak77/firebase-mock
+/** @pie-kds/firebase-mock - v2.3.3
+https://github.com/key-data-systems/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.firebasemock = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
@@ -512,7 +512,7 @@ var objectKeys = Object.keys || function (obj) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"object-assign":52,"util/":4}],2:[function(require,module,exports){
+},{"object-assign":53,"util/":4}],2:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -1134,7 +1134,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":3,"_process":54,"inherits":2}],5:[function(require,module,exports){
+},{"./support/isBuffer":3,"_process":55,"inherits":2}],5:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -3887,6 +3887,13 @@ function isSlowBuffer (obj) {
 }
 
 },{}],16:[function(require,module,exports){
+var toString = {}.toString;
+
+module.exports = Array.isArray || function (arr) {
+  return toString.call(arr) == '[object Array]';
+};
+
+},{}],17:[function(require,module,exports){
 /**
  * lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -4525,7 +4532,7 @@ function keys(object) {
 
 module.exports = assign;
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 /**
  * lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -5153,7 +5160,7 @@ function keysIn(object) {
 
 module.exports = assignIn;
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -6411,7 +6418,7 @@ bind.placeholder = {};
 module.exports = bind;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -8171,7 +8178,7 @@ function stubFalse() {
 module.exports = clone;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -9923,7 +9930,7 @@ function stubFalse() {
 module.exports = cloneDeep;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -11685,7 +11692,7 @@ function stubFalse() {
 module.exports = cloneDeepWith;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 /**
  * lodash 3.0.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -11726,7 +11733,7 @@ function compact(array) {
 
 module.exports = compact;
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -12900,7 +12907,7 @@ function isObjectLike(value) {
 module.exports = difference;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -15299,7 +15306,7 @@ function property(path) {
 module.exports = every;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -17669,7 +17676,7 @@ function property(path) {
 module.exports = filter;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -20126,7 +20133,7 @@ function property(path) {
 module.exports = find;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -22524,7 +22531,7 @@ function property(path) {
 module.exports = findIndex;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 /**
  * lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -23091,7 +23098,7 @@ function identity(value) {
 
 module.exports = forEach;
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 /**
  * lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -23584,7 +23591,7 @@ function identity(value) {
 
 module.exports = forIn;
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -24519,7 +24526,7 @@ function get(object, path, defaultValue) {
 module.exports = get;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -25612,7 +25619,7 @@ function has(object, path) {
 module.exports = has;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 /**
  * lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -26359,7 +26366,7 @@ function values(object) {
 
 module.exports = includes;
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 /**
  * lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -26692,7 +26699,7 @@ function toNumber(value) {
 
 module.exports = indexOf;
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -27278,7 +27285,7 @@ function stubFalse() {
 module.exports = isEmpty;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 (function (global){
 /**
  * Lodash (Custom Build) <https://lodash.com/>
@@ -29130,7 +29137,7 @@ function stubFalse() {
 module.exports = isEqual;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 (function (global){
 /**
  * Lodash (Custom Build) <https://lodash.com/>
@@ -29289,7 +29296,7 @@ function isObject(value) {
 module.exports = isFunction;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 /**
  * lodash 3.0.3 (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -29370,7 +29377,7 @@ function isNumber(value) {
 
 module.exports = isNumber;
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 /**
  * lodash 3.0.2 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -29409,7 +29416,7 @@ function isObject(value) {
 
 module.exports = isObject;
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 /**
  * lodash 4.0.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -29506,7 +29513,7 @@ function isString(value) {
 
 module.exports = isString;
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 /**
  * lodash 3.0.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern modularize exports="npm" -o ./`
@@ -29538,7 +29545,7 @@ function isUndefined(value) {
 
 module.exports = isUndefined;
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 /**
  * lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
@@ -29941,7 +29948,7 @@ function keys(object) {
 
 module.exports = keys;
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -32311,7 +32318,7 @@ function property(path) {
 module.exports = map;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 (function (global){
 /**
  * Lodash (Custom Build) <https://lodash.com/>
@@ -34278,7 +34285,7 @@ function stubFalse() {
 module.exports = merge;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 /**
  * lodash 3.0.1 (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize include="noop" exports="npm" -o ./foo`
@@ -34308,7 +34315,7 @@ function noop() {
 
 module.exports = noop;
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -36798,7 +36805,7 @@ function property(path) {
 module.exports = orderBy;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -39174,7 +39181,7 @@ function property(path) {
 module.exports = reduce;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -41518,7 +41525,7 @@ function property(path) {
 module.exports = remove;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -42512,7 +42519,7 @@ function set(object, path, value) {
 module.exports = set;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -43105,7 +43112,7 @@ function isString(value) {
 module.exports = size;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -43978,7 +43985,7 @@ function values(object) {
 module.exports = toArray;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 (function (global){
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -45163,7 +45170,7 @@ function noop() {
 module.exports = union;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 /*
 object-assign
 (c) Sindre Sorhus
@@ -45255,7 +45262,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -45303,7 +45310,7 @@ function nextTick(fn, arg1, arg2, arg3) {
 
 
 }).call(this,require('_process'))
-},{"_process":54}],54:[function(require,module,exports){
+},{"_process":55}],55:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -45489,10 +45496,10 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],55:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 module.exports = require('./lib/_stream_duplex.js');
 
-},{"./lib/_stream_duplex.js":56}],56:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":57}],57:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -45624,7 +45631,7 @@ Duplex.prototype._destroy = function (err, cb) {
 
   pna.nextTick(cb, err);
 };
-},{"./_stream_readable":58,"./_stream_writable":60,"core-util-is":9,"inherits":14,"process-nextick-args":53}],57:[function(require,module,exports){
+},{"./_stream_readable":59,"./_stream_writable":61,"core-util-is":9,"inherits":14,"process-nextick-args":54}],58:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -45672,7 +45679,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":59,"core-util-is":9,"inherits":14}],58:[function(require,module,exports){
+},{"./_stream_transform":60,"core-util-is":9,"inherits":14}],59:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -46694,7 +46701,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":56,"./internal/streams/BufferList":61,"./internal/streams/destroy":62,"./internal/streams/stream":63,"_process":54,"core-util-is":9,"events":10,"inherits":14,"isarray":64,"process-nextick-args":53,"safe-buffer":71,"string_decoder/":65,"util":6}],59:[function(require,module,exports){
+},{"./_stream_duplex":57,"./internal/streams/BufferList":62,"./internal/streams/destroy":63,"./internal/streams/stream":64,"_process":55,"core-util-is":9,"events":10,"inherits":14,"isarray":16,"process-nextick-args":54,"safe-buffer":71,"string_decoder/":65,"util":6}],60:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -46909,7 +46916,7 @@ function done(stream, er, data) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":56,"core-util-is":9,"inherits":14}],60:[function(require,module,exports){
+},{"./_stream_duplex":57,"core-util-is":9,"inherits":14}],61:[function(require,module,exports){
 (function (process,global,setImmediate){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -47599,7 +47606,7 @@ Writable.prototype._destroy = function (err, cb) {
   cb(err);
 };
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"./_stream_duplex":56,"./internal/streams/destroy":62,"./internal/streams/stream":63,"_process":54,"core-util-is":9,"inherits":14,"process-nextick-args":53,"safe-buffer":71,"timers":73,"util-deprecate":74}],61:[function(require,module,exports){
+},{"./_stream_duplex":57,"./internal/streams/destroy":63,"./internal/streams/stream":64,"_process":55,"core-util-is":9,"inherits":14,"process-nextick-args":54,"safe-buffer":71,"timers":73,"util-deprecate":74}],62:[function(require,module,exports){
 'use strict';
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -47679,7 +47686,7 @@ if (util && util.inspect && util.inspect.custom) {
     return this.constructor.name + ' ' + obj;
   };
 }
-},{"safe-buffer":71,"util":6}],62:[function(require,module,exports){
+},{"safe-buffer":71,"util":6}],63:[function(require,module,exports){
 'use strict';
 
 /*<replacement>*/
@@ -47754,17 +47761,10 @@ module.exports = {
   destroy: destroy,
   undestroy: undestroy
 };
-},{"process-nextick-args":53}],63:[function(require,module,exports){
+},{"process-nextick-args":54}],64:[function(require,module,exports){
 module.exports = require('events').EventEmitter;
 
-},{"events":10}],64:[function(require,module,exports){
-var toString = {}.toString;
-
-module.exports = Array.isArray || function (arr) {
-  return toString.call(arr) == '[object Array]';
-};
-
-},{}],65:[function(require,module,exports){
+},{"events":10}],65:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -48073,13 +48073,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":56,"./lib/_stream_passthrough.js":57,"./lib/_stream_readable.js":58,"./lib/_stream_transform.js":59,"./lib/_stream_writable.js":60}],68:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":57,"./lib/_stream_passthrough.js":58,"./lib/_stream_readable.js":59,"./lib/_stream_transform.js":60,"./lib/_stream_writable.js":61}],68:[function(require,module,exports){
 module.exports = require('./readable').Transform
 
 },{"./readable":67}],69:[function(require,module,exports){
 module.exports = require('./lib/_stream_writable.js');
 
-},{"./lib/_stream_writable.js":60}],70:[function(require,module,exports){
+},{"./lib/_stream_writable.js":61}],70:[function(require,module,exports){
 (function (process,global,setImmediate){
 /*!
  * @overview RSVP - a tiny implementation of Promises/A+.
@@ -50628,7 +50628,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"_process":54,"timers":73}],71:[function(require,module,exports){
+},{"_process":55,"timers":73}],71:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var buffer = require('buffer')
 var Buffer = buffer.Buffer
@@ -50821,7 +50821,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":10,"inherits":14,"readable-stream/duplex.js":55,"readable-stream/passthrough.js":66,"readable-stream/readable.js":67,"readable-stream/transform.js":68,"readable-stream/writable.js":69}],73:[function(require,module,exports){
+},{"events":10,"inherits":14,"readable-stream/duplex.js":56,"readable-stream/passthrough.js":66,"readable-stream/readable.js":67,"readable-stream/transform.js":68,"readable-stream/writable.js":69}],73:[function(require,module,exports){
 (function (setImmediate,clearImmediate){
 var nextTick = require('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
@@ -50900,7 +50900,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
   delete immediateIds[id];
 };
 }).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"process/browser.js":54,"timers":73}],74:[function(require,module,exports){
+},{"process/browser.js":55,"timers":73}],74:[function(require,module,exports){
 (function (global){
 
 /**
@@ -50975,7 +50975,7 @@ function config (name) {
 arguments[4][3][0].apply(exports,arguments)
 },{"dup":3}],76:[function(require,module,exports){
 arguments[4][4][0].apply(exports,arguments)
-},{"./support/isBuffer":75,"_process":54,"dup":4,"inherits":14}],77:[function(require,module,exports){
+},{"./support/isBuffer":75,"_process":55,"dup":4,"inherits":14}],77:[function(require,module,exports){
 'use strict';
 
 var _ = require('./lodash');
@@ -52720,6 +52720,41 @@ MockFirestoreDocument.prototype.delete = function (callback) {
   });
 };
 
+MockFirestoreDocument.prototype.onSnapshot = function (optionsOrObserverOrOnNext, observerOrOnNextOrOnError, onErrorArg) {
+  var err = this._nextErr('onSnapshot');
+  var self = this;
+  var onNext = optionsOrObserverOrOnNext;
+  var onError = observerOrOnNextOrOnError;
+  var includeMetadataChanges = optionsOrObserverOrOnNext.includeMetadataChanges;
+
+  if (includeMetadataChanges) {
+    // Note this doesn't truly mimic the firestore metadata changes behavior, however
+    // since everything is syncronous, there isn't any difference in behavior.
+    onNext = observerOrOnNextOrOnError;
+    onError = onErrorArg;
+  }
+  var context = {
+    data: self._getData(),
+  };
+  var onSnapshot = function () {
+    // compare the current state to the one from when this function was created
+    // and send the data to the callback if different.
+    if (err === null) {
+      if (JSON.stringify(self.data) !== JSON.stringify(context.data) || includeMetadataChanges) {
+        onNext(new DocumentSnapshot(self.id, self.ref, self._getData()));
+        context.data = self._getData();
+      }
+    } else {
+      onError(err);
+    }
+  };
+  var unsubscribe = this.queue.onPostFlush(onSnapshot);
+
+  // return the unsubscribe function
+  return unsubscribe;
+};
+
+
 /**
  * Fetches the subcollections that are direct children of the document.
  * @see https://cloud.google.com/nodejs/docs/reference/firestore/0.15.x/DocumentReference#getCollections
@@ -52833,23 +52868,23 @@ module.exports = MockFirestoreFieldValue;
 var _ = require('./lodash');
 var DocumentSnapshot = require('./firestore-document-snapshot');
 
-function MockFirestoreQuerySnapshot (ref, data) {
+function MockFirestoreQuerySnapshot (ref, data, keyOrder) {
   this._ref = ref;
   this.data = _.cloneDeep(data) || {};
+  this.keyOrder = keyOrder;
   if (_.isObject(this.data) && _.isEmpty(this.data)) {
     this.data = {};
   }
-  this.size = _.size(this.data);
+  this.size = _.size(this.keyOrder);
   this.empty = this.size === 0;
 
   var self = this;
-  this.docs = _.map(this.data, function (value, key) {
-    return new DocumentSnapshot(key, self._ref.doc(key), value);
+  this.docs = _.map(keyOrder, function (key) {
+    return new DocumentSnapshot(key, self._ref.doc(key), self.data[key]);
   });
 }
 
 MockFirestoreQuerySnapshot.prototype.forEach = function (callback, context) {
-  var self = this;
   _.forEach(this.docs, function (doc) {
     callback.call(context, doc);
   });
@@ -52870,7 +52905,7 @@ var Queue = require('./queue').Queue;
 var utils = require('./utils');
 var validate = require('./validators');
 
-function MockFirestoreQuery(path, data, parent, name) {
+function MockFirestoreQuery(path, data, parent, name, parentQuery) {
   this.errs = {};
   this.path = path || 'Mock://';
   this.id = parent ? name : extractName(path);
@@ -52879,9 +52914,9 @@ function MockFirestoreQuery(path, data, parent, name) {
   this.parent = parent || null;
   this.firestore = parent ? parent.firestore : null;
   this.children = {};
-  this.orderedProperties = [];
-  this.orderedDirections = [];
-  this.limited = 0;
+  this.orderedProperties = parentQuery ? _.clone(parentQuery.orderedProperties) : [];
+  this.orderedDirections = parentQuery ? _.clone(parentQuery.orderedDirections) : [];
+  this.limited = parentQuery ? parentQuery.limited : 0;
   this._setData(data);
 }
 
@@ -52927,38 +52962,13 @@ MockFirestoreQuery.prototype.get = function () {
   var self = this;
   return new Promise(function (resolve, reject) {
     self._defer('get', _.toArray(arguments), function () {
-      var results = {};
-      var limit = 0;
+      var _results = self._results();
+      var results = _results.results;
+      var keyOrder = _results.keyOrder;
 
       if (err === null) {
         if (_.size(self.data) !== 0) {
-          if (self.orderedProperties.length === 0) {
-            _.forEach(self.data, function(data, key) {
-              if (self.limited <= 0 || limit < self.limited) {
-                results[key] = _.cloneDeep(data);
-                limit++;
-              }
-            });
-          } else {
-            var queryable = [];
-            _.forEach(self.data, function(data, key) {
-              queryable.push({
-                data: data,
-                key: key
-              });
-            });
-
-            queryable = _.orderBy(queryable, _.map(self.orderedProperties, function(p) { return 'data.' + p; }), self.orderedDirections);
-
-            queryable.forEach(function(q) {
-              if (self.limited <= 0 || limit < self.limited) {
-                results[q.key] = _.cloneDeep(q.data);
-                limit++;
-              }
-            });
-          }
-
-          resolve(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id), results));
+          resolve(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id), results, keyOrder));
         } else {
           resolve(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id)));
         }
@@ -53010,24 +53020,98 @@ MockFirestoreQuery.prototype.where = function (property, operator, value) {
             break;
         }
       });
-      return new MockFirestoreQuery(this.path, results, this.parent, this.id);
+      return new MockFirestoreQuery(this.path, results, this.parent, this.id, this);
     } else {
-      return new MockFirestoreQuery(this.path, null, this.parent, this.id);
+      return new MockFirestoreQuery(this.path, null, this.parent, this.id, this);
     }
   }
 };
 
 MockFirestoreQuery.prototype.orderBy = function (property, direction) {
-  var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id);
+  var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id, this);
   query.orderedProperties.push(property);
   query.orderedDirections.push(direction || 'asc');
+
   return query;
 };
 
 MockFirestoreQuery.prototype.limit = function (limit) {
-  var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id);
+  var query = new MockFirestoreQuery(this.path, this._getData(), this.parent, this.id, this);
   query.limited = limit;
   return query;
+};
+
+MockFirestoreQuery.prototype.onSnapshot = function (optionsOrObserverOrOnNext, observerOrOnNextOrOnError, onErrorArg) {
+  var err = this._nextErr('onSnapshot');
+  var self = this;
+  var onNext = optionsOrObserverOrOnNext;
+  var onError = observerOrOnNextOrOnError;
+  var includeMetadataChanges = optionsOrObserverOrOnNext.includeMetadataChanges;
+
+  if (includeMetadataChanges) {
+    // Note this doesn't truly mimic the firestore metadata changes behavior, however
+    // since everything is syncronous, there isn't any difference in behavior.
+    onNext = observerOrOnNextOrOnError;
+    onError = onErrorArg;
+  }
+  var context = {
+    data: self._results(),
+  };
+  var onSnapshot = function () {
+    // compare the current state to the one from when this function was created
+    // and send the data to the callback if different.
+    if (err === null) {
+      self.get().then(function (querySnapshot) {
+        var results = self._results();
+        if (JSON.stringify(results) !== JSON.stringify(context.data) || includeMetadataChanges) {
+          onNext(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id), results.results, results.keyOrder));
+          // onNext(new QuerySnapshot(self.id, self.ref, results));
+          context.data = results;
+        }
+      });
+    } else {
+      onError(err);
+    }
+  };
+
+  // onSnapshot should always return when initially called, then
+  // every time data changes.
+  onSnapshot();
+  var unsubscribe = this.queue.onPostFlush(onSnapshot);
+
+  // return the unsubscribe function
+  return unsubscribe;
+};
+
+MockFirestoreQuery.prototype._results = function () {
+  var keyOrder = [];
+  var results = _.cloneDeep(this.data) || {};
+  _.forEach(results, function(data, key) {
+    keyOrder.push(key);
+  });
+
+
+  if (_.size(this.data) === 0) {
+    return results;
+  }
+
+  var ordered = [];
+  _.forEach(this.data, function(data, key) {
+    ordered.push({ data: data, key: key });
+  });
+
+  ordered = _.orderBy(ordered, _.map(this.orderedProperties, function(p) { return 'data.' + p; }), this.orderedDirections);
+
+  keyOrder = [];
+  _.forEach(ordered, function(item) {
+    keyOrder.push(item.key);
+  });
+
+  if (this.limited > 0) {
+    keyOrder = keyOrder.slice(0, this.limited);
+  }
+
+  return {results: results, keyOrder: keyOrder};
 };
 
 MockFirestoreQuery.prototype._defer = function (sourceMethod, sourceArgs, callback) {
@@ -53322,7 +53406,7 @@ module.exports = {
   union: require('lodash.union'),
 };
 
-},{"lodash.assign":16,"lodash.assignin":17,"lodash.bind":18,"lodash.clone":19,"lodash.clonedeep":20,"lodash.clonedeepwith":21,"lodash.compact":22,"lodash.difference":23,"lodash.every":24,"lodash.filter":25,"lodash.find":26,"lodash.findindex":27,"lodash.foreach":28,"lodash.forin":29,"lodash.get":30,"lodash.has":31,"lodash.includes":32,"lodash.indexof":33,"lodash.isempty":34,"lodash.isequal":35,"lodash.isfunction":36,"lodash.isnumber":37,"lodash.isobject":38,"lodash.isstring":39,"lodash.isundefined":40,"lodash.keys":41,"lodash.map":42,"lodash.merge":43,"lodash.noop":44,"lodash.orderby":45,"lodash.reduce":46,"lodash.remove":47,"lodash.set":48,"lodash.size":49,"lodash.toarray":50,"lodash.union":51}],89:[function(require,module,exports){
+},{"lodash.assign":17,"lodash.assignin":18,"lodash.bind":19,"lodash.clone":20,"lodash.clonedeep":21,"lodash.clonedeepwith":22,"lodash.compact":23,"lodash.difference":24,"lodash.every":25,"lodash.filter":26,"lodash.find":27,"lodash.findindex":28,"lodash.foreach":29,"lodash.forin":30,"lodash.get":31,"lodash.has":32,"lodash.includes":33,"lodash.indexof":34,"lodash.isempty":35,"lodash.isequal":36,"lodash.isfunction":37,"lodash.isnumber":38,"lodash.isobject":39,"lodash.isstring":40,"lodash.isundefined":41,"lodash.keys":42,"lodash.map":43,"lodash.merge":44,"lodash.noop":45,"lodash.orderby":46,"lodash.reduce":47,"lodash.remove":48,"lodash.set":49,"lodash.size":50,"lodash.toarray":51,"lodash.union":52}],89:[function(require,module,exports){
 'use strict';
 
 function MockMessaging() {
@@ -53526,6 +53610,7 @@ var EventEmitter = require('events').EventEmitter;
 
 function FlushQueue () {
   this.events = [];
+  this.postFlushListeners = [];
 }
 
 FlushQueue.prototype.push = function () {
@@ -53543,6 +53628,14 @@ FlushQueue.prototype.push = function () {
   }));
 };
 
+FlushQueue.prototype.onPostFlush = function(subscriber) {
+  this.postFlushListeners.push(subscriber);
+  var self = this;
+  return function() {
+    self.postFlushListeners.pop(subscriber);
+  };
+};
+
 FlushQueue.prototype.flushing = false;
 
 FlushQueue.prototype.flush = function (delay) {
@@ -53553,6 +53646,9 @@ FlushQueue.prototype.flush = function (delay) {
   }
   function process () {
     self.flushing = true;
+    _.forEach(self.postFlushListeners, function (subscriber) {
+      self.push(subscriber);
+    });
     while (self.events.length) {
       self.events[0].run();
     }

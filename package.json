@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "2.3.1",
+  "version": "2.3.3",
   "description": "Fork of firebase-mock: Firebase mock library for writing unit tests",
   "main": "./src",
   "scripts": {
