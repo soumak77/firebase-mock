@@ -1,6 +1,9 @@
 {
-  "name": "firebase-mock",
-  "version": "2.2.10",
+  "name": "@pie-kds/firebase-mock",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "2.3.0",
   "description": "Firebase mock library for writing unit tests",
   "main": "./src",
   "scripts": {
