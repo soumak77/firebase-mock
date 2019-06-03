@@ -215,6 +215,8 @@ describe('MockFirestoreCollection', function () {
       var results5 = collection.where('name_type', '==', 'number').get();
       var results6 = collection.where('name_type', '==', 'abc').get();
       var results7 = collection.where('value', '==', 3).get();
+      var results8 = collection.where('array', 'array-contains', 'x').get();
+      var results9 = collection.where('array', 'array-contains', 'z').get();
       db.flush();
 
       return Promise.all([
@@ -224,7 +226,9 @@ describe('MockFirestoreCollection', function () {
         expect(results4).to.eventually.have.property('size').to.equal(3),
         expect(results5).to.eventually.have.property('size').to.equal(3),
         expect(results6).to.eventually.have.property('size').to.equal(0),
-        expect(results7).to.eventually.have.property('size').to.equal(0)
+        expect(results7).to.eventually.have.property('size').to.equal(0),
+        expect(results8).to.eventually.have.property('size').to.equal(2),
+        expect(results9).to.eventually.have.property('size').to.equal(0)
       ]);
     });
 
