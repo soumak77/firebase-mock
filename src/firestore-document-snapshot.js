@@ -10,6 +10,10 @@ function MockFirestoreDocumentSnapshot (id, ref, data) {
     return _.cloneDeep(this._snapshotdata);
   };
   this.exists = this._snapshotdata !== null;
+  if (ref) {
+    this._createTime = ref._createTime;
+    this._updateTime = ref._updateTime;
+  }
 }
 
 MockFirestoreDocumentSnapshot.prototype.get = function (path) {

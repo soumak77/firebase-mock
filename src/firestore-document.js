@@ -129,6 +129,8 @@ MockFirestoreDocument.prototype.set = function (data, opts, callback) {
   var err = this._nextErr('set');
   data = _.cloneDeep(data);
   var self = this;
+  self._createTime = _opts._createTime;
+  self._updateTime = _opts._updateTime;
   return new Promise(function (resolve, reject) {
     self._defer('set', _.toArray(arguments), function () {
       if (err === null) {

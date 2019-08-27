@@ -107,4 +107,18 @@ describe('DocumentSnapshot', function () {
       expect(new Snapshot('docid', ref, data).ref).to.equal(ref);
     });
   });
+
+  describe('#_createTime', function () {
+    it('contains a _createTime field', function () {
+      ref.set({key: 'value'}, {_createTime: 'someTime'});
+      expect(new Snapshot('docid', ref)._createTime).to.equal('someTime');
+    });
+  });
+  
+  describe('#_updateTime', function () {
+    it('contains a _updateTime field', function () {
+      ref.set({key: 'value'}, {_updateTime: 'someTime'});
+      expect(new Snapshot('docid', ref)._updateTime).to.equal('someTime');
+    });
+  });
 });
