@@ -12,6 +12,7 @@ function MockFirestoreDocumentSnapshot (id, ref, data) {
   this.exists = this._snapshotdata !== null;
   if (ref) {
     this._createTime = ref._createTime;
+    this._updateTime = ref._updateTime;
   }
 }
 
