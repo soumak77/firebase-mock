@@ -60,8 +60,8 @@ describe('MockFirestoreDocument', function () {
   });
 
   describe('#collection', function () {
-    it('allow calling collection()', function() {
-      expect(function() {
+    it('allow calling collection()', function () {
+      expect(function () {
         doc.collection('collection');
       }).to.not.throw();
     });
@@ -77,7 +77,7 @@ describe('MockFirestoreDocument', function () {
 
   describe('#get', function () {
     it('gets value of doc', function (done) {
-      db.doc('doc').get().then(function(snap) {
+      db.doc('doc').get().then(function (snap) {
         expect(snap.get('title')).to.equal('title');
         done();
       }).catch(done);
@@ -96,7 +96,7 @@ describe('MockFirestoreDocument', function () {
     it('creates a new doc', function (done) {
       var createDoc = db.doc('createDoc');
 
-      createDoc.create({prop: 'title'});
+      createDoc.create({ prop: 'title' });
 
       createDoc.get().then(function (snap) {
         expect(snap.exists).to.equal(true);
@@ -110,7 +110,7 @@ describe('MockFirestoreDocument', function () {
     it('creates a new doc with null values', function (done) {
       var createDoc = db.doc('createDoc');
 
-      createDoc.create({prop: null});
+      createDoc.create({ prop: null });
 
       createDoc.get().then(function (snap) {
         expect(snap.exists).to.equal(true);
@@ -123,14 +123,14 @@ describe('MockFirestoreDocument', function () {
 
     it('throws an error when a doc already exists', function (done) {
       var createDoc = db.doc('createDoc');
-      createDoc.create({prop: 'data'});
+      createDoc.create({ prop: 'data' });
       db.flush();
 
-      createDoc.create({otherProp: 'more data'})
-        .then(function() {
+      createDoc.create({ otherProp: 'more data' })
+        .then(function () {
           done('should have thrown an error');
         })
-        .catch(function(error) {
+        .catch(function (error) {
           expect(error.code).to.equal(6);
           done();
         });
@@ -144,7 +144,7 @@ describe('MockFirestoreDocument', function () {
       doc.set({
         title: 'title2'
       });
-      doc.get().then(function(snap) {
+      doc.get().then(function (snap) {
         expect(snap.exists).to.equal(true);
         expect(snap.get('title')).to.equal('title2');
         done();
@@ -157,7 +157,7 @@ describe('MockFirestoreDocument', function () {
       doc.set({
         prop: null
       });
-      doc.get().then(function(snap) {
+      doc.get().then(function (snap) {
         expect(snap.exists).to.equal(true);
         expect(snap.get('prop')).to.equal(null);
         done();
@@ -316,6 +316,51 @@ describe('MockFirestoreDocument', function () {
       db.flush();
     });
 
+    it('updates an array property when using FieldValue.arrayRemove()', function (done) {
+      doc.set({
+        titles: ['title1', 'title2']
+      });
+      doc.update({
+        titles: Firestore.FieldValue.arrayRemove('title2')
+      });
+
+      doc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.data()).to.deep.equal({ titles: ['title1'] });
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
+    const assertUpdate = (init, update, expected) => {
+      it(`${JSON.stringify(update)} => ${JSON.stringify(expected)}`, function (done) {
+        doc.set(init);
+        doc.update(update);
+        doc.get().then(function (snap) {
+          expect(snap.data()).to.eql(expected);
+          done();
+        }).catch(done);
+        db.flush();
+      });
+    };
+
+    describe('FieldValue.arrayUnion', () => {
+      assertUpdate({}, { foo: Firestore.FieldValue.arrayUnion("hi") }, { foo: ['hi'] });
+      assertUpdate({ foo: [] }, { foo: Firestore.FieldValue.arrayUnion("hi") }, { foo: ['hi'] });
+      assertUpdate({ foo: ['hi'] }, { foo: Firestore.FieldValue.arrayUnion('hi') }, { foo: ['hi'] });
+      assertUpdate({ foo: ['hi'] }, { foo: Firestore.FieldValue.arrayUnion('there') }, { foo: ['hi', 'there'] });
+      assertUpdate({ foo: ['hi'] }, { foo: Firestore.FieldValue.arrayUnion('there', 'you') }, { foo: ['hi', 'there', 'you'] });
+      assertUpdate({ foo: { title: [] } }, { 'foo.title': Firestore.FieldValue.arrayUnion('hi') }, { foo: { title: ['hi'] } });
+    });
+
+    describe('FieldValue.arrayRemove', () => {
+      assertUpdate({ titles: ['title1', 'title2'] }, { titles: Firestore.FieldValue.arrayRemove('title1') }, { titles: ['title2'] });
+      assertUpdate({ titles: ['title1', 'title2'] }, { titles: Firestore.FieldValue.arrayRemove('title1', 'title2') }, { titles: [] });
+      assertUpdate({}, { titles: Firestore.FieldValue.arrayRemove('title1') }, { titles: [] });
+    });
+
+
     it('does not merge nested properties recursively by default', function (done) {
       doc.set({
         nested: {
@@ -461,6 +506,68 @@ describe('MockFirestoreDocument', function () {
         });
         db.flush();
       });
+    });
+  });
+
+  describe('#onSnapshot', function () {
+    it('returns value after document is updated', function (done) {
+      doc.onSnapshot(function(snap) {
+        expect(snap.get('newTitle')).to.equal('A new title');
+        done();
+      });
+      doc.update({newTitle: 'A new title'}, {setMerge: true});
+      db.flush();
+    });
+
+    it('returns error if error occured', function (done) {
+      var error = new Error("An error occured.");
+      doc.errs.onSnapshot = error;
+      doc.onSnapshot(function(snap) {
+        throw new Error("This should not be called.");
+      }, function(err) {
+        expect(err).to.equal(error);
+        done();
+      });
+      doc.update({name: 'A'}, {setMerge: true});
+      doc.flush();
+    });
+
+    it('does not returns value when not updated', function (done) {
+      var callCount = 0;
+      doc.onSnapshot(function(snap) {
+        callCount += 1;
+      });
+      doc.update({newTitle: 'A new title'}, {setMerge: true});
+      doc.flush();
+      expect(callCount).to.equal(1);
+      doc.get();
+      doc.flush();
+      expect(callCount).to.equal(1);
+      done();
+    });
+
+    it('unsubscribes', function (done) {
+      var callCount = 0;
+      var unsubscribe = doc.onSnapshot(function(snap) {
+        callCount += 1;
+      });
+      doc.update({newTitle: 'A new title'}, {setMerge: true});
+      doc.flush();
+      expect(callCount).to.equal(1);
+      doc.update({newTitle: 'A newer title'}, {setMerge: true});
+      unsubscribe();
+      doc.flush();
+      expect(callCount).to.equal(1);
+      done();
+    });
+
+    it('accepts option includeMetadataChanges', function (done) {
+      doc.onSnapshot({includeMetadataChanges: true}, function(snap) {
+        expect(snap.get('newTitle')).to.equal('A new title');
+        done();
+      });
+      doc.update({newTitle: 'A new title'}, {setMerge: true});
+      doc.flush();
     });
   });
 });

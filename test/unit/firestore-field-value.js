@@ -36,6 +36,30 @@ describe('FieldValue', function () {
     });
   });
 
+  describe('#arrayRemove', function () {
+    it('should be a function', function () {
+      expect(FieldValue.arrayRemove).to.be.a('function');
+    });
+    it('should return FieldValue', function () {
+      expect(FieldValue.arrayRemove()).to.be.instanceof(FieldValue);
+    });
+    it('should type to "serverTimestamp"', function () {
+      expect(FieldValue.arrayRemove()).to.have.property('type').to.equal('arrayRemove');
+    });
+  });
+
+  describe('#arrayUnion', function () {
+    it('should be a function', function () {
+      expect(FieldValue.arrayUnion).to.be.a('function');
+    });
+    it('should return FieldValue', function () {
+      expect(FieldValue.arrayUnion()).to.be.instanceof(FieldValue);
+    });
+    it('should type to "serverTimestamp"', function () {
+      expect(FieldValue.arrayUnion()).to.have.property('type').to.equal('arrayUnion');
+    });
+  });
+
   describe('#isEqual', function () {
     it('should be a function', function () {
       expect(FieldValue.delete().isEqual).to.be.a('function');
