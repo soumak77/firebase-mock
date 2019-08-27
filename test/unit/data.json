@@ -85,21 +85,30 @@
       "name_type": "string",
       "complex": {
         "name": "a"
-      }
+      },
+      "array": [
+        "a", "b"
+      ]
     },
     "b": {
       "name": "b",
       "name_type": "string",
       "complex": {
         "name": "b"
-      }
+      },
+      "array": [
+        "a", "c"
+      ]
     },
     "c": {
       "name": "c",
       "name_type": "string",
       "complex": {
         "name": "c"
-      }
+      },
+      "array": [
+        "b", "c"
+      ]
     },
     "1": {
       "name": 1,
