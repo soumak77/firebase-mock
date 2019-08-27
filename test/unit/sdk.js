@@ -100,6 +100,15 @@ describe('MockFirebaseSdk', function () {
     it('FieldValue.serverTimestamp', function () {
       expect(firebase.firestore.FieldValue.serverTimestamp).to.be.a('function');
     });
+
+    it('FieldValue.arrayRemove', function () {
+      expect(firebase.firestore.FieldValue.arrayRemove).to.be.a('function');
+    });
+
+    it('FieldValue.arrayUnion', function () {
+      expect(firebase.firestore.FieldValue.arrayUnion).to.be.a('function');
+    });
+
   });
 
   describe('#auth', function() {

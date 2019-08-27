@@ -22,7 +22,7 @@ describe('QuerySnapshot', function () {
       },{
         foo: 'bar2',
         bar: 'baz2'
-      }]);
+      }], ['0', '1']);
       var callback = sinon.spy();
       snapshot.forEach(callback);
       expect(callback.firstCall.args[0].data()).to.deep.equal({ foo: 'bar', bar: 'baz' });
@@ -32,7 +32,7 @@ describe('QuerySnapshot', function () {
     it('can set a this value', function () {
       var snapshot = new Snapshot(ref, {
         foo: 'bar'
-      });
+      }, ['0']);
       var callback = sinon.spy();
       var context = {};
       snapshot.forEach(callback, context);
@@ -46,7 +46,7 @@ describe('QuerySnapshot', function () {
       },{
         foo: 'bar2',
         bar: 'baz2'
-      }]);
+      }], ['0', '1']);
       var callback = sinon.spy();
       snapshot.forEach(callback);
       expect(callback.firstCall.args[0].ref).to.deep.equal(ref.doc('0'));
@@ -58,18 +58,18 @@ describe('QuerySnapshot', function () {
 
     it('tests for children', function () {
       expect(new Snapshot(ref).empty).to.equal(true);
-      expect(new Snapshot(ref, [{foo: 'bar'}]).empty).to.equal(false);
+      expect(new Snapshot(ref, [{foo: 'bar'}], ['0']).empty).to.equal(false);
     });
 
   });
 
   describe('#size', function () {
     it('returns the object size', function () {
-      expect(new Snapshot(ref, [{foo: 'bar'}]).size).to.equal(1);
+      expect(new Snapshot(ref, [{foo: 'bar'}], ['0']).size).to.equal(1);
     });
 
     it('returns 0 for a null snapshot', function () {
-      expect(new Snapshot(ref, null).size).to.equal(0);
+      expect(new Snapshot(ref, null, null).size).to.equal(0);
     });
   });
 
@@ -81,7 +81,7 @@ describe('QuerySnapshot', function () {
       },{
         foo: 'bar2',
         bar: 'baz2'
-      }]);
+      }], ['0', '1']);
       var docs = snapshot.docs;
       expect(docs.length).to.equal(2);
       expect(snapshot.size).to.equal(2);

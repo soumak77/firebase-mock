@@ -228,6 +228,15 @@ describe('MockFirestoreCollection', function () {
       ]);
     });
 
+    it('returns matched documents for operator "array-contains"', function() {
+      var results1 = collection.where('array', 'array-contains', 'a').get();
+      db.flush();
+
+      return Promise.all([
+        expect(results1).to.eventually.have.property('size').to.equal(2),
+      ]);
+    });
+
     it('returns all documents when using unsupported operator', function() {
       var expected = 6;
 
@@ -328,7 +337,7 @@ describe('MockFirestoreCollection', function () {
         snaps[1].forEach(function(doc) {
           names.push(doc.data().name);
         });
-        expect(names).to.deep.equal([1, 2, 3, 'c', 'b', 'a']);
+        expect(names).to.deep.equal([3, 2, 1, 'c', 'b', 'a']);
         done();
       }).catch(done);
     });
@@ -355,5 +364,82 @@ describe('MockFirestoreCollection', function () {
         expect(results4).to.eventually.have.property('size').to.equal(6)
       ]);
     });
+
+    it('returns limited amount of documents when not last chained call', function() {
+      var results = collection.limit(1).where('name_type', '==', 'string').get();
+      db.flush();
+
+      return Promise.all([
+        expect(results).to.eventually.have.property('size').to.equal(1),
+      ]);
+    });
+  });
+
+  describe('#onSnapshot', function () {
+    it('returns value after collection is updated', function (done) {
+      collection.onSnapshot(function(snap) {
+        var names = [];
+        snap.docs.forEach(function(doc) {
+          names.push(doc.data().name);
+        });
+        expect(names).to.contain('A');
+        expect(names).not.to.contain('a');
+        done();
+      });
+      collection.doc('a').update({name: 'A'}, {setMerge: true});
+      collection.flush();
+    });
+
+    it('calls callback after multiple updates', function (done) {
+      var callCount = 0;
+      collection.onSnapshot(function(snap) {
+        callCount += 1;
+        var names = [];
+        snap.docs.forEach(function(doc) {
+          names.push(doc.data().name);
+        });
+        if (callCount === 1) {
+          expect(names).to.contain('A');
+        } else if (callCount === 2) {
+          expect(names).not.to.contain('a');
+          done();
+        }
+      });
+      collection.doc('a').update({name: 'A'}, {setMerge: true});
+      collection.flush();
+      collection.doc('a').update({name: 'AA'}, {setMerge: true});
+      collection.flush();
+    });
+
+    it('should unsubscribe', function (done) {
+      var unsubscribe = collection.onSnapshot(function(snap) {
+        throw new Error("This should be unsubscribed.");
+      });
+      unsubscribe();
+      collection.doc('a').update({name: 'A'}, {setMerge: true});
+      collection.flush();
+      done();
+    });
+
+    it('Calls onError if error', function (done) {
+      var error = new Error("An error occured.");
+      collection.errs.onSnapshot = error;
+      var callCount = 0;
+      collection.onSnapshot(function(snap) {
+        throw new Error("This should not be called.");
+      }, function(err) {
+        // onSnapshot always returns when first called and then
+        // after data changes so we get 2 calls here.
+        if (callCount == 0) {
+          callCount++;
+          return;
+        }
+        expect(err).to.equal(error);
+        done();
+      });
+      collection.doc('a').update({name: 'A'}, {setMerge: true});
+      collection.flush();
+    });
+
   });
 });

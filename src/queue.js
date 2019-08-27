@@ -6,6 +6,7 @@ var EventEmitter = require('events').EventEmitter;
 
 function FlushQueue () {
   this.events = [];
+  this.postFlushListeners = [];
 }
 
 FlushQueue.prototype.push = function () {
@@ -23,6 +24,14 @@ FlushQueue.prototype.push = function () {
   }));
 };
 
+FlushQueue.prototype.onPostFlush = function(subscriber) {
+  this.postFlushListeners.push(subscriber);
+  var self = this;
+  return function() {
+    self.postFlushListeners.pop(subscriber);
+  };
+};
+
 FlushQueue.prototype.flushing = false;
 
 FlushQueue.prototype.flush = function (delay) {
@@ -33,6 +42,9 @@ FlushQueue.prototype.flush = function (delay) {
   }
   function process () {
     self.flushing = true;
+    _.forEach(self.postFlushListeners, function (subscriber) {
+      self.push(subscriber);
+    });
     while (self.events.length) {
       self.events[0].run();
     }
