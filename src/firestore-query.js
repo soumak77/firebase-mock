@@ -125,30 +125,66 @@ MockFirestoreQuery.prototype.stream = function () {
 MockFirestoreQuery.prototype.where = function (property, operator, value) {
   var query;
 
-  // check if unsupported operator
-  if (operator !== '==') {
-    console.warn('Using unsupported where() operator for firebase-mock, returning entire dataset');
-    return this;
-  } else {
-    if (_.size(this.data) !== 0) {
-      var results = {};
+  if (_.size(this.data) === 0) {
+    return new MockFirestoreQuery(this.path, null, this.parent, this.id);
+  }
+
+  var results = {};
+
+  switch (operator) {
+    case '==':
       _.forEach(this.data, function(data, key) {
-        switch (operator) {
-          case '==':
-            if (_.isEqual(_.get(data, property), value)) {
-              results[key] = _.cloneDeep(data);
-            }
-            break;
-          default:
-            results[key] = _.cloneDeep(data);
-            break;
+        if (_.isEqual(_.get(data, property), value)) {
+          results[key] = _.cloneDeep(data);
         }
       });
-      return new MockFirestoreQuery(this.path, results, this.parent, this.id);
-    } else {
+      break;
+
+    case '!=':
+      _.forEach(this.data, function(data, key) {
+        if (!_.isEqual(_.get(data, property), value)) {
+          results[key] = _.cloneDeep(data);
+        }
+      });
+      break;
+
+    case '>':
+      _.forEach(this.data, function(data, key) {
+        if (_.get(data, property) > value) {
+          results[key] = _.cloneDeep(data);
+        }
+      });
+      break;
+    case '>=':
+      _.forEach(this.data, function(data, key) {
+        if (_.get(data, property) >= value) {
+          results[key] = _.cloneDeep(data);
+        }
+      });
+      break;
+
+    case '<':
+      _.forEach(this.data, function(data, key) {
+        if (_.get(data, property) < value) {
+          results[key] = _.cloneDeep(data);
+        }
+      });
+      break;
+
+    case '<=':
+      _.forEach(this.data, function(data, key) {
+        if (_.get(data, property) <= value) {
+          results[key] = _.cloneDeep(data);
+        }
+      });
+      break;
+
+    default:
+      console.warn('unsupported operator');
       return new MockFirestoreQuery(this.path, null, this.parent, this.id);
-    }
   }
+
+  return new MockFirestoreQuery(this.path, results, this.parent, this.id);
 };
 
 MockFirestoreQuery.prototype.orderBy = function (property, direction) {
