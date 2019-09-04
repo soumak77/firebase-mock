@@ -1,4 +1,4 @@
-/** firebase-mock - v2.2.10
+/** firebase-mock - v2.2.11
 https://github.com/soumak77/firebase-mock
 * Copyright (c) 2016 Brian Soumakian
 * License: MIT */
@@ -51509,6 +51509,71 @@ MockFirestoreQuery.prototype.stream = function () {
 
 MockFirestoreQuery.prototype.where = function (property, operator, value) {
   var query;
+  console.log(property, operator, value);
+  if (_.size(this.data) !== 0) {
+    return new MockFirestoreQuery(this.path, null, this.parent, this.id);
+  }
+
+  switch (operator) {
+    case '==':
+      _.forEach(this.data, function(data, key) {
+        if (_.isEqual(_.get(data, property), value)) {
+          results[key] = _.cloneDeep(data);
+        }
+      });
+      break;
+
+    case '!=':
+      _.forEach(this.data, function(data, key) {
+        console.log(_.get(data, property), value, _.get(data, property) != value);
+        if (!_.isEqual(_.get(data, property), value)) {
+          results[key] = _.cloneDeep(data);
+        }
+      });
+      break;
+
+    case '>':
+      _.forEach(this.data, function(data, key) {
+        console.log(_.get(data, property), value, _.get(data, property) > value);
+        if (_.get(data, property) > value) {
+          results[key] = _.cloneDeep(data);
+        }
+      });
+      break;
+    case '>=':
+      _.forEach(this.data, function(data, key) {
+        console.log(_.get(data, property), value, _.get(data, property) >= value);
+        if (_.get(data, property) >= value) {
+          results[key] = _.cloneDeep(data);
+        }
+      });
+      break;
+
+    case '<':
+      _.forEach(this.data, function(data, key) {
+        console.log(_.get(data, property), value, _.get(data, property) < value);
+        if (_.get(data, property) < value) {
+          results[key] = _.cloneDeep(data);
+        }
+      });
+      break;
+
+    case '<=':
+      _.forEach(this.data, function(data, key) {
+        console.log(_.get(data, property), value, _.get(data, property) <= value);
+        if (_.get(data, property) <= value) {
+          results[key] = _.cloneDeep(data);
+        }
+      });
+      break;
+
+    default:
+      return new MockFirestoreQuery(this.path, null, this.parent, this.id);
+      break;
+  }
+
+  return new MockFirestoreQuery(this.path, results, this.parent, this.id);
+
 
   // check if unsupported operator
   if (operator !== '==') {
@@ -51517,21 +51582,9 @@ MockFirestoreQuery.prototype.where = function (property, operator, value) {
   } else {
     if (_.size(this.data) !== 0) {
       var results = {};
-      _.forEach(this.data, function(data, key) {
-        switch (operator) {
-          case '==':
-            if (_.isEqual(_.get(data, property), value)) {
-              results[key] = _.cloneDeep(data);
-            }
-            break;
-          default:
-            results[key] = _.cloneDeep(data);
-            break;
-        }
-      });
-      return new MockFirestoreQuery(this.path, results, this.parent, this.id);
+
     } else {
-      return new MockFirestoreQuery(this.path, null, this.parent, this.id);
+
     }
   }
 };
