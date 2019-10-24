@@ -199,6 +199,45 @@ MockFirestoreDocument.prototype.delete = function (callback) {
   });
 };
 
+MockFirestoreDocument.prototype.onSnapshot = function (optionsOrObserverOrOnNext, observerOrOnNextOrOnError, onErrorArg) {
+  var err = this._nextErr('onSnapshot');
+  var self = this;
+  var onNext = optionsOrObserverOrOnNext;
+  var onError = observerOrOnNextOrOnError;
+  var includeMetadataChanges = optionsOrObserverOrOnNext.includeMetadataChanges;
+
+  if (includeMetadataChanges) {
+    // Note this doesn't truly mimic the firestore metadata changes behavior, however
+    // since everything is syncronous, there isn't any difference in behavior.
+    onNext = observerOrOnNextOrOnError;
+    onError = onErrorArg;
+  }
+  var context = {
+    data: self._getData(),
+  };
+  var onSnapshot = function (forceTrigger) {
+    // compare the current state to the one from when this function was created
+    // and send the data to the callback if different.
+    if (err === null) {
+      if (JSON.stringify(self.data) !== JSON.stringify(context.data) || includeMetadataChanges || forceTrigger) {
+        onNext(new DocumentSnapshot(self.id, self.ref, self._getData()));
+        context.data = self._getData();
+      }
+    } else {
+      onError(err);
+    }
+  };
+
+  // onSnapshot should always return when initially called, then
+  // every time data changes.
+  onSnapshot(true);
+  var unsubscribe = this.queue.onPostFlush(onSnapshot);
+
+  // return the unsubscribe function
+  return unsubscribe;
+};
+
+
 /**
  * Fetches the subcollections that are direct children of the document.
  * @see https://cloud.google.com/nodejs/docs/reference/firestore/0.15.x/DocumentReference#getCollections
