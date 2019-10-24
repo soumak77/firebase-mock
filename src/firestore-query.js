@@ -154,13 +154,13 @@ MockFirestoreQuery.prototype.onSnapshot = function (optionsOrObserverOrOnNext, o
   var context = {
     data: self._results(),
   };
-  var onSnapshot = function () {
+  var onSnapshot = function (forceTrigger) {
     // compare the current state to the one from when this function was created
     // and send the data to the callback if different.
     if (err === null) {
       self.get().then(function (querySnapshot) {
         var results = self._results();
-        if (JSON.stringify(results) !== JSON.stringify(context.data) || includeMetadataChanges) {
+        if (JSON.stringify(results) !== JSON.stringify(context.data) || includeMetadataChanges || forceTrigger) {
           onNext(new QuerySnapshot(self.parent === null ? self : self.parent.collection(self.id), results));
           // onNext(new QuerySnapshot(self.id, self.ref, results));
           context.data = results;
@@ -173,7 +173,7 @@ MockFirestoreQuery.prototype.onSnapshot = function (optionsOrObserverOrOnNext, o
 
   // onSnapshot should always return when initially called, then
   // every time data changes.
-  onSnapshot();
+  onSnapshot(true);
   var unsubscribe = this.queue.onPostFlush(onSnapshot);
 
   // return the unsubscribe function

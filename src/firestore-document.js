@@ -215,11 +215,11 @@ MockFirestoreDocument.prototype.onSnapshot = function (optionsOrObserverOrOnNext
   var context = {
     data: self._getData(),
   };
-  var onSnapshot = function () {
+  var onSnapshot = function (forceTrigger) {
     // compare the current state to the one from when this function was created
     // and send the data to the callback if different.
     if (err === null) {
-      if (JSON.stringify(self.data) !== JSON.stringify(context.data) || includeMetadataChanges) {
+      if (JSON.stringify(self.data) !== JSON.stringify(context.data) || includeMetadataChanges || forceTrigger) {
         onNext(new DocumentSnapshot(self.id, self.ref, self._getData()));
         context.data = self._getData();
       }
@@ -227,6 +227,10 @@ MockFirestoreDocument.prototype.onSnapshot = function (optionsOrObserverOrOnNext
       onError(err);
     }
   };
+
+  // onSnapshot should always return when initially called, then
+  // every time data changes.
+  onSnapshot(true);
   var unsubscribe = this.queue.onPostFlush(onSnapshot);
 
   // return the unsubscribe function
