@@ -4,6 +4,7 @@
   "description": "Firebase mock library for writing unit tests",
   "main": "./src",
   "scripts": {
+    "test-only": "gulp test",
     "test": "gulp lint && gulp test",
     "publish-patch": "git checkout master && git pull && gulp release && npm publish",
     "publish-minor": "git checkout master && git pull && gulp release --type minor && npm publish",
@@ -72,7 +73,7 @@
     "chai": "~3.5.0",
     "chai-as-promised": "^6.0.0",
     "es5-shim": "^4.5.10",
-    "gulp": "^3.8.10",
+    "gulp": "^4.0.0",
     "gulp-bump": "^3.1.1",
     "gulp-footer": "^1.1.2",
     "gulp-header": "^1.8.12",

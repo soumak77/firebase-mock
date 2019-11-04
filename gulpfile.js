@@ -56,13 +56,13 @@ gulp.task('cover', function () {
     .pipe(plugins.istanbul.hookRequire());
 });
 
-gulp.task('test', ['cover'], function () {
+gulp.task('test', gulp.series('cover', function () {
   return gulp.src('test/unit/*.js')
     .pipe(plugins.mocha({
       grep: argv.grep
     }))
     .pipe(plugins.istanbul.writeReports());
-});
+}));
 
 gulp.task('karma', function (cb) {
   new Server({
@@ -92,7 +92,7 @@ gulp.task('karma', function (cb) {
   }, cb).start();
 });
 
-gulp.task('smoke', ['bundle-smoke'], function (cb) {
+gulp.task('smoke', gulp.series('bundle-smoke', function (cb) {
   new Server({
     frameworks: ['mocha', 'chai'],
     browsers: ['PhantomJS'],
@@ -111,7 +111,7 @@ gulp.task('smoke', ['bundle-smoke'], function (cb) {
     autoWatch: false,
     singleRun: true
   }, cb).start();
-});
+}));
 
 gulp.task('lint', function () {
   return gulp.src(['./gulpfile.js', './src/**/*.js', './test/**/*.js'])
@@ -129,7 +129,7 @@ gulp.task('bump', function () {
     .pipe(gulp.dest('./'));
 });
 
-gulp.task('release', ['bundle', 'bump'], function () {
+gulp.task('release', gulp.series('bundle', 'bump', function () {
   var versionString = 'v' + version();
   var message = 'Release ' + versionString;
   return plugins.shell.task([
@@ -140,4 +140,4 @@ gulp.task('release', ['bundle', 'bump'], function () {
     'git push',
     'git push --tags'
   ])();
-});
+}));
