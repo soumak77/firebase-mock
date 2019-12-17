@@ -146,6 +146,16 @@ describe('MockQuery', function () {
         expect(spy.called).to.equal(true);
       });
 
+      it('should work with boolean equalTo', function() {
+        var spy = sinon.spy(function(snap) {
+          expect(_.keys(snap.val())).eql(['zbool_true']);
+        });
+
+        ref.limitToLast(2).equalTo(true).on('value', spy);
+        ref.flush();
+        expect(spy).callCount(1);
+      });
+
       it('should return null if not equalTo', function() {
         var spy = sinon.spy(function(snap) {
           expect(snap.val()).equals(null);
@@ -344,9 +354,5 @@ describe('MockQuery', function () {
     it('should start at the key given');
 
     it('should start at the key+priority given');
-  });
-
-  describe('equalTo', function() {
-    it('should start and stop at the key given');
   });
 });

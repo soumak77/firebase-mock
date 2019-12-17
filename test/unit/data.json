@@ -77,6 +77,12 @@
     "char_c": {
       ".priority": "c",
       "aLetter": "c"
+    },
+    "zbool_true": {
+      "aBoolean": true
+    },
+    "zbool_false": {
+      "aBoolean": false
     }
   },
   "collections": {
