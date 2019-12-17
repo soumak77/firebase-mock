@@ -174,8 +174,8 @@ MockQuery.prototype.endAt = function (priority, key) {
 };
 
 function assertQuery (method, pri, key) {
-  if (pri !== null && typeof(pri) !== 'string' && typeof(pri) !== 'number') {
-    throw new Error(method + ' failed: first argument must be a valid firebase priority (a string, number, or null).');
+  if (pri !== null && typeof(pri) !== 'string' && typeof(pri) !== 'number' && typeof(pri) !== 'boolean') {
+    throw new Error(method + ' failed: first argument must be a valid firebase priority (a string, number, boolean, or null).');
   }
   if (!_.isUndefined(key)) {
     utils.assertKey(method, key, 'second');

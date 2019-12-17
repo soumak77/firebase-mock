@@ -345,4 +345,8 @@ describe('MockQuery', function () {
 
     it('should start at the key+priority given');
   });
+
+  describe('equalTo', function() {
+    it('should start and stop at the key given');
+  });
 });
